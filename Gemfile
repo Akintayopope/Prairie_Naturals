@@ -74,3 +74,4 @@ gem "bootstrap", "~> 5.3.0"
 gem 'dotenv-rails'
 gem 'sassc-rails'
 gem 'activeadmin'
+gem 'friendly_id', '~> 5.4.0'

@@ -7,4 +7,7 @@ class Product < ApplicationRecord
 
   validates :name, :price, :stock_quantity, presence: true
   validates :price, numericality: { greater_than_or_equal_to: 0 }
+
+  extend FriendlyId
+  friendly_id :name, use: :slugged
 end

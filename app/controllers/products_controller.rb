@@ -1,12 +1,12 @@
 class ProductsController < ApplicationController
-  before_action :set_product, only: %i[ show edit update destroy ]
+  before_action :set_product, only: %i[show edit update destroy]
 
-  # GET /products or /products.json
+  # GET /products
   def index
     @products = Product.all
   end
 
-  # GET /products/1 or /products/1.json
+  # GET /products/:id
   def show
   end
 
@@ -15,11 +15,11 @@ class ProductsController < ApplicationController
     @product = Product.new
   end
 
-  # GET /products/1/edit
+  # GET /products/:id/edit
   def edit
   end
 
-  # POST /products or /products.json
+  # POST /products
   def create
     @product = Product.new(product_params)
 
@@ -34,7 +34,7 @@ class ProductsController < ApplicationController
     end
   end
 
-  # PATCH/PUT /products/1 or /products/1.json
+  # PATCH/PUT /products/:id
   def update
     respond_to do |format|
       if @product.update(product_params)
@@ -47,24 +47,25 @@ class ProductsController < ApplicationController
     end
   end
 
-  # DELETE /products/1 or /products/1.json
+  # DELETE /products/:id
   def destroy
     @product.destroy!
 
     respond_to do |format|
-      format.html { redirect_to products_path, status: :see_other, notice: "Product was successfully destroyed." }
+      format.html { redirect_to products_path, notice: "Product was successfully destroyed.", status: :see_other }
       format.json { head :no_content }
     end
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_product
-      @product = Product.find(params.expect(:id))
-    end
 
-    # Only allow a list of trusted parameters through.
-    def product_params
-      params.expect(product: [ :name, :description, :price ])
-    end
+  # ✅ Use FriendlyId for slug support
+  def set_product
+    @product = Product.friendly.find(params[:id])
+  end
+
+  # ✅ Permit product fields securely
+  def product_params
+    params.require(:product).permit(:name, :description, :price, :image, :category_id)
+  end
 end
