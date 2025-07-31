@@ -48,7 +48,7 @@ group :development, :test do
   gem "brakeman", require: false
 
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
-  gem "rubocop-rails", require: false
+  gem "rubocop-rails-omakase", require: false
   gem 'dotenv-rails'       # For environment variables like Stripe keys
   gem 'rubocop', require: false
 end
@@ -69,3 +69,5 @@ gem 'activeadmin'
 gem 'stripe'
 gem 'kaminari'        # or 'pagy' if preferred
 gem 'image_processing', '~> 1.2'
+
+gem "bootstrap", "~> 5.3.0"
