@@ -6,6 +6,7 @@ class CategoriesController < ApplicationController
   end
 
   def show
+     @category = Category.friendly.find(params[:id])
   end
 
   def new
