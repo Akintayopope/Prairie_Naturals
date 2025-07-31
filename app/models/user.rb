@@ -6,6 +6,15 @@ class User < ApplicationRecord
   # Constants for role management
   ROLES = %w[customer admin].freeze
 
+  # Associations
+  has_many :orders, dependent: :destroy
+  has_many :addresses, dependent: :destroy
+  has_many :reviews, dependent: :destroy
+  has_many :wishlist_items, dependent: :destroy
+
+  # Role validation
+  validates :role, inclusion: { in: ROLES }
+
   # Role checks
   def admin?
     role == 'admin'
