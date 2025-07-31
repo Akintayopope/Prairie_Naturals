@@ -1,10 +1,26 @@
-# This file should ensure the existence of records required to run the application in every environment (production,
-# development, test). The code here should be idempotent so that it can be executed at any point in every environment.
-# The data can then be loaded with the bin/rails db:seed command (or created alongside the database with db:setup).
-#
-# Example:
-#
-#   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
-#     MovieGenre.find_or_create_by!(name: genre_name)
-#   end
-AdminUser.create!(email: 'admin@example.com', password: 'password', password_confirmation: 'password') if Rails.env.development?
+# db/seeds.rb
+
+puts "Seeding categories..."
+categories = %w[Hair Skin Vitamins Supplements Body]
+categories.each do |name|
+  Category.find_or_create_by!(name: name)
+end
+
+puts "Seeding provinces..."
+provinces = [
+  { name: "Ontario", pst: 0.08, gst: 0.05, hst: 0.13 },
+  { name: "Manitoba", pst: 0.07, gst: 0.05, hst: 0.0 },
+  { name: "Alberta", pst: 0.0, gst: 0.05, hst: 0.0 },
+  { name: "British Columbia", pst: 0.07, gst: 0.05, hst: 0.0 },
+  { name: "Quebec", pst: 0.09975, gst: 0.05, hst: 0.0 }
+]
+
+provinces.each do |prov|
+  Province.find_or_create_by!(name: prov[:name]) do |p|
+    p.pst = prov[:pst]
+    p.gst = prov[:gst]
+    p.hst = prov[:hst]
+  end
+end
+
+puts "Seeding completed!"
