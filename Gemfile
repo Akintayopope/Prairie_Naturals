@@ -72,3 +72,4 @@ gem 'image_processing', '~> 1.2'
 
 gem "bootstrap", "~> 5.3.0"
 gem 'dotenv-rails'
+gem 'sassc-rails'
