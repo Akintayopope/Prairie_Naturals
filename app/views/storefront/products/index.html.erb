@@ -1,5 +1,17 @@
 <h1>Our Products</h1>
 
+<!-- Category Filter Form -->
+<div class="filter">
+  <%= form_with url: storefront_products_path, method: :get, local: true do %>
+    <label for="category_id"><strong>Filter by Category:</strong></label>
+    <%= select_tag :category_id,
+          options_from_collection_for_select(@categories, :id, :name, @selected_category),
+          include_blank: "All Categories",
+          onchange: "this.form.submit();" %>
+  <% end %>
+</div>
+
+<!-- Product List -->
 <div class="products">
   <% @products.each do |product| %>
     <div class="product">
@@ -9,4 +21,9 @@
       <p><strong>Price:</strong> $<%= product.price %></p>
     </div>
   <% end %>
+</div>
+
+<!-- Pagination Links -->
+<div class="pagination">
+  <%= paginate @products %>
 </div>
