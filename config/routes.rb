@@ -1,5 +1,9 @@
 Rails.application.routes.draw do
-  resources :products
+  namespace :storefront do
+    get "products/index"
+    get "products/show"
+  end
+  resources :products, only: [:index, :show]
   resources :categories, only: [:index, :show]
   devise_for :admin_users, ActiveAdmin::Devise.config
   ActiveAdmin.routes(self)
