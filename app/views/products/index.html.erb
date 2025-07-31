@@ -1,4 +1,4 @@
-<p style="color: green"><%= notice %></p>
+<p style="color: green;"><%= notice %></p>
 
 <% content_for :title, "Products" %>
 
@@ -6,14 +6,19 @@
 
 <div id="products">
   <% @products.each do |product| %>
-    <%= render product %>
+    <div class="product-card">
+      <% if product.image.attached? %>
+        <%= image_tag product.image, style: "max-width: 150px;" %><br>
+      <% end %>
 
-    <p>
-      <%= link_to product.name, product_path(product) %><br>
+      <strong><%= link_to product.name, product_path(product) %></strong><br>
+      <em><%= number_to_currency(product.price) %></em><br>
+
       <%= link_to "Edit", edit_product_path(product) %> |
       <%= button_to "Delete", product_path(product), method: :delete, data: { confirm: "Are you sure?" } %>
-    </p>
+    </div>
+    <hr>
   <% end %>
 </div>
 
-<%= link_to "New product", new_product_path %>
+<%= link_to "New Product", new_product_path, class: "button" %>

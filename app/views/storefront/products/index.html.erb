@@ -1,0 +1,12 @@
+<h1>Our Products</h1>
+
+<div class="products">
+  <% @products.each do |product| %>
+    <div class="product">
+      <%= image_tag product.image, size: "150x150" if product.image.attached? %>
+      <h3><%= link_to product.name, storefront_product_path(product) %></h3>
+      <p><%= product.description.truncate(100) %></p>
+      <p><strong>Price:</strong> $<%= product.price %></p>
+    </div>
+  <% end %>
+</div>
