@@ -3,7 +3,16 @@ class ProductsController < ApplicationController
 
   # GET /products
   def index
-    @products = Product.all
+    @categories = Category.order(:name)
+    @products = Product.includes(:category).order(created_at: :desc)
+
+    # Optional category filter
+    if params[:category_id].present?
+      @products = @products.where(category_id: params[:category_id])
+    end
+
+    # Pagination with Kaminari (12 per page)
+    @products = @products.page(params[:page]).per(12)
   end
 
   # GET /products/:id
@@ -50,7 +59,6 @@ class ProductsController < ApplicationController
   # DELETE /products/:id
   def destroy
     @product.destroy!
-
     respond_to do |format|
       format.html { redirect_to products_path, notice: "Product was successfully destroyed.", status: :see_other }
       format.json { head :no_content }
@@ -59,12 +67,12 @@ class ProductsController < ApplicationController
 
   private
 
-  # ✅ Use FriendlyId for slug support
+  # Find product by slug (FriendlyId)
   def set_product
     @product = Product.friendly.find(params[:id])
   end
 
-  # ✅ Permit product fields securely
+  # Strong parameters
   def product_params
     params.require(:product).permit(:name, :description, :price, :image, :category_id)
   end

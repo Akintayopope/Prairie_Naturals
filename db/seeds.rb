@@ -4,14 +4,14 @@ require "open-uri"
 
 puts "🌱 Seeding database..."
 
-# Categories
+# ✅ Categories
 puts "➡️ Seeding categories..."
 categories = %w[Hair Skin Vitamins Supplements Body]
 categories.each do |name|
   Category.find_or_create_by!(name: name)
 end
 
-# Provinces
+# ✅ Provinces
 puts "➡️ Seeding provinces..."
 [
   { name: "Ontario", pst: 0.08, gst: 0.05, hst: 0.13 },
@@ -27,12 +27,11 @@ puts "➡️ Seeding provinces..."
   end
 end
 
-# Products with images
+# ✅ Products with images
 puts "➡️ Seeding products..."
 sample_products = [
   { name: "Natural Shampoo", description: "Organic hair shampoo.", price: 12.99, stock: 20, image: "shampoo.jpg", category: "Hair" },
   { name: "Vitamin C Serum", description: "Brightens and repairs skin.", price: 18.49, stock: 15, image: "vitamin.jpg", category: "Skin" },
-
 ]
 
 sample_products.each do |prod|
@@ -43,11 +42,20 @@ sample_products.each do |prod|
     p.stock = prod[:stock]
   end
 
-  # Attach image if not already attached
   unless product.image.attached?
     image_path = Rails.root.join("db/seeds/images/#{prod[:image]}")
     product.image.attach(io: File.open(image_path), filename: prod[:image])
   end
 end
 
-puts "✅ Seeding completed with products and images!"
+# ✅ Admin User
+puts "➡️ Seeding admin user..."
+admin_email = ENV.fetch("ADMIN_EMAIL", "admin@prairienaturals.com")
+admin_password = ENV.fetch("ADMIN_PASSWORD", "prairienaturals")
+
+AdminUser.find_or_create_by!(email: admin_email) do |admin|
+  admin.password = admin_password
+  admin.password_confirmation = admin_password
+end
+
+puts "✅ Seeding completed with products, categories, provinces, and admin user!"

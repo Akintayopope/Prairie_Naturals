@@ -3,7 +3,7 @@ Rails.application.routes.draw do
     resources :products, only: [:index, :show]
   end
 
-  resources :products, only: [:index, :show]
+  resources :products # ← full RESTful routes including edit
   resources :categories, only: [:index, :show]
 
   devise_for :admin_users, ActiveAdmin::Devise.config
@@ -12,6 +12,5 @@ Rails.application.routes.draw do
 
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # Optional: set public storefront as homepage
   # root "storefront/products#index"
 end

@@ -470,6 +470,7 @@ DEPENDENCIES
   jbuilder
   kamal
   kaminari
+  nokogiri (~> 1.18)
   pg (~> 1.1)
   propshaft
   puma (>= 5.0)
