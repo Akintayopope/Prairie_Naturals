@@ -1,15 +1,19 @@
 <h1>Our Products</h1>
 
-<!-- Category Filter Form -->
 <div class="filter">
-  <%= form_with url: storefront_products_path, method: :get, local: true do %>
-    <label for="category_id"><strong>Filter by Category:</strong></label>
+  <%= form_with url: storefront_products_path, method: :get, local: true, id: "product-filter-form" do %>
+    <label><strong>Search:</strong></label>
+    <%= text_field_tag :search, params[:search], placeholder: "Search products..." %>
+
+    <label><strong>Category:</strong></label>
     <%= select_tag :category_id,
-        options_from_collection_for_select(@categories, :id, :name, @selected_category),
-        include_blank: "All Categories",
-        onchange: "this.form.submit();" %>
+        options_from_collection_for_select(@categories, :id, :name, params[:category_id]),
+        include_blank: "All Categories" %>
+
+    <%= submit_tag "Filter", class: "btn btn-primary" %>
   <% end %>
 </div>
+
 
 <!-- Product List -->
 <div class="products">
@@ -28,6 +32,18 @@
     </div>
   <% end %>
 </div>
+
+<script>
+  document.addEventListener("turbo:load", function () {
+    const form = document.getElementById("product-filter-form");
+    if (form) {
+      form.querySelectorAll("input, select").forEach(el => {
+        el.addEventListener("change", () => form.requestSubmit());
+      });
+    }
+  });
+</script>
+
 
 <!-- Pagination -->
 <div class="pagination">
