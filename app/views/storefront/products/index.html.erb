@@ -1,33 +1,50 @@
-<!-- app/views/storefront/products/index.html.erb -->
 <h1>Our Products</h1>
 
 <!-- Filter Form -->
-<div class="filter">
-  <%= form_with url: storefront_products_path, method: :get, local: false, id: "product-filter-form" do %>
-    <label><strong>Search:</strong></label>
-    <%= text_field_tag :search, params[:search], placeholder: "Search products..." %>
+<div class="filter" style="margin-bottom: 20px;">
+  <%= form_with url: storefront_products_path, method: :get, local: true, id: "product-filter-form" do %>
+    <div style="display: flex; flex-wrap: wrap; gap: 15px; align-items: center;">
 
-    <label><strong>Category:</strong></label>
-    <%= select_tag :category_id,
-        options_from_collection_for_select(@categories, :id, :name, params[:category_id]),
-        include_blank: "All Categories" %>
+      <!-- Search -->
+      <div>
+        <label><strong>Search:</strong></label><br>
+        <%= text_field_tag :search, params[:search], placeholder: "Search products..." %>
+      </div>
 
-    <label><strong>Filter:</strong></label>
-    <%= select_tag :filter, options_for_select([
-      ['All', ''],
-      ['New', 'new'],
-      ['On Sale', 'sale'],
-      ['Recently Updated', 'recent']
-    ], params[:filter]) %>
+      <!-- Category -->
+      <div>
+        <label><strong>Category:</strong></label><br>
+        <%= select_tag :category_id,
+            options_from_collection_for_select(@categories, :id, :name, params[:category_id]),
+            include_blank: "All Categories" %>
+      </div>
+
+      <!-- Filter -->
+      <div>
+        <label><strong>Filter:</strong></label><br>
+        <%= select_tag :filter, options_for_select([
+            ['New Arrivals', 'new'],
+            ['On Sale', 'sale'],
+            ['Recently Updated', 'recent']
+          ], selected: params[:filter]),
+          include_blank: "All" %>
+      </div>
+
+      <!-- Submit -->
+      <div style="align-self: flex-end;">
+        <%= submit_tag "Search", class: "button" %>
+      </div>
+    </div>
   <% end %>
 </div>
 
 <!-- Product List -->
-<div class="products">
+<div class="products" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px;">
   <% @products.each do |product| %>
-    <div class="product-card">
+    <div class="product-card" style="border: 1px solid #ccc; padding: 15px; border-radius: 5px;">
+
       <% if product.images.attached? %>
-        <%= image_tag url_for(product.images.first), alt: product.name, class: "product-thumb", style: "max-width: 150px;" %>
+        <%= image_tag url_for(product.images.first), alt: product.name, class: "product-thumb", style: "max-width: 100%;" %>
       <% else %>
         <p><em>No image available</em></p>
       <% end %>
@@ -41,16 +58,17 @@
       <% else %>
         <p><strong>Price:</strong> $<%= number_with_precision(product.price, precision: 2) %></p>
       <% end %>
+
     </div>
   <% end %>
 </div>
 
 <!-- Pagination -->
-<div class="pagination">
+<div class="pagination" style="margin-top: 30px;">
   <%= paginate @products %>
 </div>
 
-<!-- Auto-submit filters -->
+<!-- Auto-submit Filters (Turbo) -->
 <script>
   document.addEventListener("turbo:load", function () {
     const form = document.getElementById("product-filter-form");

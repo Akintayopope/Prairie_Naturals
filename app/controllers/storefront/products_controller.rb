@@ -27,6 +27,17 @@ module Storefront
 
     def show
       @product = Product.friendly.find(params[:id])
+
+      @related_products = Product.where(category_id: @product.category_id)
+                                 .where.not(id: @product.id)
+                                 .limit(4)
+
+      session[:recently_viewed] ||= []
+      session[:recently_viewed].delete(@product.id)
+      session[:recently_viewed].unshift(@product.id)
+      session[:recently_viewed] = session[:recently_viewed].take(5)
+
+      @recently_viewed_products = Product.find(session[:recently_viewed] - [@product.id])
     end
   end
 end
