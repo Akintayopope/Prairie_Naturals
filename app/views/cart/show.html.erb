@@ -1,7 +1,7 @@
 <h1>Your Cart</h1>
 
 <% if session[:cart].present? %>
- <%= form_with url: update_cart_quantities_cart_path, method: :patch, local: true do %>
+  <%= form_with url: update_cart_quantities_cart_path, method: :patch, local: true do %>
 
     <table>
       <thead>
@@ -40,3 +40,9 @@
   <p>Your cart is empty.</p>
   <%= link_to 'Start Shopping', storefront_products_path, class: "button" %>
 <% end %>
+<% if notice %>
+  <div style="background: #d4edda; color: #155724; padding: 10px; margin: 10px 0; border-radius: 4px;">
+    <%= notice %>
+  </div>
+<% end %>
+<p><strong>Cart Total:</strong> $<%= number_with_precision(@products.sum { |p| p.price * session[:cart][p.slug].to_i }, precision: 2) %></p>

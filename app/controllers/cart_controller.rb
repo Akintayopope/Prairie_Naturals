@@ -13,7 +13,7 @@ def add_item
   session[:cart][product_id] = (session[:cart][product_id] || 0) + 1
 
   Rails.logger.info "🛒 Added product #{product_id} to cart: #{session[:cart].inspect}"
-  redirect_to cart_path, notice: "Item added to cart."
+  redirect_to cart_path, notice: "Cart updated successfully."
 end
 
 def update_quantities
