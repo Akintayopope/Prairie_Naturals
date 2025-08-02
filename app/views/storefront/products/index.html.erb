@@ -1,5 +1,7 @@
 <h1>Our Products</h1>
 
+<h1>Our Products</h1>
+
 <!-- Filter Form -->
 <div class="filter" style="margin-bottom: 20px;">
   <%= form_with url: storefront_products_path, method: :get, local: true, id: "product-filter-form" do %>
@@ -44,7 +46,7 @@
     <div class="product-card" style="border: 1px solid #ccc; padding: 15px; border-radius: 5px;">
 
       <% if product.images.attached? %>
-        <%= image_tag url_for(product.images.first), alt: product.name, class: "product-thumb", style: "max-width: 100%;" %>
+        <%= image_tag url_for(product.images.first), alt: product.name, style: "max-width: 100%;" %>
       <% else %>
         <p><em>No image available</em></p>
       <% end %>
@@ -59,13 +61,12 @@
         <p><strong>Price:</strong> $<%= number_with_precision(product.price, precision: 2) %></p>
       <% end %>
 
+      <!-- ✅ Correct button_to for POST request -->
+      <%= button_to 'Add to Cart', add_item_cart_path(product), method: :post, class: "button" %>
 
- <%= button_to 'Add to Cart', add_item_cart_path(product), method: :post %>
     </div>
   <% end %>
-
 </div>
-
 
 <!-- Pagination -->
 <div class="pagination" style="margin-top: 30px;">

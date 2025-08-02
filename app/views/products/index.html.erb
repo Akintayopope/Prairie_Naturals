@@ -7,8 +7,10 @@
 <div id="products">
   <% @products.each do |product| %>
     <div class="product-card">
-      <% if product.image.attached? %>
-        <%= image_tag product.image, style: "max-width: 150px;" %><br>
+      <% if product.images.attached? %>
+        <%= image_tag url_for(product.images.first), style: "max-width: 150px;" %><br>
+      <% else %>
+        <p><em>No image available</em></p>
       <% end %>
 
       <strong><%= link_to product.name, product_path(product) %></strong><br>

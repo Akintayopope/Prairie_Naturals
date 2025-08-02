@@ -1,17 +1,42 @@
 <h1>Your Cart</h1>
 
-<% if @cart.present? %>
-  <ul>
-    <% @products.each do |product| %>
-      <li>
-        <strong><%= product.name %></strong> –
-        Quantity: <%= session[:cart][product.id.to_s] %>
-        <%= link_to 'Remove', remove_item_cart_path(product), method: :delete, data: { confirm: 'Remove item?' } %>
-      </li>
-    <% end %>
-  </ul>
-  <%= link_to 'Continue Shopping', storefront_products_path %>
+<% if session[:cart].present? %>
+ <%= form_with url: update_cart_quantities_cart_path, method: :patch, local: true do %>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Quantity</th>
+          <th>Unit Price</th>
+          <th>Total</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @products.each do |product| %>
+          <tr>
+            <td><strong><%= product.name %></strong></td>
+            <td>
+              <%= number_field_tag "quantities[#{product.slug}]", session[:cart][product.slug], min: 0 %>
+            </td>
+            <td>$<%= number_with_precision(product.price, precision: 2) %></td>
+            <td>$<%= number_with_precision(product.price * session[:cart][product.slug], precision: 2) %></td>
+            <td>
+              <%= link_to 'Remove', remove_item_cart_path(product), method: :delete, data: { confirm: 'Remove item?' } %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+
+    <br>
+    <%= submit_tag "Update Quantities", class: "button" %>
+  <% end %>
+
+  <br>
+  <%= link_to 'Continue Shopping', storefront_products_path, class: "button" %>
 <% else %>
   <p>Your cart is empty.</p>
-  <%= link_to 'Start Shopping', storefront_products_path %>
+  <%= link_to 'Start Shopping', storefront_products_path, class: "button" %>
 <% end %>
