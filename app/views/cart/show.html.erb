@@ -1,0 +1,17 @@
+<h1>Your Cart</h1>
+
+<% if @cart.present? %>
+  <ul>
+    <% @products.each do |product| %>
+      <li>
+        <strong><%= product.name %></strong> –
+        Quantity: <%= session[:cart][product.id.to_s] %>
+        <%= link_to 'Remove', remove_item_cart_path(product), method: :delete, data: { confirm: 'Remove item?' } %>
+      </li>
+    <% end %>
+  </ul>
+  <%= link_to 'Continue Shopping', storefront_products_path %>
+<% else %>
+  <p>Your cart is empty.</p>
+  <%= link_to 'Start Shopping', storefront_products_path %>
+<% end %>

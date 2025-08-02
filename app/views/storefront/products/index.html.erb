@@ -59,9 +59,13 @@
         <p><strong>Price:</strong> $<%= number_with_precision(product.price, precision: 2) %></p>
       <% end %>
 
+
+ <%= button_to 'Add to Cart', add_item_cart_path(product), method: :post %>
     </div>
   <% end %>
+
 </div>
+
 
 <!-- Pagination -->
 <div class="pagination" style="margin-top: 30px;">

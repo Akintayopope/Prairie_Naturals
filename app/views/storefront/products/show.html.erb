@@ -1,8 +1,71 @@
-<h2><%= @product.name %></h2>
+<h1><%= @product.name %></h1>
 
-<% if @product.image.attached? %>
-  <%= image_tag @product.image, size: "300x300" %>
+<div class="product-meta">
+  <p><strong>Category:</strong> <%= @product.category.name %></p>
+  <p><strong>Price:</strong> $<%= number_with_precision(@product.price, precision: 2) %></p>
+  <p><strong>Description:</strong> <%= @product.description %></p>
+  <p><strong>Average Rating:</strong> ⭐ <%= number_with_precision(@product.average_rating || 0, precision: 1) %> / 5</p>
+</div>
+
+<!-- Product Images -->
+<h3>Product Images</h3>
+<div class="product-images" style="display: flex; gap: 15px; flex-wrap: wrap;">
+  <% if @product.images.attached? %>
+    <% @product.images.each do |image| %>
+      <%= image_tag image.variant(resize_to_limit: [250, 250]), alt: @product.name, class: "image-thumb", style: "border: 1px solid #ccc; padding: 5px;" %>
+    <% end %>
+  <% else %>
+    <p><em>No images available for this product.</em></p>
+  <% end %>
+</div>
+
+<!-- Product Reviews -->
+<h3>Customer Reviews</h3>
+<% if @reviews.any? %>
+  <% @reviews.each do |review| %>
+    <div class="review" style="margin-bottom: 1.5rem; padding: 10px; border-bottom: 1px solid #eee;">
+      <p><strong><%= review.user.email %>:</strong> ⭐ <%= review.rating %> / 5</p>
+      <p><%= review.comment %></p>
+    </div>
+  <% end %>
+<% else %>
+  <p><em>No reviews yet. Be the first to review this product!</em></p>
 <% end %>
 
-<p><%= @product.description %></p>
-<p><strong>Price:</strong> $<%= @product.price %></p>
+<!-- Related Products -->
+<h3>Related Products</h3>
+<% if @related_products.any? %>
+  <div class="related-products" style="display: flex; flex-wrap: wrap; gap: 20px;">
+    <% @related_products.each do |related| %>
+      <div style="width: 150px; text-align: center;">
+        <% if related.images.attached? %>
+          <%= link_to image_tag(related.images.first.variant(resize_to_limit: [150, 150]), alt: related.name), storefront_product_path(related) %>
+        <% else %>
+          <%= link_to 'No Image', storefront_product_path(related) %>
+        <% end %>
+        <p><%= link_to related.name, storefront_product_path(related) %></p>
+      </div>
+    <% end %>
+  </div>
+<% else %>
+  <p><em>No related products found.</em></p>
+<% end %>
+
+<!-- Recently Viewed -->
+<h3>Recently Viewed</h3>
+<% if @recently_viewed_products.any? %>
+  <div class="recently-viewed-products" style="display: flex; flex-wrap: wrap; gap: 20px;">
+    <% @recently_viewed_products.each do |recent| %>
+      <div style="width: 150px; text-align: center;">
+        <% if recent.images.attached? %>
+          <%= link_to image_tag(recent.images.first.variant(resize_to_limit: [150, 150]), alt: recent.name), storefront_product_path(recent) %>
+        <% else %>
+          <%= link_to 'No Image', storefront_product_path(recent) %>
+        <% end %>
+        <p><%= link_to recent.name, storefront_product_path(recent) %></p>
+      </div>
+    <% end %>
+  </div>
+<% else %>
+  <p><em>No recently viewed products.</em></p>
+<% end %>
