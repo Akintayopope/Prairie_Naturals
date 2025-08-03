@@ -16,4 +16,21 @@ class ApplicationController < ActionController::Base
       redirect_to root_path, alert: "Access denied!"
     end
   end
+
+  # ✅ Merge session cart into database cart after user logs in
+  def after_sign_in_path_for(resource)
+    if session[:cart]
+      session[:cart].each do |slug, qty|
+        product = Product.friendly.find_by(slug: slug)
+        next unless product
+
+        item = resource.cart_items.find_or_initialize_by(product: product)
+        item.quantity += qty.to_i
+        item.save!
+      end
+      session[:cart] = nil
+    end
+
+    super
+  end
 end

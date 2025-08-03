@@ -1,0 +1,52 @@
+<h1>Checkout</h1>
+
+<%= form_with model: @order, url: new_checkout_path, method: :get, local: true do |f| %>
+  <div>
+    <%= f.label :shipping_name, "Full Name" %><br>
+    <%= f.text_field :shipping_name %>
+  </div>
+
+  <div>
+    <%= f.label :shipping_address, "Shipping Address" %><br>
+    <%= f.text_area :shipping_address %>
+  </div>
+
+  <div>
+    <%= f.label :province %><br>
+    <%= f.select :province, @provinces, { include_blank: 'Select a province' }, onchange: "this.form.submit();" %>
+  </div>
+<% end %>
+
+<% if current_user.cart_items.any? %>
+  <h2>Order Summary</h2>
+  <p><strong>Subtotal:</strong> $<%= number_with_precision(@subtotal, precision: 2) %></p>
+
+  <% if @tax.present? %>
+    <p><strong>Tax:</strong> $<%= number_with_precision(@tax, precision: 2) %></p>
+    <p><strong>Total:</strong> $<%= number_with_precision(@total, precision: 2) %></p>
+  <% else %>
+    <p style="color:red;"><em>Select a province to see tax and total</em></p>
+  <% end %>
+<% end %>
+
+<%= form_with model: @order, url: checkout_path, method: :post, local: true do |f| %>
+  <%= hidden_field_tag :shipping_name, @order.shipping_name %>
+  <%= hidden_field_tag :shipping_address, @order.shipping_address %>
+  <%= hidden_field_tag :province, @order.province %>
+
+  <div>
+    <%= f.submit "Place Order", class: "button" %>
+  </div>
+<% end %>
+
+<h1>My Orders</h1>
+
+<% @orders.each do |order| %>
+  <div>
+    <p><strong>Order #:</strong> <%= order.id %></p>
+    <p><strong>Status:</strong> <%= order.status.titleize %></p>
+    <p><strong>Date:</strong> <%= order.created_at.strftime("%B %d, %Y") %></p>
+    <p><%= link_to "View Details", order_path(order) %></p>
+    <hr>
+  </div>
+<% end %>

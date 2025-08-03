@@ -1,8 +1,60 @@
 <h1>Your Cart</h1>
 
-<% if session[:cart].present? %>
-  <%= form_with url: update_cart_quantities_cart_path, method: :patch, local: true do %>
+<% if notice %>
+  <div style="background: #d4edda; color: #155724; padding: 10px; margin: 10px 0; border-radius: 4px;">
+    <%= notice %>
+  </div>
+<% end %>
 
+<% if user_signed_in? %>
+  <% if @cart_items.any? %>
+    <%= form_with url: update_cart_quantities_cart_path, method: :patch, local: true do %>
+      <table>
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Unit Price</th>
+            <th>Total</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @cart_items.each do |item| %>
+            <tr>
+              <td><strong><%= item.product.name %></strong></td>
+              <td>
+                <%= number_field_tag "quantities[#{item.id}]", item.quantity, min: 0 %>
+              </td>
+              <td>$<%= number_with_precision(item.product.price, precision: 2) %></td>
+              <td>$<%= number_with_precision(item.quantity * item.product.price, precision: 2) %></td>
+              <td>
+                <%= link_to 'Remove', remove_item_cart_path(item.product), method: :delete, data: { confirm: 'Remove item?' } %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+
+      <br>
+      <%= submit_tag "Update Quantities", class: "button" %>
+    <% end %>
+
+    <br>
+    <%= link_to 'Continue Shopping', storefront_products_path, class: "button" %>
+    <p><strong>Cart Total:</strong> $<%= number_with_precision(@cart_items.sum { |i| i.product.price * i.quantity }, precision: 2) %></p>
+
+    <div style="margin-top: 20px;">
+      <%= link_to "Proceed to Checkout", new_checkout_path, class: "btn btn-primary" %>
+    </div>
+
+  <% else %>
+    <p>Your cart is empty.</p>
+    <%= link_to 'Start Shopping', storefront_products_path, class: "button" %>
+  <% end %>
+
+<% elsif session[:cart].present? %>
+  <%= form_with url: update_cart_quantities_cart_path, method: :patch, local: true do %>
     <table>
       <thead>
         <tr>
@@ -36,13 +88,13 @@
 
   <br>
   <%= link_to 'Continue Shopping', storefront_products_path, class: "button" %>
+  <p><strong>Cart Total:</strong> $<%= number_with_precision(@products.sum { |p| p.price * session[:cart][p.slug].to_i }, precision: 2) %></p>
+
+  <div style="margin-top: 20px;">
+    <%= link_to "Proceed to Checkout", new_checkout_path, class: "btn btn-primary" %>
+  </div>
+
 <% else %>
   <p>Your cart is empty.</p>
   <%= link_to 'Start Shopping', storefront_products_path, class: "button" %>
 <% end %>
-<% if notice %>
-  <div style="background: #d4edda; color: #155724; padding: 10px; margin: 10px 0; border-radius: 4px;">
-    <%= notice %>
-  </div>
-<% end %>
-<p><strong>Cart Total:</strong> $<%= number_with_precision(@products.sum { |p| p.price * session[:cart][p.slug].to_i }, precision: 2) %></p>

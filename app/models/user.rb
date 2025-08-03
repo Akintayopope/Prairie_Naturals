@@ -12,6 +12,7 @@ class User < ApplicationRecord
   has_many :reviews, dependent: :destroy
   has_many :wishlist_items, dependent: :destroy
   has_one_attached :avatar
+  has_many :cart_items, dependent: :destroy
 
   # Role validation
   validates :role, inclusion: { in: ROLES }

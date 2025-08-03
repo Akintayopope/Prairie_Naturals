@@ -1,0 +1,31 @@
+<h1>Thank You for Your Order!</h1>
+
+<p><strong>Order #:</strong> <%= @order.id %></p>
+<p><strong>Shipping to:</strong> <%= @order.shipping_address %></p>
+<p><strong>Province:</strong> <%= @order.province %></p>
+
+<h2>Order Summary</h2>
+<p><strong>Subtotal:</strong> $<%= number_with_precision(@order.subtotal, precision: 2) %></p>
+<p><strong>Tax:</strong> $<%= number_with_precision(@order.tax, precision: 2) %></p>
+<p><strong>Total:</strong> $<%= number_with_precision(@order.total, precision: 2) %></p>
+
+<%= link_to "Back to Store", storefront_products_path, class: "button" %>
+
+<h1>Order #<%= @order.id %> Details</h1>
+<p>Status: <%= @order.status.titleize %></p>
+<p>Placed on: <%= @order.created_at.strftime("%B %d, %Y") %></p>
+
+<h2>Items:</h2>
+<ul>
+  <% @order_items.each do |item| %>
+    <li>
+      <%= item.product.name %> - Qty: <%= item.quantity %> @ $<%= item.unit_price %>
+    </li>
+  <% end %>
+</ul>
+
+<p><strong>Subtotal:</strong> $<%= number_with_precision(@order.subtotal, precision: 2) %></p>
+<p><strong>Tax:</strong> $<%= number_with_precision(@order.tax, precision: 2) %></p>
+<p><strong>Total:</strong> $<%= number_with_precision(@order.total, precision: 2) %></p>
+
+<%= link_to "Download Invoice (PDF)", order_invoice_path(@order), target: "_blank" %>
