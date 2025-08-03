@@ -73,7 +73,7 @@ gem 'image_processing', '~> 1.2'
 gem "bootstrap", "~> 5.3.0"
 gem 'sassc-rails'
 gem 'activeadmin'
-gem 'friendly_id', '~> 5.4.0'
+gem 'friendly_id', '~> 5.5.1'
 
 
 gem "nokogiri", "~> 1.18"
