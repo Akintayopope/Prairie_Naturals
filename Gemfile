@@ -78,3 +78,4 @@ gem 'friendly_id', '~> 5.4.0'
 
 gem "nokogiri", "~> 1.18"
 gem 'prawn'
+gem 'dotenv-rails', groups: [:development, :test]

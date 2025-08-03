@@ -50,3 +50,11 @@
     <hr>
   </div>
 <% end %>
+
+<h1>Checkout</h1>
+
+<script>
+  const stripePublicKey = "<%= ENV['STRIPE_PUBLISHABLE_KEY'] %>";
+</script>
+
+<%= button_to "Pay with Stripe", stripe_checkout_path, method: :post, class: "btn btn-primary" %>
