@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_03_214119) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_03_220614) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -143,6 +143,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_03_214119) do
     t.string "province"
     t.string "shipping_name"
     t.text "shipping_address"
+    t.string "stripe_session_id"
+    t.string "stripe_payment_id"
     t.index ["user_id"], name: "index_orders_on_user_id"
   end
 

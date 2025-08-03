@@ -29,3 +29,9 @@
 <p><strong>Total:</strong> $<%= number_with_precision(@order.total, precision: 2) %></p>
 
 <%= link_to "Download Invoice (PDF)", order_invoice_path(@order), target: "_blank" %>
+
+<% if @order.status != "paid" %>
+  <%= button_to "Pay with Stripe", stripe_checkout_path(order_id: @order.id), method: :post, class: "btn btn-success" %>
+<% else %>
+  <p><strong>Status:</strong> Paid ✅</p>
+<% end %>

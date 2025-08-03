@@ -29,6 +29,10 @@ Rails.application.routes.draw do
   resources :products
   resources :categories, only: [:index, :show]
 
+post '/checkout/create', to: 'checkout#create', as: 'stripe_checkout'
+get '/checkout/success', to: 'checkout#success', as: 'checkout_success'
+get '/checkout/cancel', to: 'checkout#cancel', as: 'checkout_cancel'
+
   # Health check route
   get "up" => "rails/health#show", as: :rails_health_check
 end
