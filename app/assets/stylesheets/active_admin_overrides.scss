@@ -1,0 +1,38 @@
+.top-metrics-wrapper {
+  margin: 20px 0;
+}
+
+.top-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.metric-card {
+  padding: 16px;
+  border-radius: 12px;
+  color: white;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease-in-out;
+
+  &:hover {
+    transform: translateY(-3px);
+  }
+
+  h3 {
+    font-size: 1.1rem;
+    margin-bottom: 5px;
+  }
+
+  h2 {
+    font-size: 1.75rem;
+    font-weight: bold;
+  }
+
+  &.bg-indigo { background-color: #4c51bf; }
+  &.bg-green  { background-color: #38a169; }
+  &.bg-yellow { background-color: #ecc94b; color: #000; }
+  &.bg-blue   { background-color: #4299e1; }
+}
+

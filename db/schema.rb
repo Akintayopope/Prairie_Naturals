@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_03_220614) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_04_010319) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -58,7 +58,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_03_220614) do
 
   create_table "addresses", force: :cascade do |t|
     t.bigint "user_id", null: false
-    t.bigint "order_id", null: false
     t.string "line1"
     t.string "line2"
     t.string "city"
@@ -66,7 +65,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_03_220614) do
     t.string "postal_code"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["order_id"], name: "index_addresses_on_order_id"
     t.index ["province_id"], name: "index_addresses_on_province_id"
     t.index ["user_id"], name: "index_addresses_on_user_id"
   end
@@ -134,7 +132,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_03_220614) do
   create_table "orders", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.decimal "total_price"
-    t.integer "status", default: 0
+    t.string "status", default: "pending"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.decimal "subtotal"
@@ -145,6 +143,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_03_220614) do
     t.text "shipping_address"
     t.string "stripe_session_id"
     t.string "stripe_payment_id"
+    t.bigint "address_id", null: false
+    t.index ["address_id"], name: "index_orders_on_address_id"
     t.index ["user_id"], name: "index_orders_on_user_id"
   end
 
@@ -207,13 +207,13 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_03_220614) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
-  add_foreign_key "addresses", "orders"
   add_foreign_key "addresses", "provinces"
   add_foreign_key "addresses", "users"
   add_foreign_key "cart_items", "products"
   add_foreign_key "cart_items", "users"
   add_foreign_key "order_items", "orders"
   add_foreign_key "order_items", "products"
+  add_foreign_key "orders", "addresses"
   add_foreign_key "orders", "users"
   add_foreign_key "products", "categories"
   add_foreign_key "reviews", "products"

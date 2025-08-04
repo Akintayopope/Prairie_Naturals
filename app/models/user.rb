@@ -34,4 +34,13 @@ class User < ApplicationRecord
   def set_default_role
     self.role ||= 'customer'
   end
+
+  def self.ransackable_attributes(auth_object = nil)
+    %w[id email created_at updated_at role] # Only include what you want searchable
+  end
+
+  def self.ransackable_associations(auth_object = nil)
+  []
+end
+
 end

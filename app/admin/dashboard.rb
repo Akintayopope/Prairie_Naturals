@@ -1,54 +1,76 @@
 ActiveAdmin.register_page "Dashboard" do
-  menu priority: 1, label: proc { "Admin Dashboard" }
+  menu priority: 1, label: "📊 Dashboard"
 
-  content title: proc { "Welcome, Admin" } do
-    columns do
-      column do
-        panel "📦 Recent Orders" do
-          table_for Order.order(created_at: :desc).limit(5) do
-            column("Order #")     { |order| link_to order.id, admin_order_path(order) }
-            column("Customer")    { |order| order.user.email }
-           column("Status") { |order| status_tag(order.status.titleize, class: order.status) }
+  content title: "Prairie Naturals Admin Dashboard" do
+    # Welcome Message
+    div class: "welcome-message" do
+      para "👋 Welcome back, #{current_admin_user.email}!"
+    end
 
-            column("Total")       { |order| number_to_currency(order.total) }
-            column("Date")        { |order| order.created_at.strftime("%b %d, %Y") }
-          end
+    # Top Metrics (Responsive Cards)
+    div class: "top-metrics-wrapper" do
+      div class: "top-metrics" do
+        div class: "metric-card bg-indigo" do
+          h3 "🛒 Total Orders"
+          h2 Order.count
         end
-      end
-
-      column do
-        panel "📊 Quick Stats" do
-          para "🧾 Total Orders: #{Order.count}"
-          para "💰 Total Revenue: #{number_to_currency(Order.sum(:total))}"
-          para "🛒 Orders This Month: #{Order.where(created_at: Time.current.beginning_of_month..Time.current).count}"
-          para "👥 Total Users: #{User.count}"
-          para "📦 Products in Stock: #{Product.sum(:stock)}"
+        div class: "metric-card bg-green" do
+          h3 "💰 Total Revenue"
+          h2 number_to_currency(Order.sum(:total))
+        end
+        div class: "metric-card bg-yellow" do
+          h3 "📅 This Month's Orders"
+          h2 Order.where(created_at: Time.current.beginning_of_month..Time.current).count
+        end
+        div class: "metric-card bg-blue" do
+          h3 "👤 Total Users"
+          h2 User.count
         end
       end
     end
 
+    # Recent Orders Table
+    panel "🧾 Recent Orders" do
+      table_for Order.order(created_at: :desc).limit(5) do
+        column("Order #") { |order| link_to order.id, admin_order_path(order) }
+        column("Customer") { |order| order.user&.email || "N/A" }
+        column("Status") do |order|
+          css_class = case order.status
+                      when "paid" then "ok"
+                      when "pending" then "warning"
+                      else "error"
+                      end
+          status_tag(order.status.titleize, class: css_class)
+        end
+        column("Total") { |order| number_to_currency(order.total) }
+        column("Date") { |order| order.created_at.strftime("%b %d, %Y") }
+      end
+    end
+
+    # Charts Section
     columns do
       column do
-        panel "🆕 Recently Added Products" do
-          table_for Product.order(created_at: :desc).limit(5) do
-            column("Name")        { |product| link_to product.name, admin_product_path(product) }
-            column("Category")    { |product| product.category.name rescue "N/A" }
-            column("Price")       { |product| number_to_currency(product.price) }
-            column("Stock")       { |product| product.stock }
-          end
+        panel "📈 Orders This Month" do
+          render partial: "admin/dashboard/orders_chart"
         end
       end
-
       column do
-        panel "📁 Quick Admin Actions" do
-          ul do
-            li link_to "View All Orders", admin_orders_path
-            li link_to "Manage Products", admin_products_path
-            li link_to "Manage Users", admin_users_path
-            li link_to "Manage Categories", admin_categories_path
-            li link_to "Manage Coupons", admin_coupons_path
-            li link_to "Create New Product", new_admin_product_path
-          end
+        panel "💵 Revenue This Month" do
+          render partial: "admin/dashboard/revenue_chart"
+        end
+      end
+    end
+
+    # Recent Products Table
+    panel "🆕 Recently Added Products" do
+      table_for Product.order(created_at: :desc).limit(5) do
+        column("Name") { |p| link_to p.name, admin_product_path(p) }
+        column("Category") { |p| p.category&.name || "Uncategorized" }
+        column("Price") { |p| number_to_currency(p.price) }
+        column("Stock Left") do |p|
+          stock = p.stock || 0
+          css_class = stock > 10 ? "ok" : stock > 0 ? "warning" : "error"
+          status_tag("#{stock}", class: css_class)
         end
       end
     end
