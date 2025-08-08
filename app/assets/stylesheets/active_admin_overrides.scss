@@ -1,38 +1,123 @@
-.top-metrics-wrapper {
-  margin: 20px 0;
-}
 
-.top-metrics {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 20px;
-}
+body.active_admin {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f9fafb;
+  color: #1f2937;
 
-.metric-card {
-  padding: 16px;
-  border-radius: 12px;
-  color: white;
-  text-align: center;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-  transition: transform 0.2s ease-in-out;
-
-  &:hover {
-    transform: translateY(-3px);
+  .title_bar {
+    background: #f1f5f9;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 20px;
+    h2 {
+      font-size: 22px;
+      font-weight: 600;
+    }
   }
 
-  h3 {
-    font-size: 1.1rem;
+  .table_tools {
+    margin-bottom: 15px;
+  }
+
+  .index_as_table {
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    th, td {
+      padding: 12px 16px;
+      font-size: 14px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    tr:hover {
+      background-color: #f3f4f6;
+    }
+  }
+
+  .filters {
+    background: #f0f4f8;
+    border-radius: 8px;
+    padding: 15px;
+
+    label {
+      font-weight: 600;
+      color: #374151;
+    }
+  }
+
+  .panel {
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    padding: 20px;
+    margin-bottom: 30px;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+
+  .button, input[type="submit"].button {
+    background-color: #2563eb;
+    color: white;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    border: none;
+    transition: background-color 0.3s ease-in-out;
+
+    &:hover {
+      background-color: #1d4ed8;
+    }
+  }
+
+  .status-ok {
+    background-color: #22c55e !important;
+  }
+
+  .status-warning {
+    background-color: #f59e0b !important;
+  }
+
+  .attributes_table td, .attributes_table th {
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  .formtastic .inputs label {
+    font-weight: 600;
     margin-bottom: 5px;
+    display: block;
   }
 
-  h2 {
-    font-size: 1.75rem;
-    font-weight: bold;
+  .formtastic .input {
+    margin-bottom: 16px;
   }
 
-  &.bg-indigo { background-color: #4c51bf; }
-  &.bg-green  { background-color: #38a169; }
-  &.bg-yellow { background-color: #ecc94b; color: #000; }
-  &.bg-blue   { background-color: #4299e1; }
+  .formtastic input[type="text"],
+  .formtastic input[type="password"],
+  .formtastic select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+  }
+
+  .flashes .flash {
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    margin-bottom: 15px;
+  }
+
+  .flash.notice {
+    background-color: #ecfdf5;
+    color: #065f46;
+  }
+
+  .flash.error {
+    background-color: #fef2f2;
+    color: #991b1b;
+  }
 }
-
