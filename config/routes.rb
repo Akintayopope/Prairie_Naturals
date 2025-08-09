@@ -44,4 +44,3 @@ get '/checkout/cancel', to: 'checkout#cancel', as: 'checkout_cancel'
   # Health check route
   get "up" => "rails/health#show", as: :rails_health_check
 end
-

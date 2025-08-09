@@ -29,6 +29,24 @@ StaticPage.find_or_create_by!(slug: "contact") do |p|
   p.body  = "Email: support@prairienatural.com\nAddress: …"
 end
 
+if defined?(Coupon)
+  Coupon.find_or_create_by!(code: "SAVE10") do |c|
+    c.discount_type = :percent
+    c.value = 10
+    c.starts_at = 1.day.ago
+    c.ends_at   = 30.days.from_now
+    c.max_uses  = 100
+    c.active    = true
+  end
+
+  Coupon.find_or_create_by!(code: "WELCOME5") do |c|
+    c.discount_type = :amount
+    c.value = 5.00
+    c.starts_at = Time.current
+    c.active    = true
+  end
+end
+
 
 # =========================
 # Categories (final 5)

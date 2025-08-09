@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_09_191838) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_09_201856) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -108,10 +108,18 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_09_191838) do
 
   create_table "coupons", force: :cascade do |t|
     t.string "code"
-    t.decimal "discount"
     t.boolean "active"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "discount_type"
+    t.decimal "value", precision: 10, scale: 2, null: false
+    t.integer "max_uses"
+    t.integer "uses_count", default: 0, null: false
+    t.datetime "starts_at"
+    t.datetime "ends_at"
+    t.index ["active", "starts_at", "ends_at"], name: "index_coupons_on_active_and_window"
+    t.index ["code"], name: "index_coupons_on_code", unique: true
+    t.check_constraint "discount_type = 0 AND value <= 100::numeric OR discount_type = 1", name: "coupons_value_percent_cap_chk"
   end
 
   create_table "friendly_id_slugs", force: :cascade do |t|
