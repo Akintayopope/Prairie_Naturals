@@ -36,16 +36,17 @@ class CheckoutController < ApplicationController
     province_record = Province.find_by(name: @order.province)
     return prepare_failed_new(cart_items, "Please choose a valid province.") unless province_record
 
-    city        = params.dig(:order, :city)
-    postal_code = params.dig(:order, :postal_code)
+   city        = params.dig(:order, :city)
+postal_code = params.dig(:order, :postal_code)
 
-    address = current_user.addresses.where(
-      line1:       @order.shipping_address,
-      city:        city,
-      postal_code: postal_code,
-      province_id: province_record.id
-    ).first_or_initialize
-    address.name = @order.shipping_name if address.respond_to?(:name=)
+address = current_user.address || current_user.build_address
+address.assign_attributes(
+  line1:       @order.shipping_address,
+  city:        city,
+  postal_code: postal_code,
+  province_id: province_record.id
+)
+address.name = @order.shipping_name if address.respond_to?(:name=)
 
     begin
       address.save!

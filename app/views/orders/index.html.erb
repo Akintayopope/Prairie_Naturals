@@ -1,0 +1,24 @@
+<!-- app/views/orders/index.html.erb -->
+<h1>My Orders</h1>
+
+<% if @orders.any? %>
+  <ul style="list-style:none;padding:0;">
+    <% @orders.each do |order| %>
+      <li style="margin-bottom:14px;">
+        <strong>Order #<%= order.id %></strong>
+        — <%= order.status.to_s.titleize %>
+        — <%= order.created_at.strftime("%b %d, %Y") %>
+        — <%= number_to_currency(order.total) %>
+        <div>
+          <%= link_to "View details", order_path(order) %>
+          <% if order.respond_to?(:stripe_receipt_url) && order.stripe_receipt_url.present? %>
+            · <%= link_to "Stripe receipt", order.stripe_receipt_url, target: "_blank", rel: "noopener" %>
+          <% end %>
+        </div>
+      </li>
+    <% end %>
+  </ul>
+<% else %>
+  <p>You don’t have any orders yet.</p>
+  <%= link_to "Go shopping", storefront_products_path %>
+<% end %>

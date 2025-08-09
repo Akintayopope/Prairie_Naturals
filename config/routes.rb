@@ -32,11 +32,11 @@ end
   namespace :storefront do
     resources :products, only: [:index, :show]
   end
+  devise_for :users, controllers: { registrations: "users/registrations" }
 
   # Admin and User authentication
   devise_for :admin_users, ActiveAdmin::Devise.config
   ActiveAdmin.routes(self)
-  devise_for :users
 
   # Product and category resources
   resources :products

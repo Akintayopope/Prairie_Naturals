@@ -3,30 +3,29 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
 
-  # Constants for role management
+  # Roles
   ROLES = %w[customer admin].freeze
 
   # Associations
   has_many :orders, dependent: :destroy
-  has_many :addresses, dependent: :destroy
+  has_one  :address, dependent: :destroy     # 👈 primary address (changed from has_many)
   has_many :reviews, dependent: :destroy
   has_many :wishlist_items, dependent: :destroy
-  has_one_attached :avatar
   has_many :cart_items, dependent: :destroy
+  has_one_attached :avatar
 
-  # Role validation
+  # Nested address on sign-up / edit
+  accepts_nested_attributes_for :address, update_only: true
+
+  # Validations
+  validates :username, presence: true, uniqueness: true, length: { minimum: 3 }
   validates :role, inclusion: { in: ROLES }
 
-  # Role checks
-  def admin?
-    role == 'admin'
-  end
+  # Role helpers
+  def admin?    = role == 'admin'
+  def customer? = role == 'customer'
 
-  def customer?
-    role == 'customer'
-  end
-
-  # Default role assignment
+  # Defaults
   after_initialize :set_default_role, if: :new_record?
 
   private
@@ -35,12 +34,12 @@ class User < ApplicationRecord
     self.role ||= 'customer'
   end
 
-  def self.ransackable_attributes(auth_object = nil)
-    %w[id email created_at updated_at role] # Only include what you want searchable
+  # (Optional) Ransack allowlists
+  def self.ransackable_attributes(_ = nil)
+    %w[id email username created_at updated_at role]
   end
 
-  def self.ransackable_associations(auth_object = nil)
-  []
-end
-
+  def self.ransackable_associations(_ = nil)
+    %w[address orders reviews wishlist_items cart_items]
+  end
 end
