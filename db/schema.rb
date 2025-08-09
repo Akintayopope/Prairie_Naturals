@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_04_010319) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_09_021839) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -77,6 +77,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_04_010319) do
     t.datetime "remember_created_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "sign_in_count", default: 0, null: false
+    t.datetime "current_sign_in_at"
+    t.datetime "last_sign_in_at"
+    t.string "current_sign_in_ip"
+    t.string "last_sign_in_ip"
     t.index ["email"], name: "index_admin_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_admin_users_on_reset_password_token", unique: true
   end
@@ -96,6 +101,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_04_010319) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "slug"
+    t.integer "products_count", default: 0, null: false
     t.index ["slug"], name: "index_categories_on_slug", unique: true
   end
 
@@ -151,7 +157,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_04_010319) do
   create_table "products", force: :cascade do |t|
     t.string "title"
     t.text "description"
-    t.decimal "price"
+    t.decimal "price", precision: 10, scale: 2
     t.integer "stock"
     t.bigint "category_id", null: false
     t.datetime "created_at", null: false
@@ -159,6 +165,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_04_010319) do
     t.string "slug"
     t.string "name"
     t.decimal "sale_price"
+    t.decimal "rating", precision: 3, scale: 1
+    t.string "image_url"
+    t.string "link"
     t.index ["category_id"], name: "index_products_on_category_id"
     t.index ["slug"], name: "index_products_on_slug", unique: true
   end

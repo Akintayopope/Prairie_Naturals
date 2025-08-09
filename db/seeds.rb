@@ -1,24 +1,18 @@
 # db/seeds.rb
-
-require "open-uri"
+require "csv"
 
 puts "🌱 Seeding database..."
 
-# ✅ Categories
-puts "➡️ Seeding categories..."
-categories = %w[Hair Skin Vitamins Supplements Body]
-categories.each do |name|
-  Category.find_or_create_by!(name: name)
-end
-
-# ✅ Provinces
+# ===============================
+# Provinces (idempotent upserts)
+# ===============================
 puts "➡️ Seeding provinces..."
 [
-  { name: "Ontario", pst: 0.08, gst: 0.05, hst: 0.13 },
-  { name: "Manitoba", pst: 0.07, gst: 0.05, hst: 0.0 },
-  { name: "Alberta", pst: 0.0, gst: 0.05, hst: 0.0 },
-  { name: "British Columbia", pst: 0.07, gst: 0.05, hst: 0.0 },
-  { name: "Quebec", pst: 0.09975, gst: 0.05, hst: 0.0 }
+  { name: "Ontario",            pst: 0.08,    gst: 0.05, hst: 0.13 },
+  { name: "Manitoba",           pst: 0.07,    gst: 0.05, hst: 0.00 },
+  { name: "Alberta",            pst: 0.00,    gst: 0.05, hst: 0.00 },
+  { name: "British Columbia",   pst: 0.07,    gst: 0.05, hst: 0.00 },
+  { name: "Quebec",             pst: 0.09975, gst: 0.05, hst: 0.00 }
 ].each do |prov|
   Province.find_or_create_by!(name: prov[:name]) do |p|
     p.pst = prov[:pst]
@@ -27,35 +21,94 @@ puts "➡️ Seeding provinces..."
   end
 end
 
-# ✅ Products with images
-puts "➡️ Seeding products..."
-sample_products = [
-  { name: "Natural Shampoo", description: "Organic hair shampoo.", price: 12.99, stock: 20, image: "shampoo.jpg", category: "Hair" },
-  { name: "Vitamin C Serum", description: "Brightens and repairs skin.", price: 18.49, stock: 15, image: "vitamin.jpg", category: "Skin" },
-]
-
-sample_products.each do |prod|
-  category = Category.find_by(name: prod[:category])
-  product = Product.find_or_create_by!(name: prod[:name], category: category) do |p|
-    p.description = prod[:description]
-    p.price = prod[:price]
-    p.stock = prod[:stock]
-  end
-
-  unless product.image.attached?
-    image_path = Rails.root.join("db/seeds/images/#{prod[:image]}")
-    product.image.attach(io: File.open(image_path), filename: prod[:image])
-  end
+# =====================================
+# Categories (baseline seed – optional)
+# =====================================
+puts "➡️ Ensuring baseline categories exist..."
+%w[Hair Skin Vitamins Supplements Body].each do |name|
+  Category.find_or_create_by!(name: name)
 end
 
-# ✅ Admin User
+# ==========================================
+# Product import from CSV (your scraped file)
+# ==========================================
+csv_path = Rails.root.join("db/data/iherb_products.csv")
+if File.exist?(csv_path)
+  puts "➡️ Importing products from #{csv_path} ..."
+  created = updated = skipped = 0
+
+  # Single category (CSV has none)
+  supplements = Category.find_or_create_by!(name: "Supplements")
+
+  # Helpers
+  def to_price(v)  = v.to_s.gsub(/[^\d\.]/, "").presence&.to_d
+  def to_rating(v) = v.to_s[/\d+(\.\d+)?/, 0].presence&.to_d
+
+  ActiveRecord::Base.transaction do
+    CSV.foreach(csv_path, headers: true).with_index(2) do |row, i|
+      begin
+        name      = row["name"].to_s.strip
+        link      = (row["link-href"].presence || row["link"].presence).to_s.strip
+        price     = to_price(row["price"]) || 0.to_d
+        rating    = to_rating(row["rating"])
+        image_url = row["image-src"].presence
+
+        if name.blank?
+          skipped += 1
+          next
+        end
+
+        attrs = {
+          price:     price,
+          rating:    rating,
+          image_url: image_url,
+          link:      link,
+          category:  supplements
+        }
+
+        # Prefer stable upsert key by link when available; otherwise (name + category)
+        product =
+          if link.present?
+            Product.find_or_initialize_by(link: link)
+          else
+            Product.find_or_initialize_by(name: name, category_id: supplements.id)
+          end
+
+        # Ensure name present for link-keyed records
+        product.name ||= name
+
+        if product.new_record?
+          product.assign_attributes(attrs)
+          product.save!
+          created += 1
+        else
+          if attrs.any? { |k, v| product.public_send(k) != v }
+            product.update!(attrs)
+            updated += 1
+          end
+        end
+      rescue => e
+        puts "❌ Row #{i} (#{row['name']}) failed: #{e.class} – #{e.message}"
+      end
+    end
+  end
+
+  puts "✅ Products import done. Created: #{created}, Updated: #{updated}, Skipped blank-name rows: #{skipped}"
+else
+  puts "⚠️ No CSV found at #{csv_path}. Skipping product import."
+  puts "   Tip: Save your scrape to db/data/iherb_products.csv and re-run: rails db:seed"
+end
+
+# ==================
+# Admin user (dev)
+# ==================
 puts "➡️ Seeding admin user..."
-admin_email = ENV.fetch("ADMIN_EMAIL", "admin@prairienaturals.com")
+admin_email    = ENV.fetch("ADMIN_EMAIL", "admin@prairienaturals.com")
 admin_password = ENV.fetch("ADMIN_PASSWORD", "prairienaturals")
 
 AdminUser.find_or_create_by!(email: admin_email) do |admin|
-  admin.password = admin_password
+  admin.password              = admin_password
   admin.password_confirmation = admin_password
 end
 
-puts "✅ Seeding completed with products, categories, provinces, and admin user!"
+puts "✅ Seeding completed!"

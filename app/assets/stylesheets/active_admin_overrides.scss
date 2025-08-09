@@ -121,3 +121,48 @@ body.active_admin {
     color: #991b1b;
   }
 }
+
+
+body.active_admin {
+  background-color: #f9fafb;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.title_bar {
+  background-color: #2563eb !important;
+  color: #fff !important;
+  padding: 20px;
+  font-size: 22px;
+  font-weight: bold;
+  border-bottom: 2px solid #1e40af;
+}
+
+.index_as_table th, .index_as_table td {
+  padding: 12px 16px;
+  font-size: 14px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.button, input[type="submit"].button {
+  background-color: #2563eb;
+  color: white;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  border: none;
+  transition: background-color 0.3s ease-in-out;
+}
+
+.button:hover {
+  background-color: #1e40af;
+}
+
+.panel {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  padding: 20px;
+  margin-bottom: 30px;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}

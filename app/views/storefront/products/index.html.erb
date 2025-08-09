@@ -1,86 +1,95 @@
-<h1>Our Products</h1>
+<% content_for :title, "Our Products" %>
 
-<h1>Our Products</h1>
+<div class="container py-4">
+  <h1 class="mb-4">Our Products</h1>
 
-<!-- Filter Form -->
-<div class="filter" style="margin-bottom: 20px;">
-  <%= form_with url: storefront_products_path, method: :get, local: true, id: "product-filter-form" do %>
-    <div style="display: flex; flex-wrap: wrap; gap: 15px; align-items: center;">
-
-      <!-- Search -->
-      <div>
-        <label><strong>Search:</strong></label><br>
-        <%= text_field_tag :search, params[:search], placeholder: "Search products..." %>
-      </div>
-
-      <!-- Category -->
-      <div>
-        <label><strong>Category:</strong></label><br>
-        <%= select_tag :category_id,
-            options_from_collection_for_select(@categories, :id, :name, params[:category_id]),
-            include_blank: "All Categories" %>
-      </div>
-
-      <!-- Filter -->
-      <div>
-        <label><strong>Filter:</strong></label><br>
-        <%= select_tag :filter, options_for_select([
-            ['New Arrivals', 'new'],
-            ['On Sale', 'sale'],
-            ['Recently Updated', 'recent']
-          ], selected: params[:filter]),
-          include_blank: "All" %>
-      </div>
-
-      <!-- Submit -->
-      <div style="align-self: flex-end;">
-        <%= submit_tag "Search", class: "button" %>
-      </div>
+  <!-- Filters -->
+  <%= form_with url: storefront_products_path, method: :get, local: true, id: "product-filter-form", class: "row g-2 mb-3" do %>
+    <div class="col-md-4">
+      <label class="form-label">Search</label>
+      <input type="text" name="q" value="<%= h(params[:q] || params[:search]) %>" class="form-control" placeholder="Search products...">
     </div>
+
+    <div class="col-md-3">
+      <label class="form-label">Category</label>
+      <select name="category_id" class="form-select">
+        <option value="">All Categories</option>
+        <% @categories.each do |c| %>
+          <option value="<%= c.id %>" <%= "selected" if c.id.to_s == params[:category_id].to_s %>><%= c.name %></option>
+        <% end %>
+      </select>
+    </div>
+
+    <div class="col-md-3">
+      <label class="form-label">Sort</label>
+      <select name="sort" class="form-select">
+        <option value="">Name (A–Z)</option>
+        <option value="price_asc"  <%= "selected" if params[:sort] == "price_asc" %>>Price: Low → High</option>
+        <option value="price_desc" <%= "selected" if params[:sort] == "price_desc" %>>Price: High → Low</option>
+        <option value="rating"     <%= "selected" if params[:sort] == "rating" %>>Rating</option>
+        <option value="newest"     <%= "selected" if params[:sort] == "newest" %>>Newest</option>
+      </select>
+    </div>
+
+    <div class="col-md-2 d-grid align-items-end">
+      <button class="btn btn-primary mt-4">Apply</button>
+    </div>
+  <% end %>
+
+  <!-- Products grid -->
+  <% if @products.present? %>
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
+      <% @products.each do |product| %>
+        <div class="col">
+          <div class="card h-100">
+            <% if product.images.attached? %>
+              <%= image_tag product.images.first.variant(resize_to_limit: [600, 600]), class: "card-img-top", alt: product.name %>
+            <% elsif product.image_url.present? %>
+              <%= image_tag product.image_url, class: "card-img-top", alt: product.name %>
+            <% else %>
+              <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                <span class="text-muted">No image</span>
+              </div>
+            <% end %>
+
+            <div class="card-body d-flex flex-column">
+              <h6 class="card-title mb-1"><%= link_to product.name, storefront_product_path(product) %></h6>
+              <p class="text-muted mb-2"><%= product.category&.name %></p>
+
+              <div class="mt-auto">
+                <div class="fw-bold mb-1"><%= number_to_currency(product.price || 0) %></div>
+                <% if product.rating.present? && product.rating.to_f > 0 %>
+                  <small class="text-muted">Rating: <%= product.rating %>/5</small>
+                <% end %>
+              </div>
+            </div>
+
+            <div class="card-footer bg-white">
+              <%= button_to "Add to Cart",
+                    add_item_cart_path(product_id: product.id),
+                    method: :post,
+                    class: "btn btn-sm btn-outline-primary w-100" %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="mt-4">
+      <%= paginate @products if defined?(paginate) %>
+    </div>
+  <% else %>
+    <div class="alert alert-info">No products found. Try changing the filters.</div>
   <% end %>
 </div>
 
-<!-- Product List -->
-<div class="products" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px;">
-  <% @products.each do |product| %>
-    <div class="product-card" style="border: 1px solid #ccc; padding: 15px; border-radius: 5px;">
-
-      <% if product.images.attached? %>
-        <%= image_tag url_for(product.images.first), alt: product.name, style: "max-width: 100%;" %>
-      <% else %>
-        <p><em>No image available</em></p>
-      <% end %>
-
-      <h3><%= link_to product.name, storefront_product_path(product) %></h3>
-      <p><%= truncate(product.description, length: 100) %></p>
-
-      <% if product.sale_price.present? && product.sale_price < product.price %>
-        <p><strong>Sale Price:</strong> $<%= number_with_precision(product.sale_price, precision: 2) %></p>
-        <p><strike>Original:</strike> $<%= number_with_precision(product.price, precision: 2) %></p>
-      <% else %>
-        <p><strong>Price:</strong> $<%= number_with_precision(product.price, precision: 2) %></p>
-      <% end %>
-
-      <!-- ✅ Correct button_to for POST request -->
-      <%= button_to 'Add to Cart', add_item_cart_path(product), method: :post, class: "button" %>
-
-    </div>
-  <% end %>
-</div>
-
-<!-- Pagination -->
-<div class="pagination" style="margin-top: 30px;">
-  <%= paginate @products %>
-</div>
-
-<!-- Auto-submit Filters (Turbo) -->
+<!-- Auto-submit filters -->
 <script>
   document.addEventListener("turbo:load", function () {
     const form = document.getElementById("product-filter-form");
-    if (form) {
-      form.querySelectorAll("input, select").forEach(el => {
-        el.addEventListener("change", () => form.requestSubmit());
-      });
-    }
+    if (!form) return;
+    form.querySelectorAll("input, select").forEach(el => {
+      el.addEventListener("change", () => form.requestSubmit());
+    });
   });
 </script>

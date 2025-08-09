@@ -30,22 +30,25 @@ ActiveAdmin.register_page "Dashboard" do
     end
 
     # Recent Orders Table
-    panel "🧾 Recent Orders" do
-      table_for Order.order(created_at: :desc).limit(5) do
-        column("Order #") { |order| link_to order.id, admin_order_path(order) }
-        column("Customer") { |order| order.user&.email || "N/A" }
-        column("Status") do |order|
-          css_class = case order.status
-                      when "paid" then "ok"
-                      when "pending" then "warning"
-                      else "error"
-                      end
-          status_tag(order.status.titleize, class: css_class)
-        end
-        column("Total") { |order| number_to_currency(order.total) }
-        column("Date") { |order| order.created_at.strftime("%b %d, %Y") }
-      end
-    end
+panel "🧾 Recent Orders" do
+  table_for Order.order(created_at: :desc).limit(5) do
+    column("Order #")    { |order| link_to order.id, admin_order_path(order) }
+    column("Customer")   { |order| order.user&.email || "N/A" }
+
+    column("Status") do |order|
+  status_class = case order.status.to_s.downcase
+                 when 'paid' then 'ok'
+                 when 'cancelled', 'failed', '0' then 'error'
+                 else 'warning'
+                 end
+  status_tag(order.status.titleize, class: status_class)
+end
+
+
+    column("Total")      { |order| number_to_currency(order.total) }
+    column("Date")       { |order| order.created_at.strftime("%b %d, %Y") }
+  end
+end
 
     # Charts Section
     columns do

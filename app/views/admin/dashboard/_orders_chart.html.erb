@@ -2,7 +2,7 @@
 <% labels = grouped_orders.map { |date, _| date.strftime("%b %d") } %>
 <% values = grouped_orders.values %>
 
-<canvas id="ordersChart" height="300"></canvas>
+<canvas id="ordersChart" height="170"></canvas>
 
 <script>
   document.addEventListener("DOMContentLoaded", function () {
