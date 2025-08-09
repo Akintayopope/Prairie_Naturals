@@ -1,4 +1,3 @@
-# db/seeds.rb
 require "csv"
 
 puts "🌱 Seeding database..."
@@ -21,94 +20,144 @@ puts "➡️ Seeding provinces..."
   end
 end
 
-# =====================================
-# Categories (baseline seed – optional)
-# =====================================
-puts "➡️ Ensuring baseline categories exist..."
-%w[Hair Skin Vitamins Supplements Body].each do |name|
-  Category.find_or_create_by!(name: name)
+StaticPage.find_or_create_by!(slug: "about") do |p|
+  p.title = "About"
+  p.body  = "Write about your store here."
+end
+StaticPage.find_or_create_by!(slug: "contact") do |p|
+  p.title = "Contact"
+  p.body  = "Email: support@prairienatural.com\nAddress: …"
 end
 
-# ==========================================
-# Product import from CSV (your scraped file)
-# ==========================================
+
+# =========================
+# Categories (final 5)
+# =========================
+puts "➡️ Creating categories..."
+categories = %w[Vitamins Protein\ Supplements Digestive\ Health Skin\ Care Hair\ Care]
+categories.each { |name| Category.find_or_create_by!(name: name) }
+
+# =========================
+# Products from CSV (into 3 categories)
+# =========================
+puts "➡️ Importing products from CSV..."
 csv_path = Rails.root.join("db/data/iherb_products.csv")
-if File.exist?(csv_path)
-  puts "➡️ Importing products from #{csv_path} ..."
-  created = updated = skipped = 0
+if !File.exist?(csv_path)
+  puts "⚠️ CSV not found at #{csv_path}"
+else
+  vitamins         = Category.find_or_create_by!(name: "Vitamins")
+  protein_supp     = Category.find_or_create_by!(name: "Protein Supplements")
+  digestive_health = Category.find_or_create_by!(name: "Digestive Health")
 
-  # Single category (CSV has none)
-  supplements = Category.find_or_create_by!(name: "Supplements")
-
-  # Helpers
-  def to_price(v)  = v.to_s.gsub(/[^\d\.]/, "").presence&.to_d
-  def to_rating(v) = v.to_s[/\d+(\.\d+)?/, 0].presence&.to_d
-
-  ActiveRecord::Base.transaction do
-    CSV.foreach(csv_path, headers: true).with_index(2) do |row, i|
-      begin
-        name      = row["name"].to_s.strip
-        link      = (row["link-href"].presence || row["link"].presence).to_s.strip
-        price     = to_price(row["price"]) || 0.to_d
-        rating    = to_rating(row["rating"])
-        image_url = row["image-src"].presence
-
-        if name.blank?
-          skipped += 1
-          next
-        end
-
-        attrs = {
-          price:     price,
-          rating:    rating,
-          image_url: image_url,
-          link:      link,
-          category:  supplements
-        }
-
-        # Prefer stable upsert key by link when available; otherwise (name + category)
-        product =
-          if link.present?
-            Product.find_or_initialize_by(link: link)
-          else
-            Product.find_or_initialize_by(name: name, category_id: supplements.id)
-          end
-
-        # Ensure name present for link-keyed records
-        product.name ||= name
-
-        if product.new_record?
-          product.assign_attributes(attrs)
-          product.save!
-          created += 1
-        else
-          if attrs.any? { |k, v| product.public_send(k) != v }
-            product.update!(attrs)
-            updated += 1
-          end
-        end
-      rescue => e
-        puts "❌ Row #{i} (#{row['name']}) failed: #{e.class} – #{e.message}"
-      end
-    end
+  def map_csv_category(name, vitamins, protein_supp, digestive_health)
+    down = name.to_s.downcase
+    return vitamins         if down.include?("vitamin")
+    return protein_supp     if down.include?("protein") || down.include?("whey") || down.include?("collagen")
+    return digestive_health if down.include?("digest")  || down.include?("probiotic") || down.include?("fiber")
+    vitamins
   end
 
-  puts "✅ Products import done. Created: #{created}, Updated: #{updated}, Skipped blank-name rows: #{skipped}"
-else
-  puts "⚠️ No CSV found at #{csv_path}. Skipping product import."
-  puts "   Tip: Save your scrape to db/data/iherb_products.csv and re-run: rails db:seed"
+  require "csv"
+  require "open-uri"
+
+  created = updated = skipped = 0
+  headers = nil
+
+  CSV.foreach(csv_path, headers: true).with_index(2) do |row, i|
+    headers ||= row.headers
+    name       = row["name"].to_s.strip
+    price_str  = row["price"].to_s
+    rating_str = row["rating"].to_s
+    link       = (row["link-href"].presence || row["link"].presence)
+    image_url  = (row["image-src"].presence || row["image_url"].presence)
+
+    if name.blank?
+      skipped += 1
+      next
+    end
+
+    price  = price_str.gsub(/[^\d\.]/, "").presence&.to_d || 0
+    rating = rating_str[/\d+(\.\d+)?/, 0].presence&.to_d
+
+    category = map_csv_category(name, vitamins, protein_supp, digestive_health)
+
+    product =
+      if link.present?
+        Product.find_or_initialize_by(link: link)
+      else
+        Product.find_or_initialize_by(name: name, category_id: category.id)
+      end
+
+    product.name       ||= name
+    product.price        = price
+    product.rating       = rating
+    product.image_url    = image_url if product.respond_to?(:image_url)
+    product.category_id  = category.id
+
+    if product.new_record?
+      product.save!
+      created += 1
+    else
+      if product.changed?
+        product.save!
+        updated += 1
+      end
+    end
+
+    # Attach image to ActiveStorage if available and not already attached
+    if image_url.present? && product.respond_to?(:images) && !product.images.attached?
+      begin
+        file = URI.open(image_url, open_timeout: 8, read_timeout: 12)
+        fname = File.basename(URI(image_url).path.presence || "image.jpg")
+        product.images.attach(io: file, filename: fname)
+      rescue => e
+        Rails.logger.warn("CSV image attach failed for #{product.id}: #{e.message}")
+      end
+    end
+  rescue => e
+    puts "❌ Row #{i} failed (headers: #{headers.inspect}): #{e.class} – #{e.message}"
+  end
+
+  puts "✅ CSV import done. Created: #{created}, Updated: #{updated}, Skipped: #{skipped}"
 end
 
-# ==================
-# Admin user (dev)
-# ==================
+# =========================
+# Products from Walmart API
+# =========================
+puts "➡️ Importing Walmart API products..."
+system('KEYWORDS="ashwagandha,turmeric,lavender oil" LIMIT=90 bin/rake seed:walmart')
+
+# =========================
+# Admin user
+# =========================
 puts "➡️ Seeding admin user..."
 admin_email    = ENV.fetch("ADMIN_EMAIL", "admin@prairienaturals.com")
 admin_password = ENV.fetch("ADMIN_PASSWORD", "prairienaturals")
-
 AdminUser.find_or_create_by!(email: admin_email) do |admin|
   admin.password              = admin_password
   admin.password_confirmation = admin_password
 end
+
+# ✅ Only create if there are products & admins to comment on
+if AdminUser.any? && Product.any?
+  puts "➡️ Creating sample comments..."
+
+  admin = AdminUser.first
+  product = Product.first
+
+  5.times do |i|
+    ActiveAdmin::Comment.create!(
+      namespace: "admin",
+      body: "This is a sample comment ##{i + 1} for testing.",
+      resource: product,
+      author: admin
+    )
+  end
+
+  puts "✅ Added 5 sample comments."
+else
+  puts "⚠️ No AdminUser or Product found — skipping comment seeding."
+end
+
 
 puts "✅ Seeding completed!"
