@@ -1,30 +1,46 @@
 # app/models/category.rb
+# frozen_string_literal: true
+
 class Category < ApplicationRecord
   extend FriendlyId
   friendly_id :name, use: :slugged
 
-  # Associations
+  # --- Constants ---
+VALID_CATEGORY_NAMES = [
+  "Vitamins",
+  "Protein Supplements",
+  "Digestive Health",
+  "Skin Care",
+  "Hair Care"
+].freeze
+
+  # --- Associations ---
   has_many :products, dependent: :restrict_with_error, inverse_of: :category
-  # Note: ensure categories.products_count exists if you're using counter_cache on Product
+  # If you add counter cache:
+  # has_many :products, dependent: :restrict_with_error, inverse_of: :category
+  # (and add products_count column + counter_cache: true on Product)
 
-  # Normalization
-  before_validation :normalize_name
+  # --- Callbacks ---
+  before_validation :normalize_name!
 
-  # Validations
+  # --- Validations ---
   validates :name,
             presence: true,
             uniqueness: { case_sensitive: false },
-            length: { maximum: 100 }
+            length: { maximum: 100 },
+            inclusion: { in: VALID_CATEGORY_NAMES,
+                         message: "must be one of: #{VALID_CATEGORY_NAMES.join(', ')}" }
 
-  # Scopes
+  # --- Scopes ---
   scope :alphabetical, -> { order(Arel.sql('LOWER(name) ASC')) }
+  scope :defaults,     -> { where(name: VALID_CATEGORY_NAMES) }
 
-  # FriendlyId: regenerate slug when name changes
+  # --- FriendlyId ---
   def should_generate_new_friendly_id?
     will_save_change_to_name? || super
   end
 
-  # Ransack (ActiveAdmin)
+  # --- Ransack (ActiveAdmin) ---
   def self.ransackable_attributes(_ = nil)
     %w[id name slug created_at updated_at products_count]
   end
@@ -33,9 +49,17 @@ class Category < ApplicationRecord
     %w[products]
   end
 
+  # --- Utilities ---
+  # Seed helper you can call from seeds: Category.ensure_default_set!
+  def self.ensure_default_set!
+    VALID_CATEGORY_NAMES.each { |n| find_or_create_by!(name: n) }
+  end
+
   private
 
-  def normalize_name
+  def normalize_name!
     self.name = name.to_s.strip.squeeze(" ")
+                      .gsub(/\s+/, " ")
+                      .split.map(&:capitalize).join(" ")
   end
 end
