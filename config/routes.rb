@@ -3,9 +3,13 @@ Rails.application.routes.draw do
   get "/contact", to: "static_pages#show", defaults: { slug: "contact" }, as: :contact
 
   get "orders/show"
-  # Checkout
-  resource :checkout, only: [:new, :create], controller: 'checkout'
-  resources :orders, only: [:index, :show]
+# config/routes.rb
+resource :checkout, only: [:new, :create], controller: "checkout" do
+  get :success
+  get :cancel
+  get :preview_receipt
+end
+
 
  # config/routes.rb
 namespace :api do
@@ -22,6 +26,7 @@ end
 
   # Root path
   root "storefront/products#index"
+  resources :orders, only: [:index, :show]
 
   # Storefront namespace for public-facing product pages
   namespace :storefront do
@@ -36,10 +41,6 @@ end
   # Product and category resources
   resources :products
   resources :categories, only: [:index, :show]
-
-post '/checkout/create', to: 'checkout#create', as: 'stripe_checkout'
-get '/checkout/success', to: 'checkout#success', as: 'checkout_success'
-get '/checkout/cancel', to: 'checkout#cancel', as: 'checkout_cancel'
 
   # Health check route
   get "up" => "rails/health#show", as: :rails_health_check
