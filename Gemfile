@@ -49,7 +49,6 @@ group :development, :test do
 
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
-  gem 'dotenv-rails'       # For environment variables like Stripe keys
   gem 'rubocop', require: false
 end
 
@@ -72,7 +71,6 @@ gem 'image_processing', '~> 1.2'
 
 gem "bootstrap", "~> 5.3.0"
 gem 'sassc-rails'
-gem 'activeadmin'
 gem 'friendly_id', '~> 5.4.0'
 
 
@@ -83,3 +81,4 @@ gem 'dotenv-rails', groups: [:development, :test]
 gem "chartkick", "~> 5.2"
 gem "groupdate", "~> 6.7"
 gem "chart-js-rails"
+gem "httparty"   # <-- correct spelling

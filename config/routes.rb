@@ -1,9 +1,17 @@
 Rails.application.routes.draw do
+  get "/about",   to: "static_pages#show", defaults: { slug: "about" },   as: :about
+  get "/contact", to: "static_pages#show", defaults: { slug: "contact" }, as: :contact
+
   get "orders/show"
   # Checkout
   resource :checkout, only: [:new, :create], controller: 'checkout'
   resources :orders, only: [:index, :show]
 
+ # config/routes.rb
+namespace :api do
+  get  "health_products",        to: "health_products#index"
+  post "health_products/import", to: "health_products#import"
+end
 
   # Cart controller using singular `resource`, since there's only one cart per session
   resource :cart, only: [:show], controller: 'cart' do

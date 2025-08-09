@@ -16,7 +16,12 @@ class ProductsController < ApplicationController
   end
 
   # GET /products/:id
+  def index
+    @products = Product.includes(images_attachments: :blob).order(created_at: :desc)
+  end
+
   def show
+    @product = Product.includes(images_attachments: :blob).find(params[:id])
   end
 
   # GET /products/new

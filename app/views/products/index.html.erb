@@ -1,26 +1,39 @@
-<p style="color: green;"><%= notice %></p>
-
 <% content_for :title, "Products" %>
 
-<h1>Products</h1>
+<div class="container my-4">
+  <h1 class="mb-4">Our Products</h1>
 
-<div id="products">
-  <% @products.each do |product| %>
-    <div class="product-card">
-      <% if product.images.attached? %>
-        <%= image_tag url_for(product.images.first), style: "max-width: 150px;" %><br>
-      <% else %>
-        <p><em>No image available</em></p>
-      <% end %>
+  <div class="row g-4">
+    <% @products.each do |product| %>
+      <div class="col-6 col-md-4 col-lg-3">
+        <div class="card h-100 shadow-sm">
+          <% if (img = product_main_image(product)) %>
+            <% thumb = product_variant(img, size: [400, 400]) %>
+            <%= image_tag url_for(thumb), alt: product.name, class: "card-img-top product-thumb", loading: "lazy" %>
+          <% else %>
+            <%= image_tag product_placeholder, alt: "No image", class: "card-img-top product-thumb", loading: "lazy" %>
+          <% end %>
 
-      <strong><%= link_to product.name, product_path(product) %></strong><br>
-      <em><%= number_to_currency(product.price) %></em><br>
+          <div class="card-body d-flex flex-column">
+            <h6 class="card-title mb-1 text-truncate-2">
+              <%= link_to product.name, product_path(product), class: "stretched-link text-decoration-none" %>
+            </h6>
+            <div class="text-muted small mb-2"><%= product.category&.name || "Uncategorized" %></div>
+            <div class="fw-bold mb-3"><%= number_to_currency(product.price) %></div>
 
-      <%= link_to "Edit", edit_product_path(product) %> |
-      <%= button_to "Delete", product_path(product), method: :delete, data: { confirm: "Are you sure?" } %>
-    </div>
-    <hr>
-  <% end %>
+            <div class="mt-auto">
+              <%= button_to "Add to Cart",
+                            cart_items_path(product_id: product.id),
+                            method: :post,
+                            class: "btn btn-outline-primary w-100" %>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="mt-4">
+    <%= paginate @products if respond_to?(:paginate) %>
+  </div>
 </div>
-
-<%= link_to "New Product", new_product_path, class: "button" %>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_09_021839) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_09_191838) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -103,6 +103,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_09_021839) do
     t.string "slug"
     t.integer "products_count", default: 0, null: false
     t.index ["slug"], name: "index_categories_on_slug", unique: true
+    t.check_constraint "name::text = ANY (ARRAY['Vitamins'::character varying, 'Protein Supplements'::character varying, 'Digestive Health'::character varying, 'Skin Care'::character varying, 'Hair Care'::character varying]::text[])", name: "categories_name_whitelist"
   end
 
   create_table "coupons", force: :cascade do |t|
@@ -190,6 +191,15 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_09_021839) do
     t.datetime "updated_at", null: false
     t.index ["product_id"], name: "index_reviews_on_product_id"
     t.index ["user_id"], name: "index_reviews_on_user_id"
+  end
+
+  create_table "static_pages", force: :cascade do |t|
+    t.string "title"
+    t.string "slug"
+    t.text "body"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["slug"], name: "index_static_pages_on_slug"
   end
 
   create_table "users", force: :cascade do |t|
