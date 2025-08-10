@@ -1,0 +1,104 @@
+<h1>Checkout</h1>
+
+<% if flash[:alert].present? %>
+  <div style="background:#fde2e1;color:#7a1c1c;padding:10px;border-radius:6px;margin-bottom:12px;">
+    <%= flash[:alert] %>
+  </div>
+<% end %>
+
+<% if @order && @order.errors.any? %>
+  <div style="background:#fff3cd;color:#7a5c00;padding:10px;border-radius:6px;margin-bottom:12px;">
+    <strong>Please fix the following:</strong>
+    <ul style="margin:6px 0 0 18px;">
+      <% @order.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>
+
+<!-- Preview form (GET): lets user select province and see totals -->
+<%= form_with model: @order, url: new_checkout_path, method: :get, local: true do |f| %>
+  <div>
+    <%= f.label :shipping_name, "Full Name" %><br>
+    <%= f.text_field :shipping_name, onchange: "this.form.submit();" %>
+  </div>
+
+  <div>
+    <%= f.label :shipping_address, "Shipping Address" %><br>
+    <%= f.text_area :shipping_address, onchange: "this.form.submit();" %>
+  </div>
+
+  <div>
+    <%= label_tag "order[city]", "City" %><br>
+    <%= text_field_tag "order[city]", params.dig(:order, :city), onchange: "this.form.submit();" %>
+  </div>
+
+  <div>
+    <%= label_tag "order[postal_code]", "Postal Code" %><br>
+    <%= text_field_tag "order[postal_code]", params.dig(:order, :postal_code), onchange: "this.form.submit();" %>
+  </div>
+
+  <div>
+    <%= f.label :province %><br>
+    <%= f.select :province, @provinces, { include_blank: 'Select a province' }, onchange: "this.form.submit();" %>
+  </div>
+<% end %>
+
+<% if @cart_items.present? %>
+  <h2>Order Summary</h2>
+  <p><strong>Subtotal:</strong> <%= number_to_currency(@subtotal) %></p>
+
+  <% if @tax.present? %>
+    <p><strong>Tax:</strong> <%= number_to_currency(@tax) %></p>
+    <p><strong>Total:</strong> <%= number_to_currency(@total) %></p>
+  <% else %>
+    <p style="color:red;"><em>Select a province to see tax and total.</em></p>
+  <% end %>
+<% end %>
+
+<!-- Final submit (POST) to create order + start Stripe -->
+<%= form_with model: @order, url: checkout_path, method: :post, local: true do |f| %>
+  <%= f.hidden_field :shipping_name,    value: @order.shipping_name %>
+  <%= f.hidden_field :shipping_address, value: @order.shipping_address %>
+  <%= hidden_field_tag "order[city]",        params.dig(:order, :city) %>
+  <%= hidden_field_tag "order[postal_code]", params.dig(:order, :postal_code) %>
+  <%= f.hidden_field :province,         value: @order.province %>
+
+  <%= link_to "Download Preview PDF",
+    preview_receipt_checkout_path(
+      format: :pdf,
+      order: {
+        shipping_name:    @order.shipping_name,
+        shipping_address: @order.shipping_address,
+        city:             params.dig(:order, :city),
+        postal_code:      params.dig(:order, :postal_code),
+        province:         @order.province
+      }
+    ),
+    class: "button",
+    target: "_blank",
+    rel: "noopener" %>
+
+
+  <div style="margin-top: 16px;">
+    <%= f.submit "Place Order", class: "button", disabled: @cart_items.blank? %>
+  </div>
+<% end %>
+
+<hr>
+
+<h1>My Orders</h1>
+<% if @orders.present? %>
+  <% @orders.each do |order| %>
+    <div>
+      <p><strong>Order #:</strong> <%= order.id %></p>
+      <p><strong>Status:</strong> <%= order.status.to_s.titleize %></p>
+      <p><strong>Date:</strong> <%= order.created_at.strftime("%B %d, %Y") %></p>
+      <p><%= link_to "View Details", order_path(order) %></p>
+      <hr>
+    </div>
+  <% end %>
+<% else %>
+  <p>You have no past orders yet.</p>
+<% end %>

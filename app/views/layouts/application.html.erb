@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= content_for(:title) || "Prairie Naturals" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= yield :head %>
+
+    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
+
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+
+    <%= stylesheet_link_tag 'application', media: 'all', 'data-turbo-track': 'reload' %>
+    <%= javascript_include_tag "application", "data-turbo-track": "reload", defer: true %>
+    <%= javascript_include_tag "chartkick" %>
+    <%= javascript_include_tag "Chart.bundle" %>
+  </head>
+
+  <body>
+    <header style="display:flex;gap:12px;align-items:center;justify-content:space-between;padding:10px 16px;">
+      <div style="display:flex;gap:12px;align-items:center;">
+        <% if user_signed_in? && current_user.avatar.attached? %>
+          <%= image_tag current_user.avatar.variant(resize_to_limit: [100, 100]), class: "rounded-circle", alt: "Avatar" %>
+        <% end %>
+
+        <p style="margin:0;">
+          <% if user_signed_in? %>
+            Welcome, <%= current_user.email %>
+          <% elsif admin_user_signed_in? %>
+            Admin: <%= current_admin_user.email %>
+          <% end %>
+        </p>
+      </div>
+
+      <nav style="display:flex;gap:12px;align-items:center;">
+        <% if user_signed_in? %>
+          <%= link_to "My Orders", orders_path %>
+          <%= button_to "Logout", destroy_user_session_path, method: :delete, class: "btn btn-link", form: { style: "display:inline" } %>
+        <% elsif admin_user_signed_in? %>
+          <%= link_to "Admin", admin_root_path %>
+          <%= button_to "Admin Logout", destroy_admin_user_session_path, method: :delete, class: "btn btn-link", form: { style: "display:inline" } %>
+        <% else %>
+          <%= link_to "Log in",  new_user_session_path %>
+          <%= link_to "Sign up", new_user_registration_path %>
+        <% end %>
+      </nav>
+    </header>
+
+    <%= yield %>
+
+    <div id="floating-cart" style="
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background-color: #333;
+      color: #fff;
+      padding: 12px 16px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      z-index: 9999;
+      font-size: 14px;">
+      🛒 <%= link_to 'Cart', cart_path, style: "color:#fff; text-decoration:none;" %>
+      (<%= cart_count %> items - <%= number_to_currency(cart_total) %>)
+    </div>
+  </body>
+</html>

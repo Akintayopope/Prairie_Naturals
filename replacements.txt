@@ -1,0 +1,4 @@
+regex:sk_(test|live)_[0-9A-Za-z]+
+STRIPE_SECRET_REDACTED
+regex:pk_(test|live)_[0-9A-Za-z]+
+STRIPE_PUBLISHABLE_REDACTED

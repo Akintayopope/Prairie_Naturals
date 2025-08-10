@@ -1,0 +1,109 @@
+<h1>Your Cart</h1>
+
+<% if notice %>
+  <div style="background:#d4edda;color:#155724;padding:10px;margin:10px 0;border-radius:4px;">
+    <%= notice %>
+  </div>
+<% end %>
+
+<% if user_signed_in? %>
+  <% if @cart_items.any? %>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th class="text-center">Quantity</th>
+          <th class="text-end">Unit Price</th>
+          <th class="text-end">Total</th>
+          <th class="text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @cart_items.each do |item| %>
+          <tr>
+            <td><strong><%= item.product.name %></strong></td>
+
+            <!-- per-row PATCH form -->
+            <td class="text-center">
+              <%= form_with url: update_cart_quantities_cart_path, method: :patch, local: true do %>
+                <%= number_field_tag "quantities[#{item.id}]", item.quantity, min: 0, class: "form-control d-inline-block", style: "width:90px" %>
+                <%= submit_tag "Update", class: "btn btn-sm btn-outline-secondary ms-1" %>
+              <% end %>
+            </td>
+
+            <td class="text-end"><%= number_to_currency(item.product.price) %></td>
+            <td class="text-end"><%= number_to_currency(item.quantity * item.product.price) %></td>
+
+            <!-- separate DELETE form -->
+            <td class="text-center">
+              <%= button_to "Remove",
+                  remove_item_cart_path(product_id: item.product.slug),
+                  method: :delete,
+                  form: { data: { turbo_confirm: "Remove item?" } },
+                  class: "btn btn-link p-0 text-danger" %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+
+    <div class="d-flex justify-content-between align-items-center mt-3">
+      <%= link_to 'Continue Shopping', storefront_products_path, class: "btn btn-outline-secondary" %>
+      <p class="m-0"><strong>Cart Total:</strong> <%= number_to_currency(@cart_items.sum { |i| i.product.price * i.quantity }) %></p>
+      <%= link_to "Proceed to Checkout", new_checkout_path, class: "btn btn-primary" %>
+    </div>
+  <% else %>
+    <p>Your cart is empty.</p>
+    <%= link_to 'Start Shopping', storefront_products_path, class: "btn btn-primary" %>
+  <% end %>
+
+<% elsif session[:cart].present? %>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Product</th>
+        <th class="text-center">Quantity</th>
+        <th class="text-end">Unit Price</th>
+        <th class="text-end">Total</th>
+        <th class="text-center">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @products.each do |product| %>
+        <tr>
+          <td><strong><%= product.name %></strong></td>
+
+          <!-- per-row PATCH form (guest) -->
+          <td class="text-center">
+            <%= form_with url: update_cart_quantities_cart_path, method: :patch, local: true do %>
+              <%= number_field_tag "quantities[#{product.slug}]", session[:cart][product.slug], min: 0, class: "form-control d-inline-block", style: "width:90px" %>
+              <%= submit_tag "Update", class: "btn btn-sm btn-outline-secondary ms-1" %>
+            <% end %>
+          </td>
+
+          <td class="text-end"><%= number_to_currency(product.price) %></td>
+          <td class="text-end"><%= number_to_currency(product.price * session[:cart][product.slug].to_i) %></td>
+
+          <!-- separate DELETE form -->
+          <td class="text-center">
+            <%= button_to "Remove",
+                remove_item_cart_path(product_id: product.slug),
+                method: :delete,
+                form: { data: { turbo_confirm: "Remove item?" } },
+                class: "btn btn-link p-0 text-danger" %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <div class="d-flex justify-content-between align-items-center mt-3">
+    <%= link_to 'Continue Shopping', storefront_products_path, class: "btn btn-outline-secondary" %>
+    <p class="m-0"><strong>Cart Total:</strong> <%= number_to_currency(@products.sum { |p| p.price * session[:cart][p.slug].to_i }) %></p>
+    <%= link_to "Proceed to Checkout", new_checkout_path, class: "btn btn-primary" %>
+  </div>
+
+<% else %>
+  <p>Your cart is empty.</p>
+  <%= link_to 'Start Shopping', storefront_products_path, class: "btn btn-primary" %>
+<% end %>

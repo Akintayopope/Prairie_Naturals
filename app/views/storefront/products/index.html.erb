@@ -1,0 +1,119 @@
+<% content_for :title, "Our Products" %>
+
+<div class="container py-4">
+  <h1 class="mb-4">Our Products</h1>
+
+  <!-- Filters -->
+  <%= form_with url: storefront_products_path, method: :get, local: true, id: "product-filter-form", class: "row g-2 mb-3" do %>
+    <div class="col-md-4">
+      <label class="form-label">Search</label>
+      <input type="text" name="search" value="<%= h(params[:search] || params[:q]) %>" class="form-control" placeholder="Search products...">
+    </div>
+
+    <div class="col-md-3">
+      <label class="form-label">Category</label>
+      <select name="category_id" class="form-select">
+        <option value="">All Categories</option>
+        <% @categories.each do |c| %>
+          <option value="<%= c.id %>" <%= "selected" if c.id.to_s == params[:category_id].to_s %>><%= c.name %></option>
+        <% end %>
+      </select>
+    </div>
+
+    <div class="col-md-2">
+      <label class="form-label">Show</label>
+      <select name="filter" class="form-select">
+        <option value=""        <%= "selected" if params[:filter].blank? %>>All products</option>
+        <option value="sale"    <%= "selected" if params[:filter] == "sale" %>>On sale</option>
+        <option value="new"     <%= "selected" if params[:filter] == "new" %>>New</option>
+        <option value="recent"  <%= "selected" if params[:filter] == "recent" %>>Recently updated</option>
+      </select>
+    </div>
+
+    <div class="col-md-3">
+      <label class="form-label">Sort</label>
+      <select name="sort" class="form-select">
+        <option value=""             <%= "selected" if params[:sort].blank? %>>Name (A–Z)</option>
+        <option value="price_asc"    <%= "selected" if params[:sort] == "price_asc" %>>Price: Low → High</option>
+        <option value="price_desc"   <%= "selected" if params[:sort] == "price_desc" %>>Price: High → Low</option>
+        <option value="rating"       <%= "selected" if params[:sort] == "rating" %>>Rating</option>
+        <option value="newest"       <%= "selected" if params[:sort] == "newest" %>>Newest</option>
+      </select>
+    </div>
+
+    <div class="col-md-12 col-lg-0 d-grid align-items-end">
+      <button class="btn btn-primary mt-4">Apply</button>
+    </div>
+  <% end %>
+
+  <!-- Products grid -->
+  <% if @products.present? %>
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
+      <% @products.each do |product| %>
+        <% sale = product.respond_to?(:sale_price) && product.sale_price.present? && product.sale_price.to_d < product.price.to_d rescue false %>
+        <div class="col">
+          <div class="card h-100 position-relative">
+            <% if sale %>
+              <span class="badge bg-danger position-absolute m-2" style="z-index:1;">Sale</span>
+            <% end %>
+
+            <% if product.images.attached? %>
+              <%= image_tag product.images.first.variant(resize_to_limit: [600, 600]), class: "card-img-top", alt: product.name %>
+            <% elsif product.image_url.present? %>
+              <%= image_tag product.image_url, class: "card-img-top", alt: product.name %>
+            <% else %>
+              <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                <span class="text-muted">No image</span>
+              </div>
+            <% end %>
+
+            <div class="card-body d-flex flex-column">
+              <h6 class="card-title mb-1"><%= link_to product.name, storefront_product_path(product) %></h6>
+              <p class="text-muted mb-2"><%= product.category&.name %></p>
+
+              <div class="mt-auto">
+                <% if sale %>
+                  <div class="fw-bold">
+                    <span class="text-danger me-2"><%= number_to_currency(product.sale_price) %></span>
+                    <small class="text-muted text-decoration-line-through"><%= number_to_currency(product.price) %></small>
+                  </div>
+                <% else %>
+                  <div class="fw-bold mb-1"><%= number_to_currency(product.price || 0) %></div>
+                <% end %>
+
+                <% rating = product.try(:average_rating) || product.try(:rating) %>
+                <% if rating.present? && rating.to_f > 0 %>
+                  <small class="text-muted">Rating: <%= number_with_precision(rating.to_f, precision: 1) %>/5</small>
+                <% end %>
+              </div>
+            </div>
+
+            <div class="card-footer bg-white">
+              <%= button_to "Add to Cart",
+                    add_item_cart_path(product_id: product.id),
+                    method: :post,
+                    class: "btn btn-sm btn-outline-primary w-100" %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="mt-4">
+      <%= paginate @products if defined?(paginate) %>
+    </div>
+  <% else %>
+    <div class="alert alert-info">No products found. Try changing the filters.</div>
+  <% end %>
+</div>
+
+<!-- Auto-submit filters -->
+<script>
+  document.addEventListener("turbo:load", function () {
+    const form = document.getElementById("product-filter-form");
+    if (!form) return;
+    form.querySelectorAll("input, select").forEach(el => {
+      el.addEventListener("change", () => form.requestSubmit());
+    });
+  });
+</script>

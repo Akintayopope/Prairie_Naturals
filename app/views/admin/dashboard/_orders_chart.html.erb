@@ -1,0 +1,34 @@
+<% grouped_orders = Order.group_by_day(:created_at).count %>
+<% labels = grouped_orders.map { |date, _| date.strftime("%b %d") } %>
+<% values = grouped_orders.values %>
+
+<canvas id="ordersChart" height="170"></canvas>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const canvas = document.getElementById("ordersChart");
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+
+    new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: <%= raw labels.to_json %>,
+        datasets: [{
+          label: "Orders",
+          data: <%= raw values.to_json %>,
+          backgroundColor: "#6366F1"
+        }]
+      },
+      options: {
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
+    });
+  });
+</script>

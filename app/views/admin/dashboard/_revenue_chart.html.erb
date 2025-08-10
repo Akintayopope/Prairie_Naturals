@@ -1,0 +1,43 @@
+<% grouped_revenue = Order.group_by_day(:created_at).sum(:total) %>
+<% labels = grouped_revenue.map { |date, _| date.strftime("%b %d") } %>
+<% values = grouped_revenue.values %>
+
+<canvas id="revenueChart" height="170"></canvas>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const canvas = document.getElementById("revenueChart");
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+
+    new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: ["Aug 01", "Aug 02", "Aug 03", "Aug 04", "Aug 05", "Aug 06", "Aug 07", "Aug 08", "Aug 09", "Aug 10"],
+        datasets: [{
+          label: "Revenue",
+          data: [69.4176, 106.9488, 54.8688, 176.9064, 55.6864, 36.12, 40.32, 36.12, 24.08, 12.04],
+          backgroundColor: "rgba(16, 185, 129, 0.2)",
+          borderColor: "#10B981",
+          borderWidth: 2,
+          fill: true,
+          tension: 0.4
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            display: true
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+  });
+</script>

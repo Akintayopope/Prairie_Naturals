@@ -1,0 +1,66 @@
+<h1>Order #<%= @order.id %></h1>
+
+<% if flash[:notice].present? %>
+  <div style="background:#e7f6ec;color:#135f2f;padding:10px;border-radius:6px;margin-bottom:12px;">
+    <%= flash[:notice] %>
+  </div>
+<% end %>
+
+<p><strong>Status:</strong> <%= @order.status.to_s.titleize %></p>
+<p><strong>Placed on:</strong> <%= @order.created_at.strftime("%B %d, %Y") %></p>
+
+<h3>Shipping</h3>
+<p>
+  <%= @order.shipping_name %><br>
+  <% if @order.address %>
+    <%= @order.address.full_address %>
+  <% else %>
+    <%= @order.shipping_address %>
+    <% if @order.province.present? %>, <%= @order.province %><% end %>
+  <% end %>
+</p>
+
+<h3>Items</h3>
+<table style="width:100%;border-collapse:collapse;">
+  <thead>
+    <tr>
+      <th style="text-align:left;border-bottom:1px solid #ddd;padding:6px 0;">Product</th>
+      <th style="text-align:center;border-bottom:1px solid #ddd;">Qty</th>
+      <th style="text-align:right;border-bottom:1px solid #ddd;">Unit</th>
+      <th style="text-align:right;border-bottom:1px solid #ddd;">Line Total</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @order.order_items.each do |item| %>
+      <tr>
+        <td style="padding:6px 0;"><%= item.product&.name || "Product ##{item.product_id}" %></td>
+        <td style="text-align:center;"><%= item.quantity %></td>
+        <td style="text-align:right;"><%= number_to_currency(item.unit_price) %></td>
+        <td style="text-align:right;"><%= number_to_currency(item.quantity * item.unit_price) %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<div style="margin-top:12px;">
+  <p><strong>Subtotal:</strong> <%= number_to_currency(@order.subtotal) %></p>
+  <p><strong>Tax:</strong> <%= number_to_currency(@order.tax) %></p>
+  <p><strong>Total:</strong> <%= number_to_currency(@order.total) %></p>
+</div>
+
+<div style="margin-top:12px;">
+  <%# Show Stripe’s hosted receipt if you saved it on the order %>
+  <% if @order.respond_to?(:stripe_receipt_url) && @order.stripe_receipt_url.present? %>
+    <p><%= link_to "View Stripe Receipt", @order.stripe_receipt_url, target: "_blank", rel: "noopener" %></p>
+  <% end %>
+
+  <%# If you added a PDF receipt action (OrdersController#receipt) and route %>
+  <% if defined?(receipt_order_path) %>
+    <p><%= link_to "Download Invoice (PDF)", receipt_order_path(@order, format: :pdf), target: "_blank", rel: "noopener" %></p>
+  <% end %>
+</div>
+
+<p style="margin-top:16px;">
+  <%= link_to "Back to My Orders", orders_path, class: "button" %>
+  <%= link_to "Back to Store", storefront_products_path, class: "button" %>
+</p>

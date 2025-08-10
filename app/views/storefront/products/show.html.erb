@@ -1,0 +1,109 @@
+<% content_for :title, @product.name %>
+
+<div class="container py-4">
+  <!-- Product Header -->
+  <div class="row mb-4">
+    <div class="col-md-6">
+      <% if @product.images.attached? %>
+        <%= image_tag @product.images.first.variant(resize_to_limit: [800, 800]), class: "img-fluid rounded shadow-sm", alt: @product.name %>
+      <% elsif @product.image_url.present? %>
+        <%= image_tag @product.image_url, class: "img-fluid rounded shadow-sm", alt: @product.name %>
+      <% else %>
+        <div class="bg-light d-flex align-items-center justify-content-center border rounded" style="height: 400px;">
+          <span class="text-muted">No image available</span>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="col-md-6">
+      <h1 class="h3 mb-3"><%= @product.name %></h1>
+      <p class="mb-1"><strong>Category:</strong> <%= @product.category&.name %></p>
+      <p class="mb-1"><strong>Price:</strong> <%= number_to_currency(@product.price || 0) %></p>
+      <p class="mb-3"><strong>Average Rating:</strong> ⭐ <%= number_with_precision(@product.average_rating || 0, precision: 1) %> / 5</p>
+      <p><%= simple_format(@product.description) %></p>
+
+      <%= button_to "Add to Cart", add_item_cart_path(product_id: @product.id), method: :post, class: "btn btn-primary mt-3" %>
+    </div>
+  </div>
+
+  <!-- Product Images Gallery -->
+  <% if @product.images.attached? && @product.images.many? %>
+    <h4>More Images</h4>
+    <div class="row g-2 mb-4">
+      <% @product.images.each do |image| %>
+        <div class="col-4 col-md-2">
+          <%= image_tag image.variant(resize_to_limit: [250, 250]), class: "img-fluid border rounded", alt: @product.name %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <!-- Customer Reviews -->
+  <h4>Customer Reviews</h4>
+  <% if @reviews.any? %>
+    <div class="list-group mb-4">
+      <% @reviews.each do |review| %>
+        <div class="list-group-item">
+          <p class="mb-1"><strong><%= review.user.email %></strong> – ⭐ <%= review.rating %>/5</p>
+          <p class="mb-0"><%= review.comment %></p>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <p class="text-muted mb-4"><em>No reviews yet. Be the first to review this product!</em></p>
+  <% end %>
+
+  <!-- Related Products -->
+  <h4>Related Products</h4>
+  <% if @related_products.any? %>
+    <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 g-3 mb-4">
+      <% @related_products.each do |related| %>
+        <div class="col">
+          <div class="card h-100 text-center">
+            <% if related.images.attached? %>
+              <%= link_to image_tag(related.images.first.variant(resize_to_limit: [200, 200]), class: "card-img-top", alt: related.name), storefront_product_path(related) %>
+            <% elsif related.image_url.present? %>
+              <%= link_to image_tag(related.image_url, class: "card-img-top", alt: related.name), storefront_product_path(related) %>
+            <% else %>
+              <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                <span class="text-muted">No image</span>
+              </div>
+            <% end %>
+            <div class="card-body p-2">
+              <p class="card-title small mb-0"><%= link_to related.name, storefront_product_path(related) %></p>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <p class="text-muted mb-4"><em>No related products found.</em></p>
+  <% end %>
+
+  <!-- Recently Viewed -->
+  <h4>Recently Viewed</h4>
+  <% if @recently_viewed_products.any? %>
+    <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 g-3">
+      <% @recently_viewed_products.each do |recent| %>
+        <div class="col">
+          <div class="card h-100 text-center">
+            <% if recent.images.attached? %>
+              <%= link_to image_tag(recent.images.first.variant(resize_to_limit: [200, 200]), class: "card-img-top", alt: recent.name), storefront_product_path(recent) %>
+            <% elsif recent.image_url.present? %>
+              <%= link_to image_tag(recent.image_url, class: "card-img-top", alt: recent.name), storefront_product_path(recent) %>
+            <% else %>
+              <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                <span class="text-muted">No image</span>
+              </div>
+            <% end %>
+            <div class="card-body p-2">
+              <p class="card-title small mb-0"><%= link_to recent.name, storefront_product_path(recent) %></p>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <p class="text-muted"><em>No recently viewed products.</em></p>
+  <% end %>
+</div>

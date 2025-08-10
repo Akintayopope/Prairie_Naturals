@@ -1,0 +1,41 @@
+class Coupon < ApplicationRecord
+  enum :discount_type, { percent: 0, amount: 1 }
+
+  before_validation { self.code = code.to_s.upcase.strip }
+
+  validates :code, presence: true, uniqueness: true, length: { maximum: 32 }
+  validates :discount_type, presence: true
+  validates :value, numericality: { greater_than: 0 }
+  validates :value, numericality: { less_than_or_equal_to: 100 }, if: :percent?
+  validates :max_uses, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
+
+  scope :active_now, -> {
+    now = Time.current
+    where("(starts_at IS NULL OR starts_at <= ?) AND (ends_at IS NULL OR ends_at >= ?) AND active = TRUE", now, now)
+  }
+
+  def active_now?
+    active && (starts_at.nil? || starts_at <= Time.current) && (ends_at.nil? || ends_at >= Time.current)
+  end
+
+  def usage_string
+    "#{uses_count || 0} / #{max_uses || '∞'}"
+  end
+
+  # 🔎 Ransack 4 allowlists
+  def self.ransackable_attributes(_auth_object = nil)
+    %w[
+      id code discount_type value max_uses uses_count active
+      starts_at ends_at created_at updated_at
+    ]
+  end
+
+  def self.ransackable_associations(_auth_object = nil)
+    [] # no associations on Coupon you want searchable
+  end
+
+  # (optional) expose scopes for searches like Coupon.ransack(active_now_true: 1)
+  def self.ransackable_scopes(_auth_object = nil)
+    %i[active_now]
+  end
+end

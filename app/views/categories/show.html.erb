@@ -1,0 +1,10 @@
+<h1><%= @category.name %></h1>
+
+<h2>Products in this category:</h2>
+<ul>
+  <% @category.products.each do |product| %>
+    <li>
+      <%= link_to product.name, product_path(product) %>
+    </li>
+  <% end %>
+</ul>
