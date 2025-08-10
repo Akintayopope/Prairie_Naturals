@@ -10,63 +10,214 @@
 
     <%= yield :head %>
 
-    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
-
     <link rel="icon" href="/icon.png" type="image/png">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icon.png">
 
-    <%= stylesheet_link_tag 'application', media: 'all', 'data-turbo-track': 'reload' %>
+    <%= stylesheet_link_tag "application", media: "all", "data-turbo-track": "reload" %>
     <%= javascript_include_tag "application", "data-turbo-track": "reload", defer: true %>
     <%= javascript_include_tag "chartkick" %>
     <%= javascript_include_tag "Chart.bundle" %>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+
+
+
   </head>
 
-  <body>
-    <header style="display:flex;gap:12px;align-items:center;justify-content:space-between;padding:10px 16px;">
-      <div style="display:flex;gap:12px;align-items:center;">
-        <% if user_signed_in? && current_user.avatar.attached? %>
-          <%= image_tag current_user.avatar.variant(resize_to_limit: [100, 100]), class: "rounded-circle", alt: "Avatar" %>
-        <% end %>
+  <body class="pn-body">
+  <!-- Unified Header -->
+<!-- Top Promo & Social Bar -->
+<div class="top-bar bg-black text-white py-1 small px-3 ">
+  <div class="d-flex align-items-center justify-content-between w-100">
 
-        <p style="margin:0;">
-          <% if user_signed_in? %>
-            Welcome, <%= current_user.email %>
-          <% elsif admin_user_signed_in? %>
-            Admin: <%= current_admin_user.email %>
-          <% end %>
-        </p>
-      </div>
 
-      <nav style="display:flex;gap:12px;align-items:center;">
-        <% if user_signed_in? %>
-          <%= link_to "My Orders", orders_path %>
-          <%= button_to "Logout", destroy_user_session_path, method: :delete, class: "btn btn-link", form: { style: "display:inline" } %>
-        <% elsif admin_user_signed_in? %>
-          <%= link_to "Admin", admin_root_path %>
-          <%= button_to "Admin Logout", destroy_admin_user_session_path, method: :delete, class: "btn btn-link", form: { style: "display:inline" } %>
-        <% else %>
-          <%= link_to "Log in",  new_user_session_path %>
-          <%= link_to "Sign up", new_user_registration_path %>
-        <% end %>
-      </nav>
-    </header>
+    <!-- Center: promo -->
+    <div class="text-center flex-grow-1">
+      <span class="fw-bold">15% sitewide!</span>
+      use promo code <span class="text-uppercase">LOVE15</span>
+    </div>
 
+    <!-- Right: social -->
+    <div class="d-flex gap-3">
+      <a href="#" class="text-white"><i class="bi bi-instagram"></i></a>
+      <a href="#" class="text-white"><i class="bi bi-facebook"></i></a>
+      <a href="#" class="text-white"><i class="bi bi-youtube"></i></a>
+      <a href="#" class="text-white"><i class="bi bi-twitter-x"></i></a>
+    </div>
+
+  </div>
+</div>
+
+
+  <!-- Your existing navbar starts here -->
+
+  <!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top px-3">
+  <!-- Left: Brand with Logo + Slogan -->
+  <%= link_to root_path, class: "navbar-brand fw-bold d-flex flex-column align-items-start" do %>
+    <div class="d-flex align-items-center">
+      <%= image_tag "logo.png", alt: "Prairie Naturals Logo", class: "me-2", height: 36 %>
+      Prairie Naturals
+    </div>
+    <small class="text-muted" style="font-size: 0.8rem;">
+      </small>
+  <% end %>
+
+  <!-- Mobile toggle -->
+  <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+          aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <!-- Nav contents -->
+  <!-- Nav contents -->
+<div id="mainNav" class="collapse navbar-collapse position-relative">
+
+  <!-- Desktop (lg+): perfectly centered -->
+  <ul class="navbar-nav d-none d-lg-flex position-absolute gap-3" style="left: 38%; transform: translateX(-50%);">
+    <li class="nav-item"><%= link_to "Shop",     storefront_products_path, class: "nav-link" %></li>
+    <li class="nav-item"><%= link_to "About Us", about_path,               class: "nav-link" %></li>
+    <li class="nav-item"><%= link_to "Contact",  contact_path,             class: "nav-link" %></li>
+  </ul>
+
+  <!-- Mobile (< lg): normal in-flow list -->
+  <ul class="navbar-nav d-lg-none mb-2">
+    <li class="nav-item"><%= link_to "Shop",     storefront_products_path, class: "nav-link" %></li>
+    <li class="nav-item"><%= link_to "About Us", about_path,               class: "nav-link" %></li>
+    <li class="nav-item"><%= link_to "Contact",  contact_path,             class: "nav-link" %></li>
+  </ul>
+
+  <!-- RIGHT: search + user/cart -->
+  <div class="d-flex align-items-center ms-auto">
+    <%= form_with url: storefront_products_path, method: :get, local: true, class: "d-none d-lg-flex me-3" do %>
+      <input class="form-control" type="search" name="q"
+             value="<%= h(params[:q] || params[:search]) %>"
+             placeholder="Search products…">
+    <% end %>
+
+    <div class="d-flex gap-2 align-items-center">
+      <% if user_signed_in? %>
+        <span class="small text-muted d-none d-md-inline">
+          Welcome, <%= current_user.username.presence || current_user.email.to_s.split("@").first.titleize %>
+        </span>
+        <%= link_to "My Orders", orders_path, class: "btn btn-link" %>
+        <%= button_to "Logout", destroy_user_session_path, method: :delete,
+                      class: "btn btn-outline-secondary btn-sm btn-lift",
+                      form: { style: "display:inline" } %>
+      <% elsif admin_user_signed_in? %>
+        <span class="small text-muted d-none d-md-inline">Admin: <%= current_admin_user.email %></span>
+        <%= link_to "Admin", admin_root_path, class: "btn btn-link" %>
+        <%= button_to "Logout", destroy_admin_user_session_path, method: :delete,
+                      class: "btn btn-outline-secondary btn-sm btn-lift",
+                      form: { style: "display:inline" } %>
+      <% else %>
+        <%= link_to "Log in", new_user_session_path, class: "btn btn-outline-secondary btn-sm btn-lift" %>
+        <%= link_to "Sign up", new_user_registration_path, class: "btn btn-primary btn-sm btn-lift" %>
+      <% end %>
+
+      <%= link_to cart_path, class: "btn btn-primary btn-lift ms-1" do %>
+        🛒 <span class="d-none d-sm-inline">Cart</span>
+        <span class="badge text-bg-light ms-1"><%= cart_count %></span>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+
+</nav>
+
+
+
+    <!-- Flash -->
+    <div class="container mt-3">
+      <% if notice %><div class="alert alert-success shadow-sm"><%= notice %></div><% end %>
+      <% if alert  %><div class="alert alert-danger  shadow-sm"><%= alert  %></div><% end %>
+    </div>
+
+    <!-- Page content -->
     <%= yield %>
 
-    <div id="floating-cart" style="
-      position: fixed;
-      bottom: 30px;
-      right: 30px;
-      background-color: #333;
-      color: #fff;
-      padding: 12px 16px;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-      z-index: 9999;
-      font-size: 14px;">
-      🛒 <%= link_to 'Cart', cart_path, style: "color:#fff; text-decoration:none;" %>
-      (<%= cart_count %> items - <%= number_to_currency(cart_total) %>)
+    <!-- Floating cart (kept, restyled) -->
+    <div id="floating-cart" class="pn-floating-cart">
+      🛒 <%= link_to 'Cart', cart_path, class: "text-white text-decoration-none" %>
+      (<%= cart_count %> items — <%= number_to_currency(cart_total) %>)
     </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white pt-5 pb-4 mb-0">
+  <div class="container">
+    <div class="row gy-4">
+
+      <!-- Shop -->
+      <div class="col-6 col-md-3">
+        <h6 class="text-uppercase fw-bold mb-3">Shop</h6>
+        <ul class="list-unstyled mb-0">
+          <li><%= link_to "All Products", storefront_products_path,                   class: "text-white-50 text-decoration-none d-block py-1" %></li>
+          <li><%= link_to "New",          storefront_products_path(sort: "newest"),   class: "text-white-50 text-decoration-none d-block py-1" %></li>
+          <li><%= link_to "Best Sellers", "#",                                        class: "text-white-50 text-decoration-none d-block py-1" %></li>
+          <li><%= link_to "Nature",         "#",                                        class: "text-white-50 text-decoration-none d-block py-1" %></li>
+        </ul>
+      </div>
+
+      <!-- Our Store -->
+      <div class="col-6 col-md-3">
+        <h6 class="text-uppercase fw-bold mb-3">Our Store</h6>
+        <address class="text-white-50 mb-3">
+          742 Prairie View Drive<br>
+          Winnipeg, MB R3Z 5K2
+        </address>
+        <div class="text-white-50 small mb-3">
+          Mon–Fri: 11am–10pm<br>
+          Sat–Sun: 11am–12pm
+        </div>
+        <div class="text-white-50 small">
+          Tel: 123-456-7890<br>
+          Email: info@prairienaturals.com
+        </div>
+      </div>
+
+      <!-- Policy -->
+      <div class="col-6 col-md-3">
+        <h6 class="text-uppercase fw-bold mb-3">Policy</h6>
+        <ul class="list-unstyled mb-0">
+          <li><%= link_to "Shipping & Returns", "#", class: "text-white-50 text-decoration-none d-block py-1" %></li>
+          <li><%= link_to "Store Policy",        "#", class: "text-white-50 text-decoration-none d-block py-1" %></li>
+          <li><%= link_to "Payment Methods",     "#", class: "text-white-50 text-decoration-none d-block py-1" %></li>
+          <li><%= link_to "FAQ",                 "#", class: "text-white-50 text-decoration-none d-block py-1" %></li>
+        </ul>
+      </div>
+
+      <!-- Customer Service -->
+      <div class="col-6 col-md-3">
+        <h6 class="text-uppercase fw-bold mb-3">Customer Service</h6>
+        <div class="text-white-50 small mb-3">
+          Tel: 123-456-7890<br>
+          Email: helpline@prairienaturals.com
+        </div>
+        <div class="d-flex align-items-center gap-3">
+          <a href="#" aria-label="Instagram" class="text-white-50 hover-text-white"><i class="bi bi-instagram fs-5"></i></a>
+          <a href="#" aria-label="Facebook"  class="text-white-50 hover-text-white"><i class="bi bi-facebook fs-5"></i></a>
+          <a href="#" aria-label="YouTube"   class="text-white-50 hover-text-white"><i class="bi bi-youtube fs-5"></i></a>
+          <a href="#" aria-label="Twitter X" class="text-white-50 hover-text-white"><i class="bi bi-twitter-x fs-5"></i></a>
+        </div>
+      </div>
+
+    </div>
+
+    <hr class="border-secondary my-4">
+
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+      <p class="text-white-50 mb-0">© <%= Time.current.year %> Prairie Naturals. All rights reserved.</p>
+      <div class="d-flex gap-3 small">
+        <%= link_to "Privacy Policy", "#", class: "text-white-50 text-decoration-none" %>
+        <%= link_to "Terms of Service", "#", class: "text-white-50 text-decoration-none" %>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
   </body>
 </html>

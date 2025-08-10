@@ -3,37 +3,85 @@
 <div class="container my-4">
   <h1 class="mb-4">Our Products</h1>
 
-  <div class="row g-4">
-    <% @products.each do |product| %>
-      <div class="col-6 col-md-4 col-lg-3">
-        <div class="card h-100 shadow-sm">
-          <% if (img = product_main_image(product)) %>
-            <% thumb = product_variant(img, size: [400, 400]) %>
-            <%= image_tag url_for(thumb), alt: product.name, class: "card-img-top product-thumb", loading: "lazy" %>
-          <% else %>
-            <%= image_tag product_placeholder, alt: "No image", class: "card-img-top product-thumb", loading: "lazy" %>
-          <% end %>
+  <% if @products.blank? %>
+    <div class="text-center text-muted py-5">
+      <p class="mb-2">No products found.</p>
+      <%= link_to "Back to shop", storefront_products_path, class: "btn btn-primary btn-pill" %>
+    </div>
+  <% else %>
+    <div class="row g-4">
+      <% @products.each do |product| %>
+        <% sale_price = product.try(:sale_price).presence %>
+        <% regular     = product.try(:price).to_d rescue 0 %>
+        <% on_sale     = sale_price && sale_price.to_d > 0 && sale_price.to_d < regular %>
+        <% rating      = product.try(:average_rating) || product.try(:rating) %>
 
-          <div class="card-body d-flex flex-column">
-            <h6 class="card-title mb-1 text-truncate-2">
-              <%= link_to product.name, product_path(product), class: "stretched-link text-decoration-none" %>
-            </h6>
-            <div class="text-muted small mb-2"><%= product.category&.name || "Uncategorized" %></div>
-            <div class="fw-bold mb-3"><%= number_to_currency(product.price) %></div>
+        <div class="col-6 col-md-4 col-lg-3">
+          <div class="card h-100 shadow-sm product-card position-relative">
+            <%# Badge(s) %>
+            <% if on_sale %>
+              <span class="badge bg-danger position-absolute m-2" style="z-index:1;">Sale</span>
+            <% end %>
 
-            <div class="mt-auto">
-              <%= button_to "Add to Cart",
-                            cart_items_path(product_id: product.id),
-                            method: :post,
-                            class: "btn btn-outline-primary w-100" %>
+            <%# Image %>
+            <% if (img = product_main_image(product)) %>
+              <% thumb = product_variant(img, size: [600, 600]) %>
+              <%= link_to product_path(product), class: "ratio ratio-1x1 d-block overflow-hidden" do %>
+                <%= image_tag url_for(thumb),
+                              alt: product.name,
+                              class: "product-thumb w-100 h-100",
+                              loading: "lazy",
+                              sizes: "(max-width: 576px) 50vw, (max-width: 992px) 33vw, 25vw" %>
+              <% end %>
+            <% else %>
+              <%= link_to product_path(product), class: "ratio ratio-1x1 d-block overflow-hidden bg-light d-flex align-items-center justify-content-center" do %>
+                <span class="text-muted">No image</span>
+              <% end %>
+            <% end %>
+
+            <%# Body %>
+            <div class="card-body d-flex flex-column">
+              <h6 class="card-title mb-1 text-truncate-2">
+                <%= link_to product.name, product_path(product), class: "stretched-link text-decoration-none text-reset" %>
+              </h6>
+              <div class="text-muted small mb-2"><%= product.category&.name || "Uncategorized" %></div>
+
+              <%# Rating (optional) %>
+              <% if rating.present? && rating.to_f > 0 %>
+                <div class="small text-warning mb-2" aria-label="Rating <%= number_with_precision(rating.to_f, precision: 1) %> out of 5">
+                  <% rounded = rating.to_f.round %>
+                  <% 5.times do |i| %>
+                    <span><%= i < rounded ? "★" : "☆" %></span>
+                  <% end %>
+                  <span class="text-muted ms-1"><%= number_with_precision(rating.to_f, precision: 1) %>/5</span>
+                </div>
+              <% end %>
+
+              <%# Price %>
+              <div class="mb-3">
+                <% if on_sale %>
+                  <span class="fw-bold text-danger"><%= number_to_currency(sale_price) %></span>
+                  <span class="text-muted text-decoration-line-through ms-2"><%= number_to_currency(regular) %></span>
+                <% else %>
+                  <span class="fw-bold"><%= number_to_currency(regular) %></span>
+                <% end %>
+              </div>
+
+              <%# CTA %>
+              <div class="mt-auto">
+                <%= button_to "Add to Cart",
+                              cart_items_path(product_id: product.id),
+                              method: :post,
+                              class: "btn btn-outline-primary w-100 btn-lift" %>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    <% end %>
-  </div>
+      <% end %>
+    </div>
 
-  <div class="mt-4">
-    <%= paginate @products if respond_to?(:paginate) %>
-  </div>
+    <div class="mt-4">
+      <%= paginate @products if respond_to?(:paginate) %>
+    </div>
+  <% end %>
 </div>
