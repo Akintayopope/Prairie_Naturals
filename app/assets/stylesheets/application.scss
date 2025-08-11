@@ -1,34 +1,49 @@
 /*
- * This is a manifest file that'll be compiled into application.css.
- *
- * With Propshaft, assets are served efficiently without preprocessing steps. You can still include
- * application-wide styles in this file, but keep in mind that CSS precedence will follow the standard
- * cascading order, meaning styles declared later in the document or manifest will override earlier ones,
- * depending on specificity.
- *
- * Consider organizing styles into separate files for maintainability.
- */
+ * This file is compiled into application.css by Sprockets.
+ * Keep require_self so rules below the imports win.
+ *= require_self
+ *= require_tree .
+*/
 @import "bootstrap";
+// app/assets/stylesheets/application.scss
+/* app/assets/stylesheets/application.scss */
+@import "storefront_sidebar";      // if file is app/assets/stylesheets/storefront_sidebar.scss
+@import "storefront_catalog";      // add only if this file exists
+@import "floating_cart";
 
 
-#floating-cart {
-  position: fixed;
-  bottom: 30px;
-  right: 30px;
-  background-color: #333;
-  color: #fff;
-  padding: 12px 16px;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-  z-index: 9999;
-  font-size: 14px;
+/* --- Your global overrides (put custom CSS below) --- */
+body {
+  background-color: rgb(246, 240, 241) !important;
 }
 
-#floating-cart {
-  transition: background-color 0.3s ease;
+footer {
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
 }
-#floating-cart:hover {
-  background-color: #444;
-  cursor: pointer;
+body {
+  margin: 0;
+  padding: 0;
 }
+
+/* Square images, crisp crop, graceful hover */
+.product-thumb { object-fit: cover; transition: transform .25s ease; }
+.product-card .ratio { background: #fff; }
+.product-card:hover .product-thumb { transform: scale(1.03); }
+.product-card { transition: box-shadow .2s ease, transform .2s ease; }
+.product-card:hover { box-shadow: 0 .5rem 1rem rgba(0,0,0,.12); }
+
+/* Two-line clamp for titles */
+.text-truncate-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* Safari/Chrome */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Subtle button lift (you already use .btn-lift elsewhere) */
+.btn-lift { transition: transform .15s ease, box-shadow .15s ease; }
+.btn-lift:hover { transform: translateY(-1px); box-shadow: 0 .25rem .75rem rgba(0,0,0,.12); }
+
+
 
