@@ -1,4 +1,26 @@
 # test/system/products_test.rb
+# at top
+require "securerandom"
+
+# in setup:
+@product = Product.create!(
+  name:  "Sample Product #{SecureRandom.hex(4)}",
+  title: "Sample Product",
+  price: 9.99,
+  stock: 10,
+  category: @category
+)
+
+# in "should create product":
+Product.create!(
+  name:  "New Test Product #{SecureRandom.hex(4)}",
+  title: "New Test Product",
+  price: 12.34,
+  stock: 5,
+  category: @category
+)
+
+
 # frozen_string_literal: true
 require "application_system_test_case"
 
