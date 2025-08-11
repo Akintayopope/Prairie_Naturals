@@ -1,5 +1,5 @@
-require 'open-uri'
-require 'json'
+require "open-uri"
+require "json"
 
 namespace :import do
   desc "Import products from Open Food Facts API"

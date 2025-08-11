@@ -1,9 +1,19 @@
 <p style="color: green"><%= notice %></p>
 
-<% if @product.image.attached? %>
+<%# --- Product image (supports multiple or single attachment), else inline placeholder --- %>
+<% if @product.respond_to?(:images) && @product.images.attached? %>
   <p>
-    <%= image_tag @product.image, style: "max-width: 200px;" %>
+    <%= image_tag url_for(@product.images.first), style: "max-width: 200px;" %>
   </p>
+<% elsif @product.respond_to?(:image) && @product.image.attached? %>
+  <p>
+    <%= image_tag url_for(@product.image), style: "max-width: 200px;" %>
+  </p>
+<% else %>
+  <div class="d-inline-flex align-items-center justify-content-center border rounded bg-light"
+       style="width:200px;height:200px;">
+    <span class="text-muted">No image</span>
+  </div>
 <% end %>
 
 <%= render @product %>

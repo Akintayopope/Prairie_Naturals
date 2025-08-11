@@ -20,7 +20,7 @@ ActiveAdmin.register Product do
     selectable_column
     column "Image" do |p|
       if p.images.attached?
-        image_tag url_for(p.images.first.variant(resize_to_limit: [60, 60])), width: 60, height: 60
+        image_tag url_for(p.images.first.variant(resize_to_limit: [ 60, 60 ])), width: 60, height: 60
       end
     end
     column :name
@@ -47,7 +47,7 @@ ActiveAdmin.register Product do
         div class: "flex flex-wrap gap-3" do
           resource.images.each do |img|
             div do
-              concat image_tag url_for(img.variant(resize_to_limit: [300, 300]))
+              concat image_tag url_for(img.variant(resize_to_limit: [ 300, 300 ]))
               # delete button for each image
               concat(
                 link_to "Delete",
@@ -84,7 +84,7 @@ ActiveAdmin.register Product do
         ul do
           f.object.images.each do |img|
             li do
-              span image_tag url_for(img.variant(resize_to_limit: [120, 120]))
+              span image_tag url_for(img.variant(resize_to_limit: [ 120, 120 ]))
               span " "
               span link_to "Delete", purge_image_admin_product_path(f.object, attachment_id: img.id),
                              method: :delete, data: { confirm: "Delete this image?" }

@@ -1,13 +1,9 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-
+---
 one:
-  name: MyString
-  gst: 9.99
-  pst: 9.99
-  hst: 9.99
-
-two:
-  name: MyString
-  gst: 9.99
-  pst: 9.99
-  hst: 9.99
+  id: 1
+  name: provinces_value
+  gst: 1.0
+  pst: 1.0
+  hst: 1.0
+  created_at: 2025-08-11 11:48:35.788447223 -05:00
+  updated_at: 2025-08-11 11:48:35.788448162 -05:00

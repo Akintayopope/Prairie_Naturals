@@ -49,4 +49,3 @@ ActiveAdmin.register AdminUser do
     redirect_to resource_path, notice: "Password reset. New temporary password: #{new_password}"
   end
 end
-

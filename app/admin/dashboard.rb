@@ -29,7 +29,7 @@ ActiveAdmin.register_page "Dashboard" do
       end
     end
 
-    # Recent Orders Table
+# Recent Orders Table
 panel "🧾 Recent Orders" do
   table_for Order.order(created_at: :desc).limit(5) do
     column("Order #")    { |order| link_to order.id, admin_order_path(order) }
@@ -37,10 +37,10 @@ panel "🧾 Recent Orders" do
 
     column("Status") do |order|
   status_class = case order.status.to_s.downcase
-                 when 'paid' then 'ok'
-                 when 'cancelled', 'failed', '0' then 'error'
-                 else 'warning'
-                 end
+  when "paid" then "ok"
+  when "cancelled", "failed", "0" then "error"
+  else "warning"
+  end
   status_tag(order.status.titleize, class: status_class)
 end
 

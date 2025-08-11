@@ -12,4 +12,3 @@ class ChangeStatusToIntegerInOrders < ActiveRecord::Migration[7.0]
     change_column_default :orders, :status, 'pending'
   end
 end
-

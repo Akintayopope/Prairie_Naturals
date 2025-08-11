@@ -1,15 +1,21 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-
 one:
-  title: MyString
-  description: MyText
+  name: "Vitamin C 1000mg"
+  title: "Vitamin C 1000mg"
   price: 9.99
-  stock: 1
+  stock: 25
   category: one
 
 two:
-  title: MyString
-  description: MyText
-  price: 9.99
-  stock: 1
+  name: "Vitamin D3 2000IU"
+  title: "Vitamin D3 2000IU"
+  price: 7.49
+  stock: 15
+  category: one
+
+three:
+  name: "Hydrating Face Cream"
+  title: "Hydrating Face Cream"
+  price: 19.95
+  stock: 8
   category: two
+

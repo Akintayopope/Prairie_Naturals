@@ -70,7 +70,7 @@ ActiveAdmin.register Coupon do
     column("Window") { |c|
       start = c.starts_at&.strftime("%Y-%m-%d")
       stop  = c.ends_at&.strftime("%Y-%m-%d")
-      [start, stop].compact.join(" → ").presence || "—"
+      [ start, stop ].compact.join(" → ").presence || "—"
     }
     column("Usage")  { |c| c.usage_string }
     actions defaults: true do |c|

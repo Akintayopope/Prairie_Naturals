@@ -1,0 +1,7 @@
+---
+one:
+  id: 1
+  slug: friendly_id_slugs_value
+  sluggable_id: 1
+  sluggable_type: friendly_id_slugs_value
+  scope: friendly_id_slugs_value

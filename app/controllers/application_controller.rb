@@ -14,9 +14,9 @@ class ApplicationController < ActionController::Base
   protected
 
   def configure_permitted_parameters
-    address_attrs = [:line1, :line2, :city, :postal_code, :province_id]
-    devise_parameter_sanitizer.permit(:sign_up,        keys: [:username, address_attributes: address_attrs])
-    devise_parameter_sanitizer.permit(:account_update, keys: [:username, address_attributes: address_attrs])
+    address_attrs = [ :line1, :line2, :city, :postal_code, :province_id ]
+    devise_parameter_sanitizer.permit(:sign_up,        keys: [ :username, address_attributes: address_attrs ])
+    devise_parameter_sanitizer.permit(:account_update, keys: [ :username, address_attributes: address_attrs ])
   end
 
   private

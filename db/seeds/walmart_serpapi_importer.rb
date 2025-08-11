@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require "httparty"
 require "open-uri"
 require "action_view" # for HTML -> text sanitizing
