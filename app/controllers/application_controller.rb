@@ -47,6 +47,24 @@ class ApplicationController < ActionController::Base
     super
   end
 
+  # products_controller.rb (index)
+def index
+  @categories = Category.order(:name)
+  scope = Product.includes(:category).where(active: true)
+
+  scope = scope.where(category_id: params[:category_id]) if params[:category_id].present?
+
+  @products =
+    case params[:sort]
+    when "newest"     then scope.order(created_at: :desc)
+    when "price_asc"  then scope.order(price: :asc)
+    when "price_desc" then scope.order(price: :desc)
+    else                   scope.order(Arel.sql('LOWER(name) ASC'))
+    end
+
+  @products = @products.page(params[:page]) if @products.respond_to?(:page)
+end
+
   # Cart badge helpers
   def cart_count
     @cart_count || 0

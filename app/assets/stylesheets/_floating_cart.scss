@@ -1,0 +1,44 @@
+/* Floating cart: fixed, black pill, above everything */
+.pn-floating-cart {
+  position: fixed;
+  right: clamp(12px, 2.5vw, 20px);
+  bottom: calc(clamp(12px, 2.5vw, 20px) + env(safe-area-inset-bottom, 0px));
+  z-index: 2000; /* above navbar/dropdowns; below modal (1050) is fine, 2000 is safer */
+
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+
+  padding: .55rem .9rem;
+  border-radius: 9999px;
+
+  background: #111;
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(0,0,0,.18);
+
+  font-weight: 600;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.pn-floating-cart a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.pn-floating-cart:hover {
+  background: #000;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 576px) {
+  .pn-floating-cart {
+    padding: .6rem 1rem;           /* bigger tap target */
+    font-size: .95rem;
+  }
+}
+
+/* Don’t show on print */
+@media print {
+  .pn-floating-cart { display: none !important; }
+}
