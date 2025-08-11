@@ -4,8 +4,11 @@
 # model remove the "{}" from the fixture names and add the columns immediately
 # below each fixture, per the syntax in the comments below
 #
-one: {}
-# column: value
-#
-two: {}
-# column: value
+one:
+  email: admin1@example.com
+  # encrypted_password can stay "", since tests likely don't log in via AdminUser
+  encrypted_password: ""
+
+two:
+  email: admin2@example.com
+  encrypted_password: ""

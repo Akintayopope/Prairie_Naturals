@@ -11,3 +11,10 @@ two:
   gst: 9.99
   pst: 9.99
   hst: 9.99
+
+# test/fixtures/provinces.yml
+ab:
+  name: Alberta
+  gst: 0.05
+  pst: 0
+  hst: 0

@@ -1,7 +1,7 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-
 one:
-  name: MyString
+  # id: 980190962  # you can omit id and let Rails assign
+  name: Books
 
 two:
-  name: MyString
+  name: Electronics

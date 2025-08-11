@@ -1,19 +1,16 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
+# test/fixtures/addresses.yml
 one:
-  user: one
-  order: one
-  line1: MyString
-  line2: MyString
-  city: MyString
-  province: one
-  postal_code: MyString
+  user: one          # resolves to user_id
+  province: ab       # resolves to province_id
+  line1: "123 Main St"
+  city: "Calgary"
+  postal_code: "T1X 1A1"
 
 two:
   user: two
-  order: two
-  line1: MyString
-  line2: MyString
-  city: MyString
-  province: two
-  postal_code: MyString
+  province: ab
+  line1: "55 River Rd"
+  city: "Edmonton"
+  postal_code: "T5A 2B2"

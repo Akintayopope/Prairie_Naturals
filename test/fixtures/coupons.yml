@@ -1,11 +1,9 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-one:
-  code: MyString
-  discount: 9.99
-  active: false
-
-two:
-  code: MyString
-  discount: 9.99
-  active: false
+# test/fixtures/coupons.yml
+percent10:
+  code: TENOFF
+  active: true
+  discount_type: 0   # 0=percent, 1=fixed (adjust to your enum)
+  value: 10
+  max_uses: 100
