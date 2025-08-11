@@ -1,0 +1,9 @@
+<%# locals: title:, subtitle: nil %>
+<section class="page-hero mb-4">
+  <div class="container px-0 text-center">
+    <h1 class="page-hero__title"><%= title %></h1>
+    <% if subtitle.present? %>
+      <p class="page-hero__subtitle"><%= subtitle %></p>
+    <% end %>
+  </div>
+</section>

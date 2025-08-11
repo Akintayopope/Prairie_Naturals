@@ -1,0 +1,65 @@
+<%= render "page_hero", title: "Contact us", subtitle: "We’re here to help—typically reply within 1–2 business days." %>
+
+<div class="container">
+  <div class="row g-4">
+    <div class="col-12 col-lg-7">
+      <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-4">
+          <h2 id="contact-form" class="h5 mb-3">Send a message</h2>
+
+          <%= form_with url: storefront_contact_path, method: :post, local: true do %>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Name</label>
+                <%= text_field_tag :name, @prefill[:name], class: "form-control", required: true %>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Email</label>
+                <%= email_field_tag :email, @prefill[:email], class: "form-control", required: true %>
+              </div>
+              <div class="col-12">
+                <label class="form-label">Subject</label>
+                <%= text_field_tag :subject, nil, class: "form-control", placeholder: "Order help, product question, feedback…" %>
+              </div>
+              <!-- Honeypot -->
+              <%= text_field_tag :company, "", class: "d-none", autocomplete: "off", tabindex: -1 %>
+
+              <div class="col-12">
+                <label class="form-label">Message</label>
+                <%= text_area_tag :message, nil, class: "form-control", rows: 6, required: true %>
+              </div>
+              <div class="col-12 d-grid">
+                <button class="btn btn-dark">Send message</button>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-5">
+      <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-4">
+          <h2 class="h6 mb-3">Store details</h2>
+          <ul class="list-unstyled small mb-3">
+            <li class="mb-2"><i class="bi bi-geo-alt me-2"></i>742 Prairie View Drive, Winnipeg, MB</li>
+            <li class="mb-2"><i class="bi bi-envelope me-2"></i>support@prairienaturals.example</li>
+            <li class="mb-2"><i class="bi bi-telephone me-2"></i>+1 (204) 555-0199</li>
+            <li><i class="bi bi-clock me-2"></i>Mon–Fri 9:00–17:00 (CST)</li>
+          </ul>
+
+          <h3 class="h6 mb-2">Follow us</h3>
+          <div class="d-flex gap-2">
+            <a href="#" class="btn btn-outline-secondary btn-sm rounded-pill"><i class="bi bi-instagram"></i></a>
+            <a href="#" class="btn btn-outline-secondary btn-sm rounded-pill"><i class="bi bi-facebook"></i></a>
+            <a href="#" class="btn btn-outline-secondary btn-sm rounded-pill"><i class="bi bi-twitter-x"></i></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="ratio ratio-16x9 rounded-4 overflow-hidden mt-4 shadow-sm">
+        <iframe src="https://maps.google.com/maps?q=Winnipeg%20MB&t=&z=13&ie=UTF8&iwloc=&output=embed" style="border:0;" loading="lazy"></iframe>
+      </div>
+    </div>
+  </div>
+</div>

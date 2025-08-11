@@ -1,0 +1,23 @@
+<%= render "page_hero", title: "FAQ", subtitle: "Quick answers to common questions." %>
+
+<div class="container">
+  <div class="accordion rounded-4 shadow-sm" id="faqAccordion">
+    <% [
+      ["When will my order ship?", "Orders ship within 1–2 business days. You’ll receive tracking by email."],
+      ["How do I start a return?", "Visit Shipping & Returns for details, or contact us with your order number."],
+      ["Are your products cruelty-free?", "We partner with brands that align with our values. Look for the badge on product pages."],
+      ["Do you ship internationally?", "We currently ship within Canada and the US."]
+    ].each_with_index do |(q,a), i| %>
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="h<%= i %>">
+          <button class="accordion-button <%= i.zero? ? '' : 'collapsed' %>" type="button" data-bs-toggle="collapse" data-bs-target="#c<%= i %>">
+            <%= q %>
+          </button>
+        </h2>
+        <div id="c<%= i %>" class="accordion-collapse collapse <%= i.zero? ? 'show' : '' %>" data-bs-parent="#faqAccordion">
+          <div class="accordion-body small"><%= a %></div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

@@ -1,0 +1,27 @@
+<%= render "page_hero", title: "Payment methods", subtitle: "Secure checkout, multiple ways to pay." %>
+
+<div class="container">
+  <div class="row g-3">
+    <% [
+      ["Credit & Debit", "bi-credit-card",  "We accept Visa, Mastercard, and American Express."],
+      ["Apple Pay / Google Pay", "bi-phone", "Available on supported browsers and devices."],
+      ["PayPal", "bi-paypal", "Use your PayPal account for a quick checkout."],
+      ["Gift Cards", "bi-gift", "Redeem store gift cards at checkout."]
+    ].each do |title, icon, blurb| %>
+      <div class="col-12 col-md-6 col-lg-3">
+        <div class="card method-card border-0 shadow-sm rounded-4 h-100">
+          <div class="card-body p-4 d-flex flex-column">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <i class="bi <%= icon %> h4 mb-0"></i>
+              <h3 class="h6 mb-0"><%= title %></h3>
+            </div>
+            <p class="small text-muted mb-3"><%= blurb %></p>
+            <div class="mt-auto">
+              <span class="badge bg-light text-dark border">PCI-DSS compliant</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
