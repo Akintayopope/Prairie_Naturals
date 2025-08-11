@@ -49,7 +49,7 @@ group :development, :test do
 
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
-  gem 'rubocop', require: false
+  gem "rubocop", require: false
 end
 
 group :development do
@@ -63,20 +63,20 @@ group :test do
   gem "selenium-webdriver"
 end
 
-gem 'devise'
-gem 'activeadmin'
-gem 'stripe'
-gem 'kaminari'        # or 'pagy' if preferred
-gem 'image_processing', '~> 1.2'
+gem "devise"
+gem "activeadmin"
+gem "stripe"
+gem "kaminari"        # or 'pagy' if preferred
+gem "image_processing", "~> 1.2"
 
 gem "bootstrap", "~> 5.3.0"
-gem 'sassc-rails'
-gem 'friendly_id', '~> 5.4.0'
+gem "sassc-rails"
+gem "friendly_id", "~> 5.4.0"
 
 
 gem "nokogiri", "~> 1.18"
-gem 'prawn'
-gem 'dotenv-rails', groups: [:development, :test]
+gem "prawn"
+gem "dotenv-rails", groups: [ :development, :test ]
 
 gem "chartkick", "~> 5.2"
 gem "groupdate", "~> 6.7"

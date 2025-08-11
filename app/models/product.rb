@@ -21,8 +21,8 @@ class Product < ApplicationRecord
   validates :stock, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, allow_nil: true
 
   # Scopes
-  scope :alphabetical, -> { order(Arel.sql('LOWER(name) ASC')) }
-  scope :in_stock,     -> { where('stock IS NULL OR stock > 0') }
+  scope :alphabetical, -> { order(Arel.sql("LOWER(name) ASC")) }
+  scope :in_stock,     -> { where("stock IS NULL OR stock > 0") }
 
   # FriendlyId: refresh slug when name changes
   def should_generate_new_friendly_id?
@@ -50,6 +50,6 @@ class Product < ApplicationRecord
   private
 
   def normalize_name
-    self.name = name.to_s.strip.squeeze(' ')
+    self.name = name.to_s.strip.squeeze(" ")
   end
 end

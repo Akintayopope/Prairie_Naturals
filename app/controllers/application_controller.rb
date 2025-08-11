@@ -14,9 +14,9 @@ class ApplicationController < ActionController::Base
   protected
 
   def configure_permitted_parameters
-    address_attrs = [:line1, :line2, :city, :postal_code, :province_id]
-    devise_parameter_sanitizer.permit(:sign_up,        keys: [:username, address_attributes: address_attrs])
-    devise_parameter_sanitizer.permit(:account_update, keys: [:username, address_attributes: address_attrs])
+    address_attrs = [ :line1, :line2, :city, :postal_code, :province_id ]
+    devise_parameter_sanitizer.permit(:sign_up,        keys: [ :username, address_attributes: address_attrs ])
+    devise_parameter_sanitizer.permit(:account_update, keys: [ :username, address_attributes: address_attrs ])
   end
 
   private
@@ -47,7 +47,7 @@ class ApplicationController < ActionController::Base
     super
   end
 
-  # products_controller.rb (index)
+# products_controller.rb (index)
 def index
   @categories = Category.order(:name)
   scope = Product.includes(:category).where(active: true)
@@ -59,7 +59,7 @@ def index
     when "newest"     then scope.order(created_at: :desc)
     when "price_asc"  then scope.order(price: :asc)
     when "price_desc" then scope.order(price: :desc)
-    else                   scope.order(Arel.sql('LOWER(name) ASC'))
+    else                   scope.order(Arel.sql("LOWER(name) ASC"))
     end
 
   @products = @products.page(params[:page]) if @products.respond_to?(:page)

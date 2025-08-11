@@ -28,7 +28,7 @@ ActiveAdmin.register Category do
         column :price
         column :stock
         column "Image" do |p|
-          image_tag url_for(p.images.first.variant(resize_to_limit: [60, 60])) if p.images.attached?
+          image_tag url_for(p.images.first.variant(resize_to_limit: [ 60, 60 ])) if p.images.attached?
         end
       end
     end

@@ -2,8 +2,8 @@ class CheckoutController < ApplicationController
   before_action :authenticate_user!
 
   PROVINCES = [
-    "Manitoba","Ontario","Quebec","Alberta","Saskatchewan","British Columbia",
-    "Nova Scotia","New Brunswick","Prince Edward Island","Newfoundland and Labrador"
+    "Manitoba", "Ontario", "Quebec", "Alberta", "Saskatchewan", "British Columbia",
+    "Nova Scotia", "New Brunswick", "Prince Edward Island", "Newfoundland and Labrador"
   ].freeze
 
   def new
@@ -73,15 +73,15 @@ address.name = @order.shipping_name if address.respond_to?(:name=)
       cart_items.destroy_all
 
       stripe_session = Stripe::Checkout::Session.create(
-        payment_method_types: ['card'],
+        payment_method_types: [ "card" ],
         customer_email: current_user.email,
         line_items: @order.order_items.map { |item|
-          { price_data: { currency: 'cad',
+          { price_data: { currency: "cad",
                           product_data: { name: item.product.name },
                           unit_amount: (item.unit_price * 100).to_i },
             quantity: item.quantity }
         },
-        mode: 'payment',
+        mode: "payment",
         success_url: success_checkout_url + "?session_id={CHECKOUT_SESSION_ID}",
         cancel_url:  cancel_checkout_url
       )
@@ -129,7 +129,7 @@ address.name = @order.shipping_name if address.respond_to?(:name=)
     pdf.move_down 8
     pdf.text "Date: #{Time.zone.now.strftime("%B %d, %Y")}"
     pdf.text "Customer: #{shipping_name.presence || current_user.email}"
-    ship_to = [shipping_address, city, province_name, postal_code].reject(&:blank?).join(", ")
+    ship_to = [ shipping_address, city, province_name, postal_code ].reject(&:blank?).join(", ")
     pdf.text "Ship To: #{ship_to}"
     pdf.move_down 10
     pdf.text "Items", style: :bold

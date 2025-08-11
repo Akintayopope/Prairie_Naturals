@@ -8,6 +8,6 @@ class Address < ApplicationRecord
   validates :province, presence: true     # ⬅️ extra clarity
 
   def full_address
-    [line1, line2, city, province&.name, postal_code].compact.join(', ')
+    [ line1, line2, city, province&.name, postal_code ].compact.join(", ")
   end
 end
