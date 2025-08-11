@@ -5,6 +5,13 @@
  *= require_tree .
 */
 @import "bootstrap";
+// app/assets/stylesheets/application.scss
+/* app/assets/stylesheets/application.scss */
+@import "storefront_sidebar";      // if file is app/assets/stylesheets/storefront_sidebar.scss
+@import "storefront_catalog";      // add only if this file exists
+@import "floating_cart";
+
+
 /* --- Your global overrides (put custom CSS below) --- */
 body {
   background-color: rgb(246, 240, 241) !important;

@@ -131,7 +131,7 @@
 
 
     <!-- Flash -->
-    <div class="container mt-3">
+    <div class="container mt-0">
       <% if notice %><div class="alert alert-success shadow-sm"><%= notice %></div><% end %>
       <% if alert  %><div class="alert alert-danger  shadow-sm"><%= alert  %></div><% end %>
     </div>
@@ -139,11 +139,12 @@
     <!-- Page content -->
     <%= yield %>
 
-    <!-- Floating cart (kept, restyled) -->
-    <div id="floating-cart" class="pn-floating-cart">
-      🛒 <%= link_to 'Cart', cart_path, class: "text-white text-decoration-none" %>
-      (<%= cart_count %> items — <%= number_to_currency(cart_total) %>)
-    </div>
+    <!-- Floating cart -->
+<div id="floating-cart" class="pn-floating-cart" aria-live="polite">
+  🛒 <%= link_to 'Cart', cart_path, class: "text-white text-decoration-none" %>
+  (<%= cart_count %> items — <%= number_to_currency(cart_total) %>)
+</div>
+
 
     <!-- Footer -->
     <footer class="bg-dark text-white pt-5 pb-4 mb-0">
