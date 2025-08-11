@@ -1,28 +1,24 @@
-class UpdateCategoryNameWhitelist < ActiveRecord::Migration[7.1]
+# db/migrate/20250811_update_category_name_whitelist.rb
+class UpdateCategoryNameWhitelist < ActiveRecord::Migration[8.0]
   def up
     execute <<~SQL
       ALTER TABLE categories
       DROP CONSTRAINT IF EXISTS categories_name_whitelist;
-    SQL
 
-    execute <<~SQL
       ALTER TABLE categories
       ADD CONSTRAINT categories_name_whitelist
-      CHECK (name IN (
-        'Vitamins',
-        'Protein Supplements',
-        'Digestive Health',
-        'Skin Care',
-        'Hair Care'
-      ));
+      CHECK (name IN ('Vitamins','Skin Care','Supplements'));
     SQL
   end
 
   def down
-    # If you ever need to revert to the old whitelist, re-add it here.
     execute <<~SQL
       ALTER TABLE categories
       DROP CONSTRAINT IF EXISTS categories_name_whitelist;
+
+      ALTER TABLE categories
+      ADD CONSTRAINT categories_name_whitelist
+      CHECK (name IN ('Vitamins','Skin Care')); -- revert to previous set
     SQL
   end
 end

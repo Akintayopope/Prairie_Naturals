@@ -25,8 +25,8 @@ class FixCouponsSchema < ActiveRecord::Migration[8.0]
 
     # 4) indexes
     add_index :coupons, :code, unique: true unless index_exists?(:coupons, :code, unique: true)
-    add_index :coupons, [:active, :starts_at, :ends_at], name: "index_coupons_on_active_and_window" \
-      unless index_exists?(:coupons, [:active, :starts_at, :ends_at], name: "index_coupons_on_active_and_window")
+    add_index :coupons, [ :active, :starts_at, :ends_at ], name: "index_coupons_on_active_and_window" \
+      unless index_exists?(:coupons, [ :active, :starts_at, :ends_at ], name: "index_coupons_on_active_and_window")
 
     # 5) Postgres check constraint (skip if already present)
     if ActiveRecord::Base.connection.adapter_name.downcase.include?("postgres")
@@ -54,7 +54,7 @@ class FixCouponsSchema < ActiveRecord::Migration[8.0]
     end
 
     remove_index :coupons, name: "index_coupons_on_active_and_window" \
-      if index_exists?(:coupons, [:active, :starts_at, :ends_at], name: "index_coupons_on_active_and_window")
+      if index_exists?(:coupons, [ :active, :starts_at, :ends_at ], name: "index_coupons_on_active_and_window")
     remove_index :coupons, :code if index_exists?(:coupons, :code)
 
     remove_column(:coupons, :active)     if column_exists?(:coupons, :active)

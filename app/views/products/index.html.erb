@@ -22,11 +22,13 @@
             <div class="fw-bold mb-3"><%= number_to_currency(product.price) %></div>
 
             <div class="mt-auto">
-              <%= button_to "Add to Cart",
-                            cart_items_path(product_id: product.id),
-                            method: :post,
-                            class: "btn btn-outline-primary w-100" %>
-            </div>
+            <%= button_to "Add to Cart",
+                add_item_cart_path(product_id: product.id),
+                method: :post,
+                params: { quantity: 1 },
+                class: "btn btn-outline-primary w-100" %>
+              </div>
+
           </div>
         </div>
       </div>

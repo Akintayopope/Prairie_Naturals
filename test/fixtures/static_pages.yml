@@ -1,11 +1,8 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-
+---
 one:
-  title: MyString
-  slug: MyString
-  body: MyText
-
-two:
-  title: MyString
-  slug: MyString
-  body: MyText
+  id: 1
+  title: static_pages_value
+  slug: static_pages_value
+  body: static_pages_value
+  created_at: 2025-08-11 11:48:35.764295775 -05:00
+  updated_at: 2025-08-11 11:48:35.764297345 -05:00

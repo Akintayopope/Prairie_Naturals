@@ -1,19 +1,14 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-
+---
 one:
   user: one
-  order: one
-  line1: MyString
-  line2: MyString
-  city: MyString
-  province: one
-  postal_code: MyString
+  line1: "123 Main St"
+  city: "Toronto"
+  province: "ON"
+  postal_code: "M1A1A1"
 
 two:
   user: two
-  order: two
-  line1: MyString
-  line2: MyString
-  city: MyString
-  province: two
-  postal_code: MyString
+  line1: "456 Queen St"
+  city: "Vancouver"
+  province: "BC"
+  postal_code: "V1A1A1"

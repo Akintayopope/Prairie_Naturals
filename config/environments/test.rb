@@ -41,6 +41,9 @@ Rails.application.configure do
 
   # Print deprecation notices to the stderr.
   config.active_support.deprecation = :stderr
+# Return a string path instead of raising when an asset is missing
+config.assets.unknown_asset_fallback = true
+
 
   # Raises error for missing translations.
   # config.i18n.raise_on_missing_translations = true

@@ -37,7 +37,7 @@ class OrdersController < ApplicationController
 
   pdf.text "Order Details", style: :bold
   pdf.table(
-    [["Product", "Quantity", "Unit Price", "Total"]] +
+    [ [ "Product", "Quantity", "Unit Price", "Total" ] ] +
     @order.order_items.map do |item|
       [
         item.product.name,
@@ -57,9 +57,7 @@ class OrdersController < ApplicationController
 
   send_data pdf.render,
             filename: "invoice_order_#{@order.id}.pdf",
-            type: 'application/pdf',
-            disposition: 'inline'
+            type: "application/pdf",
+            disposition: "inline"
 end
-
-
 end
