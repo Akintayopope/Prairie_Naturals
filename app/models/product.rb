@@ -9,6 +9,7 @@ class Product < ApplicationRecord
   has_many   :reviews,        dependent: :destroy
   has_many   :cart_items,     dependent: :destroy
   has_many   :wishlist_items, dependent: :destroy
+
   has_many_attached :images
 
   # Normalization
@@ -16,26 +17,33 @@ class Product < ApplicationRecord
 
   # Validations
   validates :category, presence: true
-  validates :name,  presence: true, uniqueness: { case_sensitive: false }, length: { maximum: 200 }
-  validates :price, presence: true, numericality: { greater_than_or_equal_to: 0 }
-  validates :stock, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, allow_nil: true
+  validates :name,
+            presence: true,
+            length: { maximum: 200 },
+            uniqueness: { case_sensitive: false }
+  validates :price,
+            presence: true,
+            numericality: { greater_than_or_equal_to: 0 }
+  validates :stock,
+            numericality: { only_integer: true, greater_than_or_equal_to: 0 },
+            allow_nil: true
 
   # Scopes
-  scope :alphabetical, -> { order(Arel.sql('LOWER(name) ASC')) }
-  scope :in_stock,     -> { where('stock IS NULL OR stock > 0') }
+  scope :alphabetical, -> { order(Arel.sql("LOWER(products.name) ASC")) }
+  scope :in_stock,     -> { where("stock IS NULL OR stock > 0") }
 
-  # FriendlyId: refresh slug when name changes
+  # FriendlyId: keep slug stable after creation
   def should_generate_new_friendly_id?
-    will_save_change_to_name? || super
+    slug.blank?
   end
 
-  # Average rating computed from reviews
+  # Calculated fields
   def average_rating
     avg = reviews.average(:rating)
     avg ? avg.to_f.round(1) : 0.0
   end
 
-  # Ransack (ActiveAdmin)
+  # Ransack whitelist (e.g., ActiveAdmin)
   def self.ransackable_associations(_ = nil)
     %w[category order_items reviews images_attachments images_blobs]
   end
@@ -50,6 +58,6 @@ class Product < ApplicationRecord
   private
 
   def normalize_name
-    self.name = name.to_s.strip.squeeze(' ')
+    self.name = name.to_s.strip.squeeze(" ")
   end
 end

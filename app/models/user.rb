@@ -22,8 +22,8 @@ class User < ApplicationRecord
   validates :role, inclusion: { in: ROLES }
 
   # Role helpers
-  def admin?    = role == 'admin'
-  def customer? = role == 'customer'
+  def admin?    = role == "admin"
+  def customer? = role == "customer"
 
   # Defaults
   after_initialize :set_default_role, if: :new_record?
@@ -31,7 +31,7 @@ class User < ApplicationRecord
   private
 
   def set_default_role
-    self.role ||= 'customer'
+    self.role ||= "customer"
   end
 
   # (Optional) Ransack allowlists

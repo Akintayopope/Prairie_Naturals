@@ -14,11 +14,11 @@ module Storefront
       end
 
       case params[:filter]
-      when 'new'
+      when "new"
         @products = @products.order(created_at: :desc)
-      when 'sale'
+      when "sale"
         @products = @products.where("sale_price IS NOT NULL AND sale_price < price")
-      when 'recent'
+      when "recent"
         @products = @products.order(updated_at: :desc)
       end
 
@@ -37,7 +37,7 @@ module Storefront
       session[:recently_viewed].unshift(@product.id)
       session[:recently_viewed] = session[:recently_viewed].take(5)
 
-      @recently_viewed_products = Product.find(session[:recently_viewed] - [@product.id])
+      @recently_viewed_products = Product.find(session[:recently_viewed] - [ @product.id ])
     end
   end
 end# app/controllers/storefront/products_controller.rb
@@ -56,14 +56,14 @@ module Storefront
       end
 
       case params[:filter]
-      when 'new'
+      when "new"
         @products = @products.order(created_at: :desc)
-      when 'sale'
+      when "sale"
         @products = @products.where("sale_price IS NOT NULL AND sale_price < price")
-      when 'recent'
+      when "recent"
         @products = @products.order(updated_at: :desc)
       else
-        @products = @products.order(Arel.sql('LOWER(name) ASC'))
+        @products = @products.order(Arel.sql("LOWER(name) ASC"))
       end
 
       @products = @products.page(params[:page]).per(6)
@@ -86,9 +86,8 @@ module Storefront
       session[:recently_viewed].unshift(@product.id)
       session[:recently_viewed] = session[:recently_viewed].uniq.take(5)
 
-      recent_ids = session[:recently_viewed] - [@product.id]
+      recent_ids = session[:recently_viewed] - [ @product.id ]
       @recently_viewed_products = Product.where(id: recent_ids)
     end
   end
 end
-

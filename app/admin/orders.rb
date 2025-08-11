@@ -67,7 +67,7 @@ ActiveAdmin.register Order do
     f.inputs "Order" do
       f.input :user, label: "User (email)", collection: User.order(:email).pluck(:email, :id)
       f.input :address, label: "Address",
-              collection: Address.includes(:user, :province).map { |a| ["#{a.user&.email} — #{a.full_address}", a.id] }
+              collection: Address.includes(:user, :province).map { |a| [ "#{a.user&.email} — #{a.full_address}", a.id ] }
       f.input :status, as: :select, collection: Order.statuses
       f.input :subtotal
       f.input :tax

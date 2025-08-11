@@ -5,7 +5,7 @@ class Category < ApplicationRecord
   extend FriendlyId
   friendly_id :name, use: :slugged
 
-  # --- Constants ---
+# --- Constants ---
 VALID_CATEGORY_NAMES = [
   "Vitamins",
   "Protein Supplements",
@@ -32,7 +32,7 @@ VALID_CATEGORY_NAMES = [
                          message: "must be one of: #{VALID_CATEGORY_NAMES.join(', ')}" }
 
   # --- Scopes ---
-  scope :alphabetical, -> { order(Arel.sql('LOWER(name) ASC')) }
+  scope :alphabetical, -> { order(Arel.sql("LOWER(name) ASC")) }
   scope :defaults,     -> { where(name: VALID_CATEGORY_NAMES) }
 
   # --- FriendlyId ---

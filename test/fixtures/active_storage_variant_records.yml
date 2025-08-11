@@ -1,0 +1,5 @@
+---
+one:
+  id: 1
+  blob_id: 1
+  variation_digest: active_storage_variant_records_value

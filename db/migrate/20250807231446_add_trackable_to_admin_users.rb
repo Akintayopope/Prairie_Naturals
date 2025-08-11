@@ -6,5 +6,4 @@ class AddTrackableToAdminUsers < ActiveRecord::Migration[8.0]
     add_column :admin_users, :current_sign_in_ip, :string
     add_column :admin_users, :last_sign_in_ip, :string
   end
-
 end
