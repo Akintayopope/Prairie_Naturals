@@ -3,3 +3,10 @@ import "@hotwired/turbo-rails"
 import "controllers"
 //= require Chart.bundle
 //= require chartkick
+// app/javascript/application.js
+import "bootstrap"              // ← add this line
+// app/javascript/application.js
+import "bootstrap/dist/js/bootstrap.bundle"   // includes Popper
+
+
+

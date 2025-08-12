@@ -147,9 +147,8 @@
   (<%= cart_count %> items — <%= number_to_currency(cart_total) %>)
 </div>
 
-
-    <!-- Footer -->
-    <footer class="bg-dark text-white pt-5 pb-4 mb-0">
+<!-- Footer -->
+<footer class="bg-dark text-white pt-5 pb-4 mb-0">
   <div class="container">
     <div class="row gy-4">
 
@@ -159,8 +158,8 @@
         <ul class="list-unstyled mb-0">
           <li><%= link_to "All Products", storefront_products_path,                   class: "text-white-50 text-decoration-none d-block py-1" %></li>
           <li><%= link_to "New",          storefront_products_path(sort: "newest"),   class: "text-white-50 text-decoration-none d-block py-1" %></li>
-          <li><%= link_to "Best Sellers", "#",                                        class: "text-white-50 text-decoration-none d-block py-1" %></li>
-          <li><%= link_to "Nature",         "#",                                        class: "text-white-50 text-decoration-none d-block py-1" %></li>
+          <li><%= link_to "Best Sellers", storefront_products_path(sort: "bestsellers"), class: "text-white-50 text-decoration-none d-block py-1" %></li>
+          <li><%= link_to "Nature",       storefront_products_path(category: "Nature"), class: "text-white-50 text-decoration-none d-block py-1" %></li>
         </ul>
       </div>
 
@@ -185,10 +184,10 @@
       <div class="col-6 col-md-3">
         <h6 class="text-uppercase fw-bold mb-3">Policy</h6>
         <ul class="list-unstyled mb-0">
-          <li><%= link_to "Shipping & Returns", "#", class: "text-white-50 text-decoration-none d-block py-1" %></li>
-          <li><%= link_to "Store Policy",        "#", class: "text-white-50 text-decoration-none d-block py-1" %></li>
-          <li><%= link_to "Payment Methods",     "#", class: "text-white-50 text-decoration-none d-block py-1" %></li>
-          <li><%= link_to "FAQ",                 "#", class: "text-white-50 text-decoration-none d-block py-1" %></li>
+          <li><%= link_to "Shipping & Returns", storefront_shipping_returns_path, class: "text-white-50 text-decoration-none d-block py-1" %></li>
+          <li><%= link_to "Store Policy",        storefront_store_policy_path,     class: "text-white-50 text-decoration-none d-block py-1" %></li>
+          <li><%= link_to "Payment Methods",     storefront_payment_methods_path,  class: "text-white-50 text-decoration-none d-block py-1" %></li>
+          <li><%= link_to "FAQ",                 storefront_faq_path,              class: "text-white-50 text-decoration-none d-block py-1" %></li>
         </ul>
       </div>
 
@@ -214,8 +213,8 @@
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
       <p class="text-white-50 mb-0">© <%= Time.current.year %> Prairie Naturals. All rights reserved.</p>
       <div class="d-flex gap-3 small">
-        <%= link_to "Privacy Policy", "#", class: "text-white-50 text-decoration-none" %>
-        <%= link_to "Terms of Service", "#", class: "text-white-50 text-decoration-none" %>
+        <%= link_to "Privacy Policy", storefront_privacy_policy_path, class: "text-white-50 text-decoration-none" %>
+        <%= link_to "Terms of Service", storefront_terms_path, class: "text-white-50 text-decoration-none" %>
       </div>
     </div>
   </div>

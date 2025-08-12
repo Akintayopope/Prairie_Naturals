@@ -1,27 +1,196 @@
-<%= render "page_hero", title: "Payment methods", subtitle: "Secure checkout, multiple ways to pay." %>
+<%= render "page_hero",
+  title: "Payment Methods",
+  subtitle: "Secure checkout with flexible, convenient options."
+%>
 
-<div class="container">
-  <div class="row g-3">
-    <% [
-      ["Credit & Debit", "bi-credit-card",  "We accept Visa, Mastercard, and American Express."],
-      ["Apple Pay / Google Pay", "bi-phone", "Available on supported browsers and devices."],
-      ["PayPal", "bi-paypal", "Use your PayPal account for a quick checkout."],
-      ["Gift Cards", "bi-gift", "Redeem store gift cards at checkout."]
-    ].each do |title, icon, blurb| %>
+<div class="container py-5">
+  <!-- Payment method cards -->
+  <div class="row g-4 mb-5">
+    <% payment_methods = [
+      ["Credit & Debit Cards", "bi-credit-card",
+       "We securely accept Visa, Mastercard, and American Express. All transactions are encrypted for your safety."],
+      ["Apple Pay & Google Pay", "bi-phone",
+       "Checkout instantly using your saved payment methods on supported browsers and devices—no typing required."],
+      ["PayPal", "bi-paypal",
+       "Log in to your PayPal account for a fast, secure, and familiar checkout experience."],
+      ["Gift Cards", "bi-gift",
+       "Redeem Prairie Naturals gift cards at checkout to save on your next order."]
+    ] %>
+
+    <% payment_methods.each do |title, icon, blurb| %>
       <div class="col-12 col-md-6 col-lg-3">
-        <div class="card method-card border-0 shadow-sm rounded-4 h-100">
+        <div class="card h-100 border-0 shadow-sm rounded-4 method-card">
           <div class="card-body p-4 d-flex flex-column">
-            <div class="d-flex align-items-center gap-2 mb-2">
-              <i class="bi <%= icon %> h4 mb-0"></i>
-              <h3 class="h6 mb-0"><%= title %></h3>
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <i class="bi <%= icon %> fs-3 text-primary"></i>
+              <h2 class="h6 fw-semibold mb-0"><%= title %></h2>
             </div>
-            <p class="small text-muted mb-3"><%= blurb %></p>
+            <p class="small text-muted flex-grow-1 mb-3"><%= blurb %></p>
             <div class="mt-auto">
-              <span class="badge bg-light text-dark border">PCI-DSS compliant</span>
+              <span class="badge bg-light text-dark border fw-semibold">
+                <i class="bi bi-shield-lock me-1"></i> PCI-DSS Compliant
+              </span>
             </div>
           </div>
         </div>
       </div>
     <% end %>
   </div>
+
+  <!-- How checkout works -->
+  <section class="mb-5">
+    <h3 class="h5 d-flex align-items-center gap-2 mb-3">
+      <i class="bi bi-cart-check text-primary"></i> How checkout works
+    </h3>
+    <ol class="list-group list-group-numbered rounded-4 shadow-sm">
+      <li class="list-group-item">Add items to cart and proceed to checkout.</li>
+      <li class="list-group-item">Enter your shipping details and choose a payment method.</li>
+      <li class="list-group-item">Review order summary (items, shipping, taxes) and confirm payment.</li>
+      <li class="list-group-item">You’ll receive an order confirmation email. A shipping email follows with tracking.</li>
+    </ol>
+  </section>
+
+  <!-- Security & Privacy -->
+  <section class="mb-5">
+    <h3 class="h5 d-flex align-items-center gap-2 mb-3">
+      <i class="bi bi-shield-check text-primary"></i> Security & privacy
+    </h3>
+    <div class="row g-3">
+      <div class="col-12 col-lg-6">
+        <div class="border rounded-4 p-4 h-100">
+          <h4 class="h6">Payment security</h4>
+          <ul class="small text-muted mb-0">
+            <li>Card details are transmitted over TLS and never stored on our servers.</li>
+            <li>Payments are processed by certified providers that meet PCI-DSS requirements.</li>
+            <li>Additional verification (3-D Secure) may be required by your card issuer.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="col-12 col-lg-6">
+        <div class="border rounded-4 p-4 h-100">
+          <h4 class="h6">Your data</h4>
+          <ul class="small text-muted mb-0">
+            <li>We only collect the information needed to fulfill your order and provide support.</li>
+            <li>You can update or delete your account information from your profile at any time.</li>
+            <li>See our <%= link_to "Policies", storefront_policies_path, class: "text-decoration-underline" %> for details.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Billing, Currency & Pre-authorizations -->
+  <section class="mb-5">
+    <h3 class="h5 d-flex align-items-center gap-2 mb-3">
+      <i class="bi bi-cash-coin text-primary"></i> Billing & currency
+    </h3>
+    <div class="row g-3">
+      <div class="col-12 col-lg-6">
+        <div class="border rounded-4 p-4 h-100">
+          <h4 class="h6">Currencies</h4>
+          <p class="small text-muted mb-0">
+            Prices are shown in your selected currency when available; otherwise, they display in CAD.
+            Your bank may charge a small foreign transaction fee if your card currency differs.
+          </p>
+        </div>
+      </div>
+      <div class="col-12 col-lg-6">
+        <div class="border rounded-4 p-4 h-100">
+          <h4 class="h6">Pre-authorizations</h4>
+          <p class="small text-muted mb-0">
+            Some orders place a temporary authorization on your card to verify funds. If your order is canceled,
+            the hold is released by your bank (typically within 3–7 business days).
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Refunds & Adjustments -->
+  <section class="mb-5">
+    <h3 class="h5 d-flex align-items-center gap-2 mb-3">
+      <i class="bi bi-arrow-counterclockwise text-primary"></i> Refunds & adjustments
+    </h3>
+    <div class="border rounded-4 p-4">
+      <p class="small text-muted">
+        Refunds are issued to the original payment method once your return is approved. Depending on your bank,
+        it can take 3–5 business days for funds to appear. For partial returns, we refund the value of returned items
+        and adjust taxes and discounts accordingly.
+      </p>
+      <p class="small text-muted mb-0">
+        For how to start a return, visit
+        <%= link_to "Shipping & Returns", storefront_shipping_returns_path, class: "text-decoration-underline" %>.
+      </p>
+    </div>
+  </section>
+
+  <!-- Taxes & Receipts -->
+  <section class="mb-5">
+    <h3 class="h5 d-flex align-items-center gap-2 mb-3">
+      <i class="bi bi-receipt text-primary"></i> Taxes & receipts
+    </h3>
+    <div class="border rounded-4 p-4">
+      <ul class="small text-muted mb-0">
+        <li>Sales tax is calculated at checkout based on your shipping address and local regulations.</li>
+        <li>You’ll receive a digital receipt by email. You can also download invoices from your account.</li>
+        <li>For corporate or FSA/HSA documentation, reply to your confirmation email and we’ll help tailor the receipt.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Troubleshooting FAQ -->
+  <section class="mb-5">
+    <h3 class="h5 d-flex align-items-center gap-2 mb-3">
+      <i class="bi bi-life-preserver text-primary"></i> Payment troubleshooting
+    </h3>
+    <div class="accordion" id="paymentHelp">
+      <% help = [
+        ["My card was declined—what should I do?",
+         "Check that your card number, expiry, and CVC are correct. If the issue persists, contact your bank and ask them to approve the transaction. You can also try another card or PayPal."],
+        ["I was charged twice.",
+         "In most cases one entry is a temporary authorization that will automatically drop off. If you see two settled charges after 3–5 business days, contact us with your order number."],
+        ["Apple Pay / Google Pay isn’t showing.",
+         "These options only appear on supported devices and browsers with a saved payment method. Ensure your wallet is set up and try a private/incognito window."],
+        ["How do gift cards work?",
+         "Enter your gift card code at checkout. If your total is more than the balance, you can pay the remainder with another method."]
+      ] %>
+
+      <% help.each_with_index do |(q, a), i| %>
+        <% h = "h-pay-#{i}" %>
+        <% c = "c-pay-#{i}" %>
+        <div class="accordion-item">
+          <h4 class="accordion-header" id="<%= h %>">
+            <button class="accordion-button <%= i.zero? ? "" : "collapsed" %>"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#<%= c %>"
+                    aria-expanded="<%= i.zero? %>"
+                    aria-controls="<%= c %>">
+              <%= q %>
+            </button>
+          </h4>
+          <div id="<%= c %>" class="accordion-collapse collapse <%= i.zero? ? "show" : "" %>" aria-labelledby="<%= h %>">
+            <div class="accordion-body small">
+              <%= a %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </section>
+
+  <!-- Need help CTA -->
+  <section class="mb-3">
+    <div class="border rounded-4 p-4 p-lg-5 bg-light">
+      <div class="row align-items-center g-3">
+        <div class="col-12 col-lg">
+          <h3 class="h5 mb-1">Need help with a payment?</h3>
+          <p class="mb-0 text-muted">Our team typically replies within 1–2 business days.</p>
+        </div>
+        <div class="col-12 col-lg-auto d-grid d-lg-inline">
+          <%= link_to "Contact Support", storefront_contact_path, class: "btn btn-dark" %>
+        </div>
+      </div>
+    </div>
+  </section>
 </div>

@@ -1,0 +1,76 @@
+<% content_for :title, "Store Policy" %>
+
+<%= render "page_hero",
+  title: "Our Store Policy",
+  subtitle: "Clear, fair, and customer-first — how we do business."
+%>
+
+<div class="container py-5">
+  <div class="row g-5">
+    <div class="col-12 col-lg-8">
+      <p class="lead">
+        At Prairie Naturals, we believe shopping should be simple, transparent, and worry-free.
+        Our Store Policy is built around respect — for you, your time, your privacy, and the trust you place in us.
+      </p>
+
+      <h3 class="mt-4">How We Handle Your Orders</h3>
+      <p>
+        Every order is processed with care, typically within <strong>1–2 business days</strong>.
+        You’ll always receive an email confirmation and tracking details so you can follow your purchase from our store to your door.
+      </p>
+
+      <h3 class="mt-4">Our Shipping Promise</h3>
+      <p>
+        We partner with reliable carriers to ensure your products arrive safely and on time.
+        Standard and expedited shipping options are available, with costs and delivery times calculated at checkout.
+      </p>
+
+      <h3 class="mt-4">Returns & Exchanges</h3>
+      <p>
+        If you’re not fully satisfied, you can return most unopened items within <strong>30 days</strong> for a refund or exchange.
+        Health and personal-care items may have additional restrictions — see our <%= link_to "full policies", storefront_policies_path %> for details.
+      </p>
+
+      <h3 class="mt-4">Your Privacy Matters</h3>
+      <p>
+        We treat your personal information with the same care we’d expect for our own.
+        We never sell or trade your data, and we work with certified payment providers to protect your transactions.
+        For more, read our <%= link_to "Privacy Policy", storefront_privacy_policy_path %>.
+      </p>
+
+      <h3 class="mt-4">Our Commitment to You</h3>
+      <p>
+        Quality is at the heart of everything we do. If something isn’t right with your order, contact us — we’ll make it right.
+        Whether it’s a replacement, refund, or credit, we’ll work with you to find the best solution.
+      </p>
+
+      <div class="alert alert-light border mt-5">
+        <p class="mb-1"><strong>Need More Details?</strong></p>
+        <p class="mb-0">
+          This page is a summary. You can view all specific rules and procedures in our
+          <%= link_to "full policies here", storefront_policies_path, class: "fw-semibold" %>.
+        </p>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-12 col-lg-4">
+      <div class="border rounded-4 p-4 bg-light">
+        <h4 class="h6 mb-3">Quick Links</h4>
+        <ul class="list-unstyled small mb-0">
+          <li><%= link_to "Privacy & Data", storefront_policies_path(anchor: "privacy") %></li>
+          <li><%= link_to "Orders & Cancellations", storefront_policies_path(anchor: "orders") %></li>
+          <li><%= link_to "Shipping & Returns", storefront_shipping_returns_path %></li>
+          <li><%= link_to "Pricing & Promotions", storefront_policies_path(anchor: "pricing") %></li>
+          <li><%= link_to "Quality Guarantee", storefront_policies_path(anchor: "quality") %></li>
+        </ul>
+      </div>
+
+      <div class="border rounded-4 p-4 mt-4">
+        <h4 class="h6 mb-2">Questions?</h4>
+        <p class="small mb-3">We usually reply within 1–2 business days.</p>
+        <%= link_to "Contact Us", storefront_contact_path, class: "btn btn-dark btn-sm" %>
+      </div>
+    </div>
+  </div>
+</div>

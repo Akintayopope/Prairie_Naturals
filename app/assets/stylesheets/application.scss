@@ -48,3 +48,56 @@ body {
 
 
 @import "static_pages";
+
+
+.accordion-button {
+  background: #fff !important;
+  color: #212529 !important;
+  box-shadow: none !important;
+}
+.accordion-button:not(.collapsed) {
+  background: #f8f9fa !important;
+  color: #212529 !important;
+}
+.accordion-item {
+  background: #fff !important;
+  border: 1px solid #e9ecef !important;
+  border-radius: .5rem !important;
+  overflow: hidden;
+  margin-bottom: .5rem;
+}
+
+
+/* Shipping & Returns timeline */
+.timeline {
+  position: relative;
+  padding-left: 1.25rem;
+}
+.timeline::before {
+  content: "";
+  position: absolute;
+  left: 8px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #e9ecef;
+}
+.t-item {
+  position: relative;
+  display: flex;
+  gap: .75rem;
+  margin-bottom: 1rem;
+}
+.t-dot {
+  position: absolute;
+  left: -1px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid #0d6efd; /* Bootstrap primary */
+  box-shadow: 0 0 0 3px #fff; /* halo */
+}
+.t-content {
+  margin-left: 1.5rem;
+}

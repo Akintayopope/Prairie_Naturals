@@ -1,35 +1,185 @@
-<%= render "page_hero", title: "Shipping & returns", subtitle: "Clear timelines, easy returns." %>
+<%= render "page_hero",
+  title: "Shipping & Returns",
+  subtitle: "Predictable timelines, transparent costs, and stress-free returns."
+%>
 
-<div class="container">
-  <div class="row g-4">
+<div class="container py-5">
+  <!-- At-a-glance summary -->
+  <div class="row g-3 mb-4">
+    <% summaries = [
+      ["bi-clock-history", "Processing", "1–2 business days"],
+      ["bi-truck", "Canada", "3–7 business days"],
+      ["bi-truck", "USA", "5–10 business days"],
+      ["bi-arrow-counterclockwise", "Returns", "30 days (unopened)"]
+    ] %>
+    <% summaries.each do |icon, title, text| %>
+      <div class="col-6 col-lg-3">
+        <div class="border rounded-4 p-3 h-100 d-flex align-items-center gap-3 bg-white shadow-sm">
+          <i class="bi <%= icon %> fs-3 text-primary"></i>
+          <div>
+            <div class="small text-muted"><%= title %></div>
+            <div class="fw-semibold"><%= text %></div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="row g-4 align-items-start">
+    <!-- Left: Policy details -->
     <div class="col-12 col-lg-7">
-      <div class="card border-0 shadow-sm rounded-4">
+      <div class="card border-0 shadow-sm rounded-4 h-100">
         <div class="card-body p-4">
-          <h2 class="h6 mb-3"><i class="bi bi-truck me-2"></i>Shipping</h2>
-          <ul class="small mb-4">
-            <li>Processing: 1–2 business days.</li>
-            <li>Canada (standard): 3–7 business days; free over $75.</li>
-            <li>USA (standard): 5–10 business days; rates shown at checkout.</li>
-            <li>Tracking provided on all orders.</li>
+          <!-- Shipping -->
+          <h2 class="h5 mb-3 d-flex align-items-center gap-2">
+            <i class="bi bi-truck text-primary"></i> Shipping
+          </h2>
+          <p class="small text-muted">
+            We aim to dispatch orders within <strong>1–2 business days</strong>. You’ll receive an email with
+            tracking as soon as your parcel leaves our warehouse.
+          </p>
+
+          <!-- Rate table -->
+          <div class="table-responsive mb-4">
+            <table class="table align-middle mb-0">
+              <thead>
+                <tr>
+                  <th class="small text-muted">Destination</th>
+                  <th class="small text-muted">Service</th>
+                  <th class="small text-muted">ETA</th>
+                  <th class="small text-muted">Cost</th>
+                </tr>
+              </thead>
+              <tbody class="small">
+                <tr>
+                  <td>Canada</td>
+                  <td>Standard</td>
+                  <td>3–7 business days</td>
+                  <td><span class="badge bg-success-subtle text-success border">Free over $75</span></td>
+                </tr>
+                <tr>
+                  <td>USA</td>
+                  <td>Standard</td>
+                  <td>5–10 business days</td>
+                  <td>Shown at checkout</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <ul class="small text-muted ps-3 mb-4">
+            <li>Remote areas may require additional transit time.</li>
+            <li>We ship weekdays only (excluding holidays).</li>
+            <li>P.O. boxes may be limited by carrier—use a street address where possible.</li>
           </ul>
 
-          <h2 class="h6 mb-3"><i class="bi bi-arrow-counterclockwise me-2"></i>Returns</h2>
-          <ul class="small">
-            <li>30-day returns on unopened items.</li>
-            <li>Return label provided for defective/damaged items.</li>
-            <li>Refunds are issued to the original payment method within 3–5 days after inspection.</li>
-          </ul>
+          <!-- Returns -->
+          <h2 class="h5 mb-3 d-flex align-items-center gap-2">
+            <i class="bi bi-arrow-counterclockwise text-primary"></i> Returns
+          </h2>
+          <p class="small text-muted mb-2">
+            We offer a <strong>30-day return window</strong> for <strong>unopened</strong> items in original
+            packaging. For items that arrive damaged/defective, we’ll make it right—no return shipping cost.
+          </p>
+          <ol class="small mb-4 ps-3">
+            <li>Start your request: contact <%= link_to "Customer Care", storefront_contact_path, class: "text-decoration-underline" %> with your order #.</li>
+            <li>Pack items securely; include all accessories and inserts.</li>
+            <li>Once received and inspected, refunds post in <strong>3–5 business days</strong> to the original method.</li>
+          </ol>
+
+          <!-- Exceptions -->
+          <div class="border rounded-4 p-3 bg-light">
+            <h3 class="h6 mb-2">Exceptions & Notes</h3>
+            <ul class="small text-muted mb-0 ps-3">
+              <li>Opened health/personal care items may not be eligible due to safety regulations.</li>
+              <li>Final-sale items are not returnable unless faulty.</li>
+              <li>Gift returns receive store credit when the original payment method isn’t available.</li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
 
+    <!-- Right: Order journey timeline -->
     <div class="col-12 col-lg-5">
-      <div class="timeline">
-        <div class="t-item"><span>Day 0</span> Order placed</div>
-        <div class="t-item"><span>Day 1–2</span> Processing & packing</div>
-        <div class="t-item"><span>Day 3–7</span> Delivery (CA)</div>
-        <div class="t-item"><span>Up to 30 days</span> Returns window</div>
+      <div class="card border-0 shadow-sm rounded-4 h-100">
+        <div class="card-body p-4">
+          <h2 class="h6 text-uppercase fw-bold mb-4 text-muted">Order Journey</h2>
+
+          <div class="timeline">
+            <% steps = [
+              ["Day 0", "Order placed"],
+              ["Day 1–2", "Processing & packing"],
+              ["Day 3–7", "Delivery (Canada)"],
+              ["Day 5–10", "Delivery (USA)"],
+              ["Up to 30 days", "Returns window"]
+            ] %>
+
+            <% steps.each do |when_, what| %>
+              <div class="t-item">
+                <div class="t-dot"></div>
+                <div class="t-content">
+                  <div class="fw-semibold"><%= when_ %></div>
+                  <div class="small text-muted"><%= what %></div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+
+          <!-- Help CTA -->
+          <div class="mt-4 p-3 bg-light rounded-3">
+            <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2">
+              <div>
+                <div class="fw-semibold">Need a hand?</div>
+                <div class="small text-muted">Questions about timelines, carriers, or returns.</div>
+              </div>
+              <%= link_to "Contact Support", storefront_contact_path, class: "btn btn-dark btn-sm" %>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="mt-5">
+    <h2 class="h5 mb-3">Shipping & Returns FAQ</h2>
+    <div class="accordion" id="shipReturnsFAQ">
+      <% faqs = [
+        ["When will my order ship?",
+         "Most orders ship within 1–2 business days. You’ll get a tracking email once it leaves our warehouse."],
+        ["Can I change my address after ordering?",
+         "Contact us ASAP with your order number. If the order hasn’t shipped, we’ll update the address. Shipped orders can’t be rerouted by us, but carriers may offer options."],
+        ["How do refunds work?",
+         "After your return is inspected, we issue a refund to your original payment method. Banks typically post funds within 3–5 business days."]
+      ] %>
+
+      <% faqs.each_with_index do |(q, a), i| %>
+        <% h = "sr-h-#{i}" %>
+        <% c = "sr-c-#{i}" %>
+        <div class="accordion-item">
+          <h3 class="accordion-header" id="<%= h %>">
+            <button class="accordion-button <%= i.zero? ? '' : 'collapsed' %>" type="button"
+                    data-bs-toggle="collapse" data-bs-target="#<%= c %>"
+                    aria-expanded="<%= i.zero? %>" aria-controls="<%= c %>">
+              <%= q %>
+            </button>
+          </h3>
+          <div id="<%= c %>" class="accordion-collapse collapse <%= i.zero? ? 'show' : '' %>"
+               aria-labelledby="<%= h %>">
+            <div class="accordion-body small">
+              <%= a %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Footer meta -->
+  <div class="mt-4">
+    <p class="small text-muted mb-0">
+      Last updated: <%= l(Date.today, format: :long) %>. Policies may change; the version on this page is the most current.
+    </p>
   </div>
 </div>

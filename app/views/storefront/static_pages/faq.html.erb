@@ -1,23 +1,185 @@
-<%= render "page_hero", title: "FAQ", subtitle: "Quick answers to common questions." %>
+<%= render "page_hero",
+  title: "FAQ",
+  subtitle: "Clear answers to help you shop with confidence."
+%>
 
-<div class="container">
-  <div class="accordion rounded-4 shadow-sm" id="faqAccordion">
-    <% [
-      ["When will my order ship?", "Orders ship within 1–2 business days. You’ll receive tracking by email."],
-      ["How do I start a return?", "Visit Shipping & Returns for details, or contact us with your order number."],
-      ["Are your products cruelty-free?", "We partner with brands that align with our values. Look for the badge on product pages."],
-      ["Do you ship internationally?", "We currently ship within Canada and the US."]
-    ].each_with_index do |(q,a), i| %>
-      <div class="accordion-item">
-        <h2 class="accordion-header" id="h<%= i %>">
-          <button class="accordion-button <%= i.zero? ? '' : 'collapsed' %>" type="button" data-bs-toggle="collapse" data-bs-target="#c<%= i %>">
-            <%= q %>
-          </button>
-        </h2>
-        <div id="c<%= i %>" class="accordion-collapse collapse <%= i.zero? ? 'show' : '' %>" data-bs-parent="#faqAccordion">
-          <div class="accordion-body small"><%= a %></div>
-        </div>
+<div class="container py-5">
+
+  <!-- Quick filter -->
+  <div class="row mb-4">
+    <div class="col-12 col-lg-8">
+      <label for="faqSearch" class="form-label fw-semibold">Search FAQs</label>
+      <input id="faqSearch" type="search" class="form-control" placeholder="Type a keyword… (e.g., shipping, refund, ingredients)" aria-describedby="faqHelp">
+      <div id="faqHelp" class="form-text">Results update as you type.</div>
+    </div>
+  </div>
+
+  <!-- Section nav -->
+  <nav class="mb-4" aria-label="FAQ sections">
+    <ul class="nav nav-pills flex-wrap gap-2">
+      <li class="nav-item"><a class="nav-link" href="#orders-shipping">Orders & Shipping</a></li>
+      <li class="nav-item"><a class="nav-link" href="#returns-refunds">Returns & Refunds</a></li>
+      <li class="nav-item"><a class="nav-link" href="#products-ingredients">Products & Ingredients</a></li>
+      <li class="nav-item"><a class="nav-link" href="#account-payments">Account & Payments</a></li>
+    </ul>
+  </nav>
+
+  <% sections = {
+    "orders-shipping" => {
+      title: "Orders & Shipping",
+      faqs: [
+        ["When will my order ship?",
+         "Most orders ship within 1–2 business days. You’ll receive a confirmation email with tracking as soon as your package leaves our warehouse."],
+        ["How do I track my package?",
+         "Use the tracking link in your shipping confirmation email. You can also log in to your account to view status and history any time."],
+        ["Do you ship internationally?",
+         "We currently ship within Canada and the United States. We’re exploring additional regions—join our newsletter for updates."]
+      ]
+    },
+    "returns-refunds" => {
+      title: "Returns & Refunds",
+      faqs: [
+        ["How do I start a return?",
+         "Visit our <a href='#{storefront_shipping_returns_path}'>Shipping & Returns</a> page for step-by-step instructions, or contact us with your order number."],
+        ["What’s your return window?",
+         "Most unopened items can be returned within 30 days of delivery. For health and personal-care items, some restrictions may apply."],
+        ["When will I receive my refund?",
+         "After your return is inspected, refunds usually process within 3–5 business days back to your original payment method."]
+      ]
+    },
+    "products-ingredients" => {
+      title: "Products & Ingredients",
+      faqs: [
+        ["Are your products cruelty-free?",
+         "We partner with brands that align with our values. Look for the cruelty-free badge on product pages and review product details."],
+        ["Where can I find ingredient lists?",
+         "Every product page includes full ingredients and usage guidance. If you have sensitivities, contact us and we’ll help verify suitability."],
+        ["Do you test products?",
+         "Yes. We review supplier documentation and perform quality checks to ensure safety, efficacy, and consistency before items are listed."]
+      ]
+    },
+    "account-payments" => {
+      title: "Account & Payments",
+      faqs: [
+        ["Do I need an account to order?",
+         "No—but creating an account lets you track orders, save addresses, and view purchase history."],
+        ["What payment methods do you accept?",
+         "We accept major credit cards and popular digital wallets. Available options appear at checkout based on your region."],
+        ["How do I update my address or password?",
+         "Log in and visit your Account settings. Need help? Reach out and we’ll guide you."]
+      ]
+    }
+  } %>
+
+  <% sections.each_with_index do |(slug, data), si| %>
+    <section id="<%= slug %>" class="mb-5 faq-section">
+      <h2 class="h4 mb-3"><%= data[:title] %></h2>
+
+      <div class="accordion" id="accordion-<%= slug %>">
+        <% data[:faqs].each_with_index do |(q, a), i| %>
+          <% header_id = "h-#{slug}-#{i}" %>
+          <% panel_id  = "c-#{slug}-#{i}" %>
+
+          <div class="accordion-item faq-item">
+            <h3 class="accordion-header" id="<%= header_id %>">
+              <button
+                class="accordion-button <%= i.zero? && si.zero? ? "" : "collapsed" %>"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#<%= panel_id %>"
+                aria-expanded="<%= i.zero? && si.zero? %>"
+                aria-controls="<%= panel_id %>">
+                <%= q.html_safe %>
+              </button>
+            </h3>
+            <div
+              id="<%= panel_id %>"
+              class="accordion-collapse collapse <%= i.zero? && si.zero? ? "show" : "" %>"
+              aria-labelledby="<%= header_id %>">
+              <div class="accordion-body">
+                <%= a.html_safe %>
+              </div>
+            </div>
+          </div>
+        <% end %>
       </div>
-    <% end %>
+    </section>
+  <% end %>
+
+  <!-- Still need help -->
+  <div class="border rounded-4 p-4 p-lg-5 bg-light">
+    <div class="row align-items-center g-3">
+      <div class="col-12 col-lg">
+        <h2 class="h5 mb-1">Still have questions?</h2>
+        <p class="mb-0 text-muted">Our team typically replies within 1–2 business days.</p>
+      </div>
+      <div class="col-12 col-lg-auto d-grid d-lg-inline">
+        <%= link_to "Contact Support", storefront_contact_path, class: "btn btn-dark" %>
+      </div>
+    </div>
+  </div>
+
+  <div class="accordion my-4" id="accordion-test">
+  <div class="accordion-item">
+    <h2 class="accordion-header" id="t-h-1">
+      <button class="accordion-button" type="button"
+              data-bs-toggle="collapse" data-bs-target="#t-c-1"
+              aria-expanded="true" aria-controls="t-c-1">
+        Test item
+      </button>
+    </h2>
+    <div id="t-c-1" class="accordion-collapse collapse show" aria-labelledby="t-h-1">
+      <div class="accordion-body">If you see this toggle, JS is working ✅</div>
+    </div>
   </div>
 </div>
+
+</div>
+
+<!-- Simple client-side filter (no libraries) -->
+<script>
+  (function () {
+    const input = document.getElementById("faqSearch");
+    if (!input) return;
+
+    input.addEventListener("input", function () {
+      const term = this.value.trim().toLowerCase();
+
+      // For each section, hide items that don't match; hide the section if all are hidden.
+      document.querySelectorAll(".faq-section").forEach(section => {
+        const items = section.querySelectorAll(".faq-item");
+        let visibleCount = 0;
+
+        items.forEach(item => {
+          const text = item.textContent.toLowerCase();
+          const match = !term || text.includes(term);
+          item.style.display = match ? "" : "none";
+          if (match) visibleCount++;
+        });
+
+        section.style.display = visibleCount ? "" : "none";
+      });
+    });
+  })();
+</script>
+
+<!-- SEO: FAQ structured data (JSON-LD) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    <% all_faqs = sections.values.flat_map { |v| v[:faqs] } %>
+    <% all_faqs.each_with_index do |(q, a), idx| %>
+      {
+        "@type": "Question",
+        "name": "<%= strip_tags(q).gsub(/"/, '\"') %>",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "<%= strip_tags(a).gsub(/"/, '\"') %>"
+        }
+      }<%= "," unless idx == all_faqs.size - 1 %>
+    <% end %>
+  ]
+}
+</script>

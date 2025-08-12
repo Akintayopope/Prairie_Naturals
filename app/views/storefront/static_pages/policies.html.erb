@@ -1,26 +1,119 @@
-<%= render "page_hero", title: "Store policy", subtitle: "Transparency you can trust." %>
+<%= render "page_hero",
+  title: "Store Policies",
+  subtitle: "Transparent, fair, and designed to protect your experience."
+%>
 
-<div class="container">
+<div class="container py-5">
+
+  <!-- Section nav -->
+  <nav class="mb-4" aria-label="Policy sections">
+    <ul class="nav nav-pills flex-wrap gap-2">
+      <li class="nav-item"><a class="nav-link" href="#privacy">Privacy & Data</a></li>
+      <li class="nav-item"><a class="nav-link" href="#orders">Orders & Cancellations</a></li>
+      <li class="nav-item"><a class="nav-link" href="#shipping">Shipping & Returns</a></li>
+      <li class="nav-item"><a class="nav-link" href="#pricing">Pricing & Promotions</a></li>
+      <li class="nav-item"><a class="nav-link" href="#quality">Quality Guarantee</a></li>
+      <li class="nav-item"><a class="nav-link" href="#taxes">Taxes & Receipts</a></li>
+      <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
   <div class="row g-4">
+    <!-- Left column -->
     <div class="col-12 col-lg-6">
-      <div class="policy-card">
-        <h3><i class="bi bi-shield-check me-2"></i>Privacy & data</h3>
-        <p class="small mb-0">We collect only what’s needed to fulfill orders and improve your experience. We never sell your data. See our full Privacy Policy for details.</p>
-      </div>
-      <div class="policy-card">
-        <h3><i class="bi bi-bag-check me-2"></i>Orders & cancellations</h3>
-        <p class="small mb-0">Orders can be edited or cancelled within 1 hour of placement. Contact support with your order number.</p>
-      </div>
+      <!-- Privacy & Data -->
+      <section id="privacy" class="border rounded-4 p-4">
+        <h2 class="h5 d-flex align-items-center gap-2 mb-3">
+          <i class="bi bi-shield-check text-primary"></i> Privacy & Data
+        </h2>
+        <ul class="small text-muted mb-0">
+          <li>We collect only what’s needed to fulfill orders, support you, and improve our services.</li>
+          <li>Payment details are processed by certified providers; we never store full card numbers.</li>
+          <li>You can request data export or deletion from your account or by contacting support.</li>
+          <li>See details in our formal policy document (available on request).</li>
+        </ul>
+      </section>
+
+      <!-- Orders & Cancellations -->
+      <section id="orders" class="border rounded-4 p-4">
+        <h2 class="h5 d-flex align-items-center gap-2 mb-3">
+          <i class="bi bi-bag-check text-primary"></i> Orders & Cancellations
+        </h2>
+        <p class="small text-muted mb-2">Orders can be edited or canceled within 1 hour of placement (before fulfillment starts).</p>
+        <ul class="small text-muted mb-0">
+          <li>Need changes? Reply to your order email or contact support with your order number.</li>
+          <li>Once fulfilled, changes/cancellations may not be possible—see returns below.</li>
+        </ul>
+      </section>
+
+      <!-- Quality Guarantee -->
+      <section id="quality" class="border rounded-4 p-4">
+        <h2 class="h5 d-flex align-items-center gap-2 mb-3">
+          <i class="bi bi-emoji-smile text-primary"></i> Quality Guarantee
+        </h2>
+        <p class="small text-muted mb-0">
+          If something isn’t right, we’ll make it right—refund, replacement, or store credit as appropriate.
+          Report issues within 14 days of delivery with photos (if applicable).
+        </p>
+      </section>
     </div>
+
+    <!-- Right column -->
     <div class="col-12 col-lg-6">
-      <div class="policy-card">
-        <h3><i class="bi bi-emoji-smile me-2"></i>Quality guarantee</h3>
-        <p class="small mb-0">If something isn’t right, we’ll make it right—refund, replace, or credit.</p>
-      </div>
-      <div class="policy-card">
-        <h3><i class="bi bi-currency-dollar me-2"></i>Pricing & promos</h3>
-        <p class="small mb-0">Promo codes must be applied at checkout and can’t be combined unless noted.</p>
-      </div>
+      <!-- Shipping & Returns -->
+      <section id="shipping" class="border rounded-4 p-4">
+        <h2 class="h5 d-flex align-items-center gap-2 mb-3">
+          <i class="bi bi-box-seam text-primary"></i> Shipping & Returns
+        </h2>
+        <ul class="small text-muted mb-2">
+          <li>Most orders ship within 1–2 business days. You’ll receive tracking via email.</li>
+          <li>Return most unopened items within 30 days of delivery (health/personal-care restrictions may apply).</li>
+        </ul>
+        <p class="small mb-0">
+          Read the full details here:
+          <%= link_to "Shipping & Returns", storefront_shipping_returns_path, class: "text-decoration-underline" %>.
+        </p>
+      </section>
+
+      <!-- Pricing & Promotions -->
+      <section id="pricing" class="border rounded-4 p-4">
+        <h2 class="h5 d-flex align-items-center gap-2 mb-3">
+          <i class="bi bi-currency-dollar text-primary"></i> Pricing & Promotions
+        </h2>
+        <ul class="small text-muted mb-0">
+          <li>Prices are shown in CAD unless noted; actual charge may vary by your card’s currency.</li>
+          <li>Promo codes must be applied at checkout and can’t be combined unless stated.</li>
+          <li>We reserve the right to correct pricing mistakes and cancel fraudulent orders.</li>
+        </ul>
+      </section>
+
+      <!-- Taxes & Receipts -->
+      <section id="taxes" class="border rounded-4 p-4">
+        <h2 class="h5 d-flex align-items-center gap-2 mb-3">
+          <i class="bi bi-receipt text-primary"></i> Taxes & Receipts
+        </h2>
+        <ul class="small text-muted mb-0">
+          <li>Sales tax is calculated at checkout based on your shipping address and local regulations.</li>
+          <li>You’ll receive an email receipt; invoices are downloadable from your account.</li>
+          <li>For special documentation (corporate, FSA/HSA), contact support after ordering.</li>
+        </ul>
+      </section>
     </div>
   </div>
+
+  <!-- Footer meta + contact -->
+  <section id="contact" class="mt-5 border rounded-4 p-4 bg-light">
+    <div class="row align-items-center g-3">
+      <div class="col-12 col-lg">
+        <h2 class="h6 mb-1">Questions about our policies?</h2>
+        <p class="mb-0 small text-muted">We typically reply within 1–2 business days.</p>
+      </div>
+      <div class="col-12 col-lg-auto d-grid d-lg-inline">
+        <%= link_to "Contact Support", storefront_contact_path, class: "btn btn-dark" %>
+      </div>
+    </div>
+    <p class="small text-muted mt-3 mb-0">
+      Last updated: <%= l(Date.today, format: :long) %>
+    </p>
+  </section>
 </div>

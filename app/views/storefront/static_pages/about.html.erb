@@ -1,38 +1,66 @@
-<%= render "page_hero", title: "Our story", subtitle: "Prairie-rooted, people-first. Quality products for everyday wellness." %>
+<%= render "page_hero",
+  title: "Our Story",
+  subtitle: "Rooted in the Prairies. Built on trust. Dedicated to your everyday wellness."
+%>
 
-<div class="container">
-  <div class="row g-4">
+<div class="container py-5">
+  <div class="row g-5 align-items-center">
+    <!-- Story Column -->
     <div class="col-12 col-lg-7">
       <div class="prose">
-        <p>Founded in Winnipeg, Prairie Naturals began with a simple belief: everyday care should feel thoughtful, honest, and effective.</p>
-        <p>We source responsibly, partner with trusted suppliers, and test every product we carry. Your feedback shapes our collections and guides our decisions.</p>
-        <p>Thank you for supporting a local business—we’re excited to be part of your routine.</p>
+        <p class="lead">
+          Prairie Naturals was born in Winnipeg with a simple yet powerful vision:
+          to create products that blend nature’s best with uncompromising quality,
+          designed to enrich your everyday life.
+        </p>
+        <p>
+          From our very first collection, we committed to sourcing responsibly,
+          partnering only with suppliers who share our values of sustainability,
+          transparency, and integrity. Every product is carefully tested to ensure
+          it meets our high standards for safety, effectiveness, and ethical sourcing.
+        </p>
+        <p>
+          Our customers aren’t just buyers—they’re collaborators in our journey.
+          Your feedback inspires innovation, influences our collections,
+          and ensures that what we offer truly supports your well-being.
+        </p>
+        <p>
+          Today, we’re proud to be more than just a local business.
+          We’re a trusted wellness partner, dedicated to helping you feel your best
+          every day—naturally, authentically, and sustainably.
+        </p>
+        <p class="fw-semibold text-primary mt-4">
+          Thank you for making us part of your routine. Together, we’re building
+          a healthier, more conscious community.
+        </p>
       </div>
     </div>
+
+    <!-- Stats Column -->
     <div class="col-12 col-lg-5">
-      <div class="row g-3">
+      <div class="row g-4">
         <div class="col-6">
-          <div class="stat-card">
-            <div class="stat">98%</div>
-            <div class="label">On-time deliveries</div>
+          <div class="stat-card shadow-sm text-center p-4 rounded-4 bg-light">
+            <div class="stat display-5 fw-bold text-primary">98%</div>
+            <div class="label small text-muted">On-time Deliveries</div>
           </div>
         </div>
         <div class="col-6">
-          <div class="stat-card">
-            <div class="stat">4.8/5</div>
-            <div class="label">Customer rating</div>
+          <div class="stat-card shadow-sm text-center p-4 rounded-4 bg-light">
+            <div class="stat display-5 fw-bold text-primary">4.8<span class="fs-6">/5</span></div>
+            <div class="label small text-muted">Customer Satisfaction</div>
           </div>
         </div>
         <div class="col-6">
-          <div class="stat-card">
-            <div class="stat">2019</div>
-            <div class="label">Established</div>
+          <div class="stat-card shadow-sm text-center p-4 rounded-4 bg-light">
+            <div class="stat display-5 fw-bold text-primary">2019</div>
+            <div class="label small text-muted">Year Founded</div>
           </div>
         </div>
         <div class="col-6">
-          <div class="stat-card">
-            <div class="stat">+500</div>
-            <div class="label">Products curated</div>
+          <div class="stat-card shadow-sm text-center p-4 rounded-4 bg-light">
+            <div class="stat display-5 fw-bold text-primary">500+</div>
+            <div class="label small text-muted">Products Curated</div>
           </div>
         </div>
       </div>

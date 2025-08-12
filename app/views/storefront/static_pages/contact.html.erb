@@ -7,6 +7,20 @@
         <div class="card-body p-4">
           <h2 id="contact-form" class="h5 mb-3">Send a message</h2>
 
+          <% if flash[:notice].present? %>
+            <div class="alert alert-success"><%= flash[:notice] %></div>
+          <% end %>
+          <% if flash[:alert].present? %>
+            <div class="alert alert-danger"><%= flash[:alert] %></div>
+          <% end %>
+          <% if defined?(@errors) && @errors.any? %>
+            <div class="alert alert-danger">
+              <ul class="mb-0">
+                <% @errors.each do |e| %><li><%= e %></li><% end %>
+              </ul>
+            </div>
+          <% end %>
+
           <%= form_with url: storefront_contact_path, method: :post, local: true do %>
             <div class="row g-3">
               <div class="col-md-6">
@@ -19,14 +33,15 @@
               </div>
               <div class="col-12">
                 <label class="form-label">Subject</label>
-                <%= text_field_tag :subject, nil, class: "form-control", placeholder: "Order help, product question, feedback…" %>
+                <%= text_field_tag :subject, params[:subject], class: "form-control", placeholder: "Order help, product question, feedback…" %>
               </div>
+
               <!-- Honeypot -->
               <%= text_field_tag :company, "", class: "d-none", autocomplete: "off", tabindex: -1 %>
 
               <div class="col-12">
                 <label class="form-label">Message</label>
-                <%= text_area_tag :message, nil, class: "form-control", rows: 6, required: true %>
+                <%= text_area_tag :message, params[:message], class: "form-control", rows: 6, required: true %>
               </div>
               <div class="col-12 d-grid">
                 <button class="btn btn-dark">Send message</button>
