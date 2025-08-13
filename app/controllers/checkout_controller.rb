@@ -1,22 +1,20 @@
+# app/controllers/checkout_controller.rb
 class CheckoutController < ApplicationController
   before_action :authenticate_user!
-
-  PROVINCES = [
-    "Manitoba", "Ontario", "Quebec", "Alberta", "Saskatchewan", "British Columbia",
-    "Nova Scotia", "New Brunswick", "Prince Edward Island", "Newfoundland and Labrador"
-  ].freeze
+  before_action :set_provinces, only: [:new, :create]
 
   def new
     if current_user.cart_items.none?
       redirect_to cart_path, alert: "Your cart is empty." and return
     end
 
+    # Build a transient order from params for preview (province, shipping fields)
     @order      = Order.new(order_params)
-    @provinces  = PROVINCES
     @cart_items = current_user.cart_items.includes(:product)
     @orders     = current_user.orders.order(created_at: :desc).limit(5)
 
     @subtotal = @cart_items.sum { |i| i.quantity * i.product.price }
+
     if @order.province.present?
       @tax_rate = tax_rate_for(@order.province)
       @tax      = @subtotal * @tax_rate
@@ -36,61 +34,68 @@ class CheckoutController < ApplicationController
     province_record = Province.find_by(name: @order.province)
     return prepare_failed_new(cart_items, "Please choose a valid province.") unless province_record
 
-   city        = params.dig(:order, :city)
-postal_code = params.dig(:order, :postal_code)
+    # Extract address-only params safely (not on Order)
+    city        = address_params[:city]
+    postal_code = address_params[:postal_code]
 
-address = current_user.address || current_user.build_address
-address.assign_attributes(
-  line1:       @order.shipping_address,
-  city:        city,
-  postal_code: postal_code,
-  province_id: province_record.id
-)
-address.name = @order.shipping_name if address.respond_to?(:name=)
+    address = current_user.address || current_user.build_address
+    address.assign_attributes(
+      line1:       @order.shipping_address,
+      city:        city,
+      postal_code: postal_code,
+      province_id: province_record.id
+    )
+    address.name = @order.shipping_name if address.respond_to?(:name=)
 
-    begin
+    ActiveRecord::Base.transaction do
       address.save!
-    rescue ActiveRecord::RecordInvalid => e
-      return prepare_failed_new(cart_items, "Address error: #{e.record.errors.full_messages.to_sentence}")
-    end
 
-    @order.address = address
+      @order.address  = address
+      @order.status ||= "pending"
 
-    subtotal   = cart_items.sum { |i| i.quantity * i.product.price }
-    tax_rate   = tax_rate_for(@order.province)
-    tax_amount = subtotal * tax_rate
-    total      = subtotal + tax_amount
+      subtotal   = cart_items.sum { |i| i.quantity * i.product.price }
+      tax_rate   = tax_rate_for(@order.province)
+      tax_amount = subtotal * tax_rate
+      total      = subtotal + tax_amount
 
-    @order.subtotal = subtotal
-    @order.tax      = tax_amount
-    @order.total    = total
-    @order.status ||= "pending"
+      @order.subtotal = subtotal
+      @order.tax      = tax_amount
+      @order.total    = total
 
-    if @order.save
+      @order.save!
+
       cart_items.find_each do |i|
-        @order.order_items.create!(product: i.product, quantity: i.quantity, unit_price: i.product.price)
+        @order.order_items.create!(
+          product:     i.product,
+          quantity:    i.quantity,
+          unit_price:  i.product.price # snapshot at time of order
+        )
       end
       cart_items.destroy_all
 
       stripe_session = Stripe::Checkout::Session.create(
-        payment_method_types: [ "card" ],
+        payment_method_types: ["card"],
         customer_email: current_user.email,
         line_items: @order.order_items.map { |item|
-          { price_data: { currency: "cad",
-                          product_data: { name: item.product.name },
-                          unit_amount: (item.unit_price * 100).to_i },
-            quantity: item.quantity }
+          {
+            price_data: {
+              currency: "cad",
+              product_data: { name: item.product.name },
+              unit_amount: (item.unit_price * 100).to_i
+            },
+            quantity: item.quantity
+          }
         },
         mode: "payment",
         success_url: success_checkout_url + "?session_id={CHECKOUT_SESSION_ID}",
         cancel_url:  cancel_checkout_url
       )
 
-      @order.update(stripe_session_id: stripe_session.id)
-      redirect_to stripe_session.url, allow_other_host: true
-    else
-      prepare_failed_new(cart_items, "Please check the form.")
+      @order.update!(stripe_session_id: stripe_session.id)
+      redirect_to stripe_session.url, allow_other_host: true and return
     end
+  rescue ActiveRecord::RecordInvalid => e
+    prepare_failed_new(current_user.cart_items.includes(:product), "Validation error: #{e.record.errors.full_messages.to_sentence}")
   rescue Stripe::StripeError => e
     prepare_failed_new(current_user.cart_items.includes(:product), "Payment error: #{e.message}")
   end
@@ -108,7 +113,7 @@ address.name = @order.shipping_name if address.respond_to?(:name=)
     redirect_to orders_path, alert: "Payment was canceled."
   end
 
-  # 👇 keep this PUBLIC (above `private`)
+  # Public for the link in your view
   def preview_receipt
     cart_items = current_user.cart_items.includes(:product)
     return redirect_to(new_checkout_path, alert: "Your cart is empty.") if cart_items.none?
@@ -153,23 +158,32 @@ address.name = @order.shipping_name if address.respond_to?(:name=)
 
   private
 
+  def set_provinces
+    # Use DB as source of truth for what users can select on the form
+    @provinces = Province.order(:name)
+  end
+
+  # Only real Order columns here
   def order_params
     params.fetch(:order, {}).permit(:shipping_name, :shipping_address, :province)
   end
 
+  # Address-only fields (NOT Order columns)
+  def address_params
+    params.require(:order).permit(:city, :postal_code)
+  end
+
+  # Sum GST/PST/HST from the Province row; handle nils gracefully
   def tax_rate_for(province_name)
-    {
-      "Manitoba" => 0.12, "Ontario" => 0.13, "Quebec" => 0.14975, "Alberta" => 0.05,
-      "Saskatchewan" => 0.11, "British Columbia" => 0.12, "Nova Scotia" => 0.15,
-      "New Brunswick" => 0.15, "Prince Edward Island" => 0.15,
-      "Newfoundland and Labrador" => 0.15
-    }[province_name] || 0
+    p = Province.find_by(name: province_name)
+    return 0.to_d unless p
+    p.hst.to_d + p.gst.to_d + p.pst.to_d
   end
 
   def prepare_failed_new(cart_items, message = nil)
-    @provinces  = PROVINCES
     @cart_items = cart_items
     @orders     = current_user.orders.order(created_at: :desc).limit(5)
+    @order    ||= Order.new(order_params)
     @subtotal   = @cart_items.sum { |i| i.quantity * i.product.price }
     if @order&.province.present?
       @tax_rate = tax_rate_for(@order.province)

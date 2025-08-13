@@ -8,7 +8,7 @@ class User < ApplicationRecord
 
   # Associations
   has_many :orders, dependent: :destroy
-  has_one  :address, dependent: :destroy     # 👈 primary address (changed from has_many)
+  has_one  :address, dependent: :destroy, inverse_of: :user   # ⇦ add inverse_of
   has_many :reviews, dependent: :destroy
   has_many :wishlist_items, dependent: :destroy
   has_many :cart_items, dependent: :destroy
@@ -20,6 +20,7 @@ class User < ApplicationRecord
   # Validations
   validates :username, presence: true, uniqueness: true, length: { minimum: 3 }
   validates :role, inclusion: { in: ROLES }
+  validates_associated :address, on: :create                 # ⇦ keep this
 
   # Role helpers
   def admin?    = role == "admin"

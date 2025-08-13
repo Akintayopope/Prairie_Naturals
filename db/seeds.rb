@@ -7,11 +7,16 @@ puts "🌱 Seeding database..."
 # ===============================
 puts "➡️ Seeding provinces..."
 [
-  { name: "Ontario",            pst: 0.08,    gst: 0.05, hst: 0.13 },
-  { name: "Manitoba",           pst: 0.07,    gst: 0.05, hst: 0.00 },
-  { name: "Alberta",            pst: 0.00,    gst: 0.05, hst: 0.00 },
-  { name: "British Columbia",   pst: 0.07,    gst: 0.05, hst: 0.00 },
-  { name: "Quebec",             pst: 0.09975, gst: 0.05, hst: 0.00 }
+  { name: "Alberta",                  pst: 0.00,    gst: 0.05, hst: 0.00 },
+  { name: "British Columbia",         pst: 0.07,    gst: 0.05, hst: 0.00 },
+  { name: "Manitoba",                 pst: 0.07,    gst: 0.05, hst: 0.00 },
+  { name: "New Brunswick",            pst: 0.00,    gst: 0.00, hst: 0.15 },
+  { name: "Newfoundland and Labrador",pst: 0.00,    gst: 0.00, hst: 0.15 },
+  { name: "Nova Scotia",              pst: 0.00,    gst: 0.00, hst: 0.15 },
+  { name: "Ontario",                  pst: 0.00,    gst: 0.00, hst: 0.13 },
+  { name: "Prince Edward Island",     pst: 0.00,    gst: 0.00, hst: 0.15 },
+  { name: "Quebec",                   pst: 0.09975, gst: 0.05, hst: 0.00 },
+  { name: "Saskatchewan",             pst: 0.06,    gst: 0.05, hst: 0.00 }
 ].each do |prov|
   Province.find_or_create_by!(name: prov[:name]) do |p|
     p.pst = prov[:pst]

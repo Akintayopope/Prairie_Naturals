@@ -1,38 +1,88 @@
-<h2>Edit <%= resource_name.to_s.humanize %></h2>
+<% content_for :title, "Edit Account" %>
 
-<%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put }) do |f| %>
+<h2 class="mb-3">Edit <%= resource_name.to_s.humanize %></h2>
+
+<%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put, multipart: true }) do |f| %>
   <%= render "devise/shared/error_messages", resource: resource %>
 
-  <div class="field">
+  <div class="field mb-3">
+    <%= f.label :username %><br />
+    <%= f.text_field :username, autocomplete: "username" %>
+  </div>
+
+  <div class="field mb-3">
     <%= f.label :email %><br />
     <%= f.email_field :email, autofocus: true, autocomplete: "email" %>
   </div>
 
   <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
-    <div>Currently waiting confirmation for: <%= resource.unconfirmed_email %></div>
+    <div class="mb-3">Currently waiting confirmation for: <%= resource.unconfirmed_email %></div>
   <% end %>
 
-  <div class="field">
+  <div class="field mb-3">
+    <%= f.label :avatar %><br/>
+    <%= f.file_field :avatar %>
+  </div>
+
+  <hr class="my-4">
+
+  <%# ----- Address (nested) ----- %>
+  <% resource.build_address unless resource.address %>
+  <fieldset class="mb-3">
+    <legend>Shipping Address</legend>
+    <%= f.fields_for :address do |a| %>
+      <%= a.hidden_field :id %>
+
+      <div class="field mb-2">
+        <%= a.label :line1, "Address line 1" %><br/>
+        <%= a.text_field :line1, autocomplete: "address-line1" %>
+      </div>
+
+      <div class="field mb-2">
+        <%= a.label :line2, "Address line 2 (optional)" %><br/>
+        <%= a.text_field :line2, autocomplete: "address-line2" %>
+      </div>
+
+      <div class="field mb-2">
+        <%= a.label :city %><br/>
+        <%= a.text_field :city, autocomplete: "address-level2" %>
+      </div>
+
+      <div class="field mb-2">
+        <%= a.label :postal_code, "Postal Code" %><br/>
+        <%= a.text_field :postal_code, autocomplete: "postal-code" %>
+      </div>
+
+      <div class="field mb-2">
+        <%= a.label :province_id, "Province" %><br/>
+        <%# Expects @provinces from controller. Falls back to a numeric field if not present. %>
+        <% if defined?(@provinces) && @provinces.present? %>
+          <%= a.collection_select :province_id, @provinces, :id, :name,
+                { include_blank: "Select a province" },
+                { class: "form-select" } %>
+        <% else %>
+          <%= a.number_field :province_id %>
+        <% end %>
+      </div>
+    <% end %>
+  </fieldset>
+
+  <hr class="my-4">
+
+  <div class="field mb-3">
     <%= f.label :password %> <i>(leave blank if you don't want to change it)</i><br />
     <%= f.password_field :password, autocomplete: "new-password" %>
     <% if @minimum_password_length %>
-      <br />
       <em><%= @minimum_password_length %> characters minimum</em>
     <% end %>
   </div>
 
-  <div class="field">
-  <%= f.label :avatar %>
-  <%= f.file_field :avatar %>
-</div>
-
-
-  <div class="field">
+  <div class="field mb-3">
     <%= f.label :password_confirmation %><br />
     <%= f.password_field :password_confirmation, autocomplete: "new-password" %>
   </div>
 
-  <div class="field">
+  <div class="field mb-4">
     <%= f.label :current_password %> <i>(we need your current password to confirm your changes)</i><br />
     <%= f.password_field :current_password, autocomplete: "current-password" %>
   </div>
@@ -42,8 +92,11 @@
   </div>
 <% end %>
 
-<h3>Cancel my account</h3>
+<h3 class="mt-4">Cancel my account</h3>
+<div>
+  <%= button_to "Cancel my account", registration_path(resource_name),
+      data: { confirm: "Are you sure?", turbo_confirm: "Are you sure?" },
+      method: :delete %>
+</div>
 
-<div>Unhappy? <%= button_to "Cancel my account", registration_path(resource_name), data: { confirm: "Are you sure?", turbo_confirm: "Are you sure?" }, method: :delete %></div>
-
-<%= link_to "Back", :back %>
+<%= link_to "Back", (request.referer || root_path) %>
