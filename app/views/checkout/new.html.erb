@@ -40,9 +40,13 @@
   </div>
 
   <div>
-    <%= f.label :province %><br>
-    <%= f.select :province, @provinces, { include_blank: 'Select a province' }, onchange: "this.form.submit();" %>
-  </div>
+  <%= f.label :province %><br>
+  <%= f.collection_select :province,
+        @provinces, :name, :name,                      # value_method, text_method
+        { include_blank: "Select a province" },        # options
+        { onchange: "this.form.submit();" } %>
+</div>
+
 <% end %>
 
 <% if @cart_items.present? %>

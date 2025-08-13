@@ -49,7 +49,9 @@ Rails.application.routes.draw do
   end
 
   # === Orders (read-only history pages) ===
-  resources :orders, only: %i[index show]
+  resources :orders, only: %i[index show] do
+  member { post :pay, to: "checkout#pay" }   # NEW
+end
 
   # === Checkout (protected in controller via before_action :authenticate_user!) ===
   resource :checkout, only: %i[new create], controller: "checkout" do

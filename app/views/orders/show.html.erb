@@ -42,11 +42,24 @@
   </tbody>
 </table>
 
+
 <div style="margin-top:12px;">
   <p><strong>Subtotal:</strong> <%= number_to_currency(@order.subtotal) %></p>
   <p><strong>Tax:</strong> <%= number_to_currency(@order.tax) %></p>
   <p><strong>Total:</strong> <%= number_to_currency(@order.total) %></p>
 </div>
+
+<%# Show "Proceed to Payment" if order is still pending %>
+<% if @order.status == "pending" %>
+  <div style="margin-top:16px;">
+    <%= button_to "Proceed to Payment",
+                  checkout_path(order_id: @order.id),   # POST /checkout
+                  method: :post,
+                  class: "button",
+                  form: { data: { turbo: true } } %>
+  </div>
+<% end %>
+
 
 <div style="margin-top:12px;">
   <%# Show Stripe’s hosted receipt if you saved it on the order %>
