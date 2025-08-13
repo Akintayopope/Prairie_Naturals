@@ -1,9 +1,12 @@
+# app/controllers/storefront/static_pages_controller.rb
 # frozen_string_literal: true
 
 module Storefront
   class StaticPagesController < ApplicationController
     # GET /storefront/about
-    def about; end
+    def about
+      render_static("about")
+    end
 
     # GET /storefront/contact
     def contact
@@ -27,7 +30,7 @@ module Storefront
         @errors  = @contact.errors.full_messages
         @prefill = { name: attrs[:name], email: attrs[:email] }
         flash.now[:alert] = @errors.join(". ")
-        return render :contact, status: :unprocessable_content
+        return render :contact, status: :unprocessable_entity
       end
 
       # ContactMailer.contact(**attrs.slice(:name, :email).merge(subject: attrs[:subject], message: attrs[:message])).deliver_later
@@ -35,16 +38,41 @@ module Storefront
       redirect_to storefront_contact_path(anchor: "contact-form")
     end
 
-    # Static pages
-    def shipping_returns; end
-    def store_policy;     end          # canonical
-    def policies;         render :store_policy end  # back-compat alias
-    def payments;         end
-    def faq;              end
-    def privacy_policy;   end
-    def terms;            end
+    # -------- Static pages (named routes) --------
+    def shipping_returns  = render_static("shipping_returns")
+    def store_policy      = render_static("store_policy")        # canonical
+    def policies          = render_static("store_policy")        # back-compat alias
+    def payments          = render_static("payments")
+    def faq               = render_static("faq")
+    def privacy_policy    = render_static("privacy_policy")
+    def terms             = render_static("terms")
+
+    # -------- Optional dynamic route: GET /storefront/:slug --------
+    # Add route:
+    #   scope :storefront, module: :storefront do
+    #     get "/:slug", to: "static_pages#show", as: :storefront_page
+    #   end
+    def show
+      render_static(params[:slug].to_s)
+    end
 
     private
+
+    # Prefer DB-managed StaticPage; fall back to ERB template if present
+    def render_static(slug)
+      if (page = StaticPage.find_by(slug: slug))
+        @title = page.title
+        @body  = page.body
+        return render template: "storefront/static_pages/dynamic"
+      end
+
+      template = "storefront/static_pages/#{slug}"
+      if lookup_context.exists?(template)
+        return render template
+      end
+
+      render file: Rails.root.join("public/404.html"), status: :not_found, layout: false
+    end
 
     # Supports either scoped (:contact_message[...]) or unscoped params (:name, etc.)
     def extract_contact_params

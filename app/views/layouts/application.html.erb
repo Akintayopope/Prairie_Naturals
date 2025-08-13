@@ -96,10 +96,12 @@
           <% end %>
           <%= button_to "Logout", destroy_user_session_path, method: :delete, class: "btn btn-outline-secondary btn-sm btn-lift" %>
         <% elsif admin_user_signed_in? %>
-          <%= link_to admin_root_path, class: "btn btn-link px-2 pn-link" do %>
-            <i class="bi bi-speedometer2"></i> <span class="d-none d-md-inline">Admin</span>
-          <% end %>
-          <%= button_to "Logout", destroy_admin_user_session_path, method: :delete, class: "btn btn-outline-secondary btn-sm btn-lift" %>
+  <%= link_to send("#{ActiveAdmin.application.default_namespace}_root_path"),
+              class: "btn btn-link px-2 pn-link" do %>
+    <i class="bi bi-speedometer2"></i> <span class="d-none d-md-inline">Admin</span>
+  <% end %>
+  <%= button_to "Logout", destroy_admin_user_session_path, method: :delete, class: "btn btn-outline-secondary btn-sm btn-lift" %>
+
         <% else %>
           <%= link_to new_user_session_path, class: "btn btn-outline-secondary btn-sm btn-lift" do %>
             <i class="bi bi-box-arrow-in-right"></i> Log in

@@ -25,9 +25,9 @@ Rails.application.routes.draw do
     get  "contact",          to: "static_pages#contact",          as: :contact
     post "contact",          to: "static_pages#contact_submit"
 
-    get  "shipping-returns", to: "static_pages#shipping_returns", as: :shipping_returns
+    get  "shipping_returns", to: "static_pages#shipping_returns", as: :shipping_returns
 
-    get  "store-policy",     to: "static_pages#store_policy",     as: :store_policy
+    get  "store_policy",     to: "static_pages#store_policy",     as: :store_policy
     get  "policies",         to: "static_pages#store_policy",     as: :policies
     get  "policy",           to: redirect("/storefront/store-policy"), status: 301
     get  "policie",          to: redirect("/storefront/store-policy"), status: 301

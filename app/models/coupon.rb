@@ -5,8 +5,23 @@ class Coupon < ApplicationRecord
 
   validates :code, presence: true, uniqueness: true, length: { maximum: 32 }
   validates :discount_type, presence: true
-  validates :value, numericality: { greater_than: 0 }
-  validates :value, numericality: { less_than_or_equal_to: 100 }, if: :percent?
+  validates :value, presence: true
+
+  # Percent coupons: 1–100
+  with_options if: :percent? do
+    validates :value, numericality: {
+      greater_than_or_equal_to: 1,
+      less_than_or_equal_to: 100
+    }
+  end
+
+  # Amount coupons: >= 0.01
+  with_options if: :amount? do
+    validates :value, numericality: {
+      greater_than_or_equal_to: 0.01
+    }
+  end
+
   validates :max_uses, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
 
   scope :active_now, -> {
@@ -31,10 +46,9 @@ class Coupon < ApplicationRecord
   end
 
   def self.ransackable_associations(_auth_object = nil)
-    [] # no associations on Coupon you want searchable
+    []
   end
 
-  # (optional) expose scopes for searches like Coupon.ransack(active_now_true: 1)
   def self.ransackable_scopes(_auth_object = nil)
     %i[active_now]
   end

@@ -1,3 +1,4 @@
+# app/admin/admin_users.rb
 ActiveAdmin.register AdminUser do
   permit_params :email, :password, :password_confirmation
 
@@ -10,9 +11,18 @@ ActiveAdmin.register AdminUser do
     column("Last Sign-In", :current_sign_in_at)
     column("Sign-Ins", :sign_in_count)
     column("Created At", :created_at)
+
     actions defaults: true do |admin_user|
-      item "Reset Password", reset_password_admin_admin_user_path(admin_user),
-           method: :put, class: "member_link"
+      ns = ActiveAdmin.application.default_namespace # e.g., :internal
+      helper = :"reset_password_#{ns}_admin_user_path" # -> reset_password_internal_admin_user_path
+
+      if helpers.respond_to?(helper)
+        item "Reset Password",
+             send(helper, admin_user),
+             method: :put,
+             class: "member_link",
+             data: { turbo: false, confirm: "Send reset instructions to #{admin_user.email}?" }
+      end
     end
   end
 
@@ -43,9 +53,9 @@ ActiveAdmin.register AdminUser do
     f.actions
   end
 
+  # Safer: send Devise reset instructions (requires :recoverable on AdminUser)
   member_action :reset_password, method: :put do
-    new_password = SecureRandom.hex(6)
-    resource.update(password: new_password, password_confirmation: new_password)
-    redirect_to resource_path, notice: "Password reset. New temporary password: #{new_password}"
+    resource.send_reset_password_instructions
+    redirect_to resource_path, notice: "Password reset email sent to #{resource.email}."
   end
 end

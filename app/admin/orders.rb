@@ -27,28 +27,64 @@ ActiveAdmin.register Order do
     actions
   end
 
-  # One-click status changes on the show page
+  # -------- One-click status changes on the show page (namespace-agnostic) --------
+  ns = ActiveAdmin.application.default_namespace # e.g., :internal
+
   action_item :mark_paid, only: :show, if: -> { resource.status != "paid" } do
-    link_to "Mark Paid", mark_paid_admin_order_path(resource), method: :patch
-  end
-  action_item :mark_processing, only: :show, if: -> { resource.status != "processing" } do
-    link_to "Mark Processing", mark_processing_admin_order_path(resource), method: :patch
-  end
-  action_item :mark_shipped, only: :show, if: -> { resource.status != "shipped" } do
-    link_to "Mark Shipped", mark_shipped_admin_order_path(resource), method: :patch
-  end
-  action_item :mark_delivered, only: :show, if: -> { resource.status != "delivered" } do
-    link_to "Mark Delivered", mark_delivered_admin_order_path(resource), method: :patch
-  end
-  action_item :mark_cancelled, only: :show, if: -> { resource.status != "cancelled" } do
-    link_to "Cancel Order", mark_cancelled_admin_order_path(resource), method: :patch
+    link_to "Mark Paid",
+            send("mark_paid_#{ActiveAdmin.application.default_namespace}_order_path", resource),
+            method: :patch, data: { turbo: false }
   end
 
-  member_action :mark_paid,       method: :patch do; resource.update!(status: "paid");       redirect_to resource_path, notice: "Order marked as Paid.";       end
-  member_action :mark_processing, method: :patch do; resource.update!(status: "processing"); redirect_to resource_path, notice: "Order marked as Processing."; end
-  member_action :mark_shipped,    method: :patch do; resource.update!(status: "shipped");    redirect_to resource_path, notice: "Order marked as Shipped.";    end
-  member_action :mark_delivered,  method: :patch do; resource.update!(status: "delivered");  redirect_to resource_path, notice: "Order marked as Delivered.";  end
-  member_action :mark_cancelled,  method: :patch do; resource.update!(status: "cancelled");  redirect_to resource_path, notice: "Order Cancelled.";            end
+  action_item :mark_processing, only: :show, if: -> { resource.status != "processing" } do
+    link_to "Mark Processing",
+            send("mark_processing_#{ActiveAdmin.application.default_namespace}_order_path", resource),
+            method: :patch, data: { turbo: false }
+  end
+
+  action_item :mark_shipped, only: :show, if: -> { resource.status != "shipped" } do
+    link_to "Mark Shipped",
+            send("mark_shipped_#{ActiveAdmin.application.default_namespace}_order_path", resource),
+            method: :patch, data: { turbo: false }
+  end
+
+  action_item :mark_delivered, only: :show, if: -> { resource.status != "delivered" } do
+    link_to "Mark Delivered",
+            send("mark_delivered_#{ActiveAdmin.application.default_namespace}_order_path", resource),
+            method: :patch, data: { turbo: false }
+  end
+
+  action_item :mark_cancelled, only: :show, if: -> { resource.status != "cancelled" } do
+    link_to "Cancel Order",
+            send("mark_cancelled_#{ActiveAdmin.application.default_namespace}_order_path", resource),
+            method: :patch, data: { turbo: false }
+  end
+
+  # -------- Member actions (unchanged) --------
+  member_action :mark_paid,       method: :patch do
+    resource.update!(status: "paid")
+    redirect_to resource_path, notice: "Order marked as Paid."
+  end
+
+  member_action :mark_processing, method: :patch do
+    resource.update!(status: "processing")
+    redirect_to resource_path, notice: "Order marked as Processing."
+  end
+
+  member_action :mark_shipped,    method: :patch do
+    resource.update!(status: "shipped")
+    redirect_to resource_path, notice: "Order marked as Shipped."
+  end
+
+  member_action :mark_delivered,  method: :patch do
+    resource.update!(status: "delivered")
+    redirect_to resource_path, notice: "Order marked as Delivered."
+  end
+
+  member_action :mark_cancelled,  method: :patch do
+    resource.update!(status: "cancelled")
+    redirect_to resource_path, notice: "Order Cancelled."
+  end
 
   # Batch update status for many orders at once
   batch_action :change_status, form: -> { { status: Order.statuses } } do |ids, inputs|
@@ -67,7 +103,7 @@ ActiveAdmin.register Order do
     f.inputs "Order" do
       f.input :user, label: "User (email)", collection: User.order(:email).pluck(:email, :id)
       f.input :address, label: "Address",
-              collection: Address.includes(:user, :province).map { |a| [ "#{a.user&.email} — #{a.full_address}", a.id ] }
+              collection: Address.includes(:user, :province).map { |a| ["#{a.user&.email} — #{a.full_address}", a.id] }
       f.input :status, as: :select, collection: Order.statuses
       f.input :subtotal
       f.input :tax

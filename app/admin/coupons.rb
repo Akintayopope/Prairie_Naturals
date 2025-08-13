@@ -1,17 +1,17 @@
 # app/admin/coupons.rb
 ActiveAdmin.register Coupon do
-  # ---------- strong params ----------
+  # ---------- Strong params ----------
   # uses_count is system-managed; no manual edits
   permit_params :code, :discount_type, :value, :starts_at, :ends_at, :max_uses, :active
 
-  # ---------- scopes ----------
+  # ---------- Scopes ----------
   scope :all, default: true
   scope("Active now") { |s| s.active_now }
   scope("Inactive")   { |s| s.where(active: false) }
   scope("Scheduled")  { |s| s.where("starts_at > ?", Time.current) }
   scope("Expired")    { |s| s.where("ends_at IS NOT NULL AND ends_at < ?", Time.current) }
 
-  # ---------- filters (Ransack) ----------
+  # ---------- Filters (Ransack) ----------
   filter :code_cont,        label: "Code contains"
   filter :discount_type_eq, as: :select, collection: -> { Coupon.discount_types.keys }
   filter :value_gteq,       label: "Min value"
@@ -21,7 +21,7 @@ ActiveAdmin.register Coupon do
   filter :ends_at
   filter :created_at
 
-  # ---------- quick actions (top-right) ----------
+  # ---------- Quick actions (top-right) ----------
   action_item :new_percent_10, only: :index do
     link_to "Create SAVE10", new_resource_path(code: "SAVE10", discount_type: :percent, value: 10)
   end
@@ -29,19 +29,23 @@ ActiveAdmin.register Coupon do
     link_to "Create WELCOME5", new_resource_path(code: "WELCOME5", discount_type: :amount, value: 5.00)
   end
   action_item :activate_all_scheduled_today, only: :index do
+    ns = ActiveAdmin.application.default_namespace
+    path_helper = "activate_today_#{ns}_coupons_path" # e.g., activate_today_internal_coupons_path
     link_to "Enable all starting today",
-            activate_today_admin_coupons_path,
+            send(path_helper),
             method: :post,
             data: { turbo: false, confirm: "Enable all coupons that start today?" }
   end
   action_item :deactivate_all_active, only: :index do
+    ns = ActiveAdmin.application.default_namespace
+    path_helper = "deactivate_all_#{ns}_coupons_path" # e.g., deactivate_all_internal_coupons_path
     link_to "Disable all active",
-            deactivate_all_admin_coupons_path,
+            send(path_helper),
             method: :post,
             data: { turbo: false, confirm: "Disable ALL active coupons?" }
   end
 
-  # ---------- batch actions ----------
+  # ---------- Batch actions ----------
   batch_action :activate do |ids|
     batch_action_collection.where(id: ids).update_all(active: true)
     redirect_back fallback_location: collection_path, notice: "Activated #{ids.size} coupon(s)."
@@ -57,7 +61,7 @@ ActiveAdmin.register Coupon do
     redirect_back fallback_location: collection_path, notice: "Reset uses for #{ids.size} coupon(s)."
   end
 
-  # ---------- index table ----------
+  # ---------- Index table ----------
   index do
     selectable_column
     id_column
@@ -70,19 +74,25 @@ ActiveAdmin.register Coupon do
     column("Window") { |c|
       start = c.starts_at&.strftime("%Y-%m-%d")
       stop  = c.ends_at&.strftime("%Y-%m-%d")
-      [ start, stop ].compact.join(" → ").presence || "—"
+      [start, stop].compact.join(" → ").presence || "—"
     }
     column("Usage")  { |c| c.usage_string }
+
     actions defaults: true do |c|
+      ns = ActiveAdmin.application.default_namespace
+      toggle_helper = "toggle_active_#{ns}_coupon_path" # member action
+      bump_helper   = "bump_use_#{ns}_coupon_path"      # member action
+      reset_helper  = "reset_uses_#{ns}_coupon_path"    # member action
+
       links = []
       links << link_to(c.active ? "Disable" : "Enable",
-                       toggle_active_admin_coupon_path(c),
+                       send(toggle_helper, c),
                        method: :put, data: { turbo: false })
       links << link_to("Use +1",
-                       bump_use_admin_coupon_path(c),
+                       send(bump_helper, c),
                        method: :put, data: { turbo: false })
       links << link_to("Reset uses",
-                       reset_uses_admin_coupon_path(c),
+                       send(reset_helper, c),
                        method: :put, data: { turbo: false, confirm: "Reset uses_count to 0?" })
       safe_join(links, " | ".html_safe)
     end
@@ -103,7 +113,7 @@ ActiveAdmin.register Coupon do
     column :updated_at
   end
 
-  # ---------- show ----------
+  # ---------- Show ----------
   show do
     attributes_table do
       row :code
@@ -120,7 +130,7 @@ ActiveAdmin.register Coupon do
     active_admin_comments
   end
 
-  # ---------- form ----------
+  # ---------- Form ----------
   form do |f|
     f.semantic_errors
     f.inputs do
@@ -136,44 +146,44 @@ ActiveAdmin.register Coupon do
     f.actions
   end
 
-  # ---------- sidebar help ----------
+  # ---------- Sidebar help ----------
   sidebar "How values work", only: %i[new edit show] do
     para "• Percent coupons: value must be 1–100."
     para "• Amount coupons: value is currency (e.g., 5.00)."
     para "• Active now means: active = true AND within start/end window."
   end
 
-  # ---------- member actions ----------
+  # ---------- Member actions ----------
   member_action :toggle_active, method: :put do
     resource.update!(active: !resource.active)
-    redirect_back fallback_location: admin_coupon_path(resource),
+    redirect_back fallback_location: resource_path,
                   notice: "Coupon #{resource.active ? 'enabled' : 'disabled'}."
   end
 
   member_action :bump_use, method: :put do
     resource.increment!(:uses_count)
-    redirect_back fallback_location: admin_coupon_path(resource),
+    redirect_back fallback_location: resource_path,
                   notice: "Incremented uses for #{resource.code}."
   end
 
   member_action :reset_uses, method: :put do
     resource.update!(uses_count: 0)
-    redirect_back fallback_location: admin_coupon_path(resource),
+    redirect_back fallback_location: resource_path,
                   notice: "Reset uses for #{resource.code}."
   end
 
-  # ---------- collection actions ----------
+  # ---------- Collection actions ----------
   collection_action :activate_today, method: :post do
     count = Coupon.where(active: false)
                   .where(starts_at: Time.current.beginning_of_day..Time.current.end_of_day)
                   .update_all(active: true)
-    redirect_back fallback_location: admin_coupons_path,
+    redirect_back fallback_location: collection_path,
                   notice: "Enabled #{count} coupon(s) starting today."
   end
 
   collection_action :deactivate_all, method: :post do
     count = Coupon.where(active: true).update_all(active: false)
-    redirect_back fallback_location: admin_coupons_path,
+    redirect_back fallback_location: collection_path,
                   alert: "Disabled #{count} active coupon(s)."
   end
 end
