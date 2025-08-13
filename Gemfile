@@ -55,6 +55,7 @@ end
 group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
+  gem "letter_opener"
 end
 
 group :test do
@@ -82,3 +83,5 @@ gem "chartkick", "~> 5.2"
 gem "groupdate", "~> 6.7"
 gem "chart-js-rails"
 gem "httparty"   # <-- correct spelling
+
+gem "discordrb", "~> 3.5"

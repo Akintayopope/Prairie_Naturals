@@ -32,4 +32,12 @@ class Order < ApplicationRecord
   def set_default_status
     self.status ||= "pending"
   end
+
+   after_commit :notify_discord_on_create, on: :create
+
+  private
+
+  def notify_discord_on_create
+    DiscordNotifier.order_created(self)
+  end
 end
