@@ -1,7 +1,7 @@
 # app/controllers/storefront/categories_controller.rb
 module Storefront
   class CategoriesController < ApplicationController
-    # Keep category browsing public. 'raise: false' prevents errors if the callback isn't defined.
+    # Keep category browsing public (avoid the earlier skip error with raise: false)
     skip_before_action :authenticate_user!, only: :show, raise: false
 
     def show
@@ -10,10 +10,10 @@ module Storefront
       @category   = Category.friendly.find(params[:id])
       @categories = Category.order(:name)
 
-      # === Base scope (mirrors your storefront/products#index) ===
+      # === Base scope (same shape as storefront/products#index) ===
       scope = Product.includes(:category).where(category_id: @category.id)
 
-      # --- Search (q or search) ---
+      # --- Search ---
       if (q = params[:q].presence || params[:search].presence)
         like  = "%#{q}%"
         scope = scope.where("products.name ILIKE :like OR products.description ILIKE :like", like: like)
@@ -37,13 +37,9 @@ module Storefront
         end
 
       # --- Pagination ---
-      @products = @products.page(params[:page]).per(18)  # Kaminari
+      @products = @products.page(params[:page]).per(18)
 
-      # Let your existing PLP view "see" the active category using its current logic:
-      # (Your index view reads Category via params[:category_id])
-      params[:category_id] = @category.id
-
-      # Reuse your current product listing page (PLP)
+      # Reuse your existing PLP template
       render "storefront/products/index"
     end
   end

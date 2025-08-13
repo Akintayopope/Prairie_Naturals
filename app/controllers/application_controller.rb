@@ -1,6 +1,6 @@
 # app/controllers/application_controller.rb
 class ApplicationController < ActionController::Base
-  # Require login for everything EXCEPT Devise pages (sign in/up, etc.)
+  # ❌ Do NOT force auth globally (breaks public storefront)
   before_action :authenticate_user!, unless: :devise_controller?
 
   before_action :require_modern_browser
@@ -14,9 +14,9 @@ class ApplicationController < ActionController::Base
   protected
 
   def configure_permitted_parameters
-    address_attrs = [ :line1, :line2, :city, :postal_code, :province_id ]
-    devise_parameter_sanitizer.permit(:sign_up,        keys: [ :username, address_attributes: address_attrs ])
-    devise_parameter_sanitizer.permit(:account_update, keys: [ :username, address_attributes: address_attrs ])
+    address_attrs = [:line1, :line2, :city, :postal_code, :province_id]
+    devise_parameter_sanitizer.permit(:sign_up,        keys: [:username, address_attributes: address_attrs])
+    devise_parameter_sanitizer.permit(:account_update, keys: [:username, address_attributes: address_attrs])
   end
 
   private
@@ -26,7 +26,7 @@ class ApplicationController < ActionController::Base
     # redirect_to unsupported_browser_path unless browser.modern?
   end
 
-  # Admin-only access control
+  # Admin-only access control (use in admin-only custom controllers if needed)
   def require_admin
     redirect_to root_path, alert: "Access denied!" unless current_user&.admin?
   end
@@ -37,7 +37,6 @@ class ApplicationController < ActionController::Base
       session[:cart].each do |slug, qty|
         product = Product.friendly.find_by(slug: slug)
         next unless product
-
         item = resource.cart_items.find_or_initialize_by(product: product)
         item.quantity = item.quantity.to_i + qty.to_i
         item.save!
@@ -46,24 +45,6 @@ class ApplicationController < ActionController::Base
     end
     super
   end
-
-# products_controller.rb (index)
-def index
-  @categories = Category.order(:name)
-  scope = Product.includes(:category).where(active: true)
-
-  scope = scope.where(category_id: params[:category_id]) if params[:category_id].present?
-
-  @products =
-    case params[:sort]
-    when "newest"     then scope.order(created_at: :desc)
-    when "price_asc"  then scope.order(price: :asc)
-    when "price_desc" then scope.order(price: :desc)
-    else                   scope.order(Arel.sql("LOWER(name) ASC"))
-    end
-
-  @products = @products.page(params[:page]) if @products.respond_to?(:page)
-end
 
   # Cart badge helpers
   def cart_count
@@ -80,7 +61,7 @@ end
       @cart_count = items.sum(:quantity)
       @cart_total = items.sum { |ci| ci.quantity.to_i * ci.product.price.to_d }
     else
-      cart = session[:cart] || {}                         # {"slug" => qty}
+      cart = session[:cart] || {} # {"slug" => qty}
       @cart_count = cart.values.map(&:to_i).sum
       if cart.any?
         products = Product.friendly.where(slug: cart.keys).index_by(&:slug)

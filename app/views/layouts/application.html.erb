@@ -14,14 +14,16 @@
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icon.png">
 
-    <%= stylesheet_link_tag "application", media: "all", "data-turbo-track": "reload" %>
-    <%= javascript_include_tag "application", "data-turbo-track": "reload", defer: true %>
-    <%= javascript_include_tag "chartkick" %>
-    <%= javascript_include_tag "Chart.bundle" %>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <!-- HEAD CLEANUP (keep only one) -->
+<%= stylesheet_link_tag "application", media: "all", "data-turbo-track": "reload" %>
+<%= javascript_include_tag "application", "data-turbo-track": "reload", defer: true %>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+<!-- Modern font -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
 
 
 
@@ -54,81 +56,70 @@
 
 
   <!-- Your existing navbar starts here -->
-
-  <!-- Navbar -->
-<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top px-3">
-  <!-- Left: Brand with Logo + Slogan -->
-  <%= link_to root_path, class: "navbar-brand fw-bold d-flex flex-column align-items-start" do %>
-    <div class="d-flex align-items-center">
-      <%= image_tag "logo.png", alt: "Prairie Naturals Logo", class: "me-2", height: 36 %>
-      Prairie Naturals
-    </div>
-    <small class="text-muted" style="font-size: 0.8rem;">
-      </small>
-  <% end %>
-
-  <!-- Mobile toggle -->
-  <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
-          aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
-
-  <!-- Nav contents -->
-  <!-- Nav contents -->
-<div id="mainNav" class="collapse navbar-collapse position-relative">
-
-  <!-- Desktop (lg+): perfectly centered -->
-  <ul class="navbar-nav d-none d-lg-flex position-absolute gap-3" style="left: 38%; transform: translateX(-50%);">
-    <li class="nav-item"><%= link_to "Shop",     storefront_products_path, class: "nav-link" %></li>
-    <li class="nav-item"><%= link_to "About Us", about_path,               class: "nav-link" %></li>
-    <li class="nav-item"><%= link_to "Contact",  contact_path,             class: "nav-link" %></li>
-  </ul>
-
-  <!-- Mobile (< lg): normal in-flow list -->
-  <ul class="navbar-nav d-lg-none mb-2">
-    <li class="nav-item"><%= link_to "Shop",     storefront_products_path, class: "nav-link" %></li>
-    <li class="nav-item"><%= link_to "About Us", about_path,               class: "nav-link" %></li>
-    <li class="nav-item"><%= link_to "Contact",  contact_path,             class: "nav-link" %></li>
-  </ul>
-
-  <!-- RIGHT: search + user/cart -->
-  <div class="d-flex align-items-center ms-auto">
-    <%= form_with url: storefront_products_path, method: :get, local: true, class: "d-none d-lg-flex me-3" do %>
-      <input class="form-control" type="search" name="q"
-             value="<%= h(params[:q] || params[:search]) %>"
-             placeholder="Search products…">
+  <!-- NAVBAR: replace your existing <nav>...</nav> with this -->
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top pn-nav">
+  <div class="container">
+    <!-- Brand -->
+    <%= link_to root_path, class: "navbar-brand fw-bold d-flex align-items-center gap-2" do %>
+      <%= image_tag "logo.png", alt: "Prairie Naturals", height: 28, class: "rounded-2 shadow-sm" rescue nil %>
+      <span class="brand-text">Prairie Naturals</span>
     <% end %>
 
-    <div class="d-flex gap-2 align-items-center">
-      <% if user_signed_in? %>
-        <span class="small text-muted d-none d-md-inline">
-          Welcome, <%= current_user.username.presence || current_user.email.to_s.split("@").first.titleize %>
-        </span>
-        <%= link_to "My Orders", orders_path, class: "btn btn-link" %>
-        <%= button_to "Logout", destroy_user_session_path, method: :delete,
-                      class: "btn btn-outline-secondary btn-sm btn-lift",
-                      form: { style: "display:inline" } %>
-      <% elsif admin_user_signed_in? %>
-        <span class="small text-muted d-none d-md-inline">Admin: <%= current_admin_user.email %></span>
-        <%= link_to "Admin", admin_root_path, class: "btn btn-link" %>
-        <%= button_to "Logout", destroy_admin_user_session_path, method: :delete,
-                      class: "btn btn-outline-secondary btn-sm btn-lift",
-                      form: { style: "display:inline" } %>
-      <% else %>
-        <%= link_to "Log in", new_user_session_path, class: "btn btn-outline-secondary btn-sm btn-lift" %>
-        <%= link_to "Sign up", new_user_registration_path, class: "btn btn-primary btn-sm btn-lift" %>
-      <% end %>
+    <!-- Mobile toggle -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+            aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
 
-      <%= link_to cart_path, class: "btn btn-primary btn-lift ms-1" do %>
-        🛒 <span class="d-none d-sm-inline">Cart</span>
-        <span class="badge text-bg-light ms-1"><%= cart_count %></span>
-      <% end %>
+    <div id="mainNav" class="collapse navbar-collapse">
+      <!-- Left: primary links -->
+      <ul class="navbar-nav me-3">
+        <li class="nav-item"><%= link_to "Shop", storefront_products_path, class: "nav-link" %></li>
+        <li class="nav-item"><%= link_to "About", about_path, class: "nav-link" %></li>
+        <li class="nav-item"><%= link_to "Contact", contact_path, class: "nav-link" %></li>
+      </ul>
+
+      <!-- Center: search (grows) -->
+      <div class="flex-grow-1 px-lg-2 my-2 my-lg-0">
+        <%= form_with url: storefront_products_path, method: :get, local: true, class: "pn-search" do %>
+          <i class="bi bi-search"></i>
+          <input type="search" name="q" value="<%= h(params[:q] || params[:search]) %>" class="form-control pn-search-input"
+                 placeholder="Search products…">
+        <% end %>
+      </div>
+
+      <!-- Right: account + cart -->
+      <div class="d-flex align-items-center gap-2 ms-lg-2">
+        <% if user_signed_in? %>
+          <%= link_to orders_path, class: "btn btn-link px-2 pn-link" do %>
+            <i class="bi bi-person-check"></i> <span class="d-none d-md-inline">My Orders</span>
+          <% end %>
+          <%= button_to "Logout", destroy_user_session_path, method: :delete, class: "btn btn-outline-secondary btn-sm btn-lift" %>
+        <% elsif admin_user_signed_in? %>
+          <%= link_to admin_root_path, class: "btn btn-link px-2 pn-link" do %>
+            <i class="bi bi-speedometer2"></i> <span class="d-none d-md-inline">Admin</span>
+          <% end %>
+          <%= button_to "Logout", destroy_admin_user_session_path, method: :delete, class: "btn btn-outline-secondary btn-sm btn-lift" %>
+        <% else %>
+          <%= link_to new_user_session_path, class: "btn btn-outline-secondary btn-sm btn-lift" do %>
+            <i class="bi bi-box-arrow-in-right"></i> Log in
+          <% end %>
+          <%= link_to new_user_registration_path, class: "btn btn-primary btn-sm btn-lift" do %>
+            <i class="bi bi-person-plus"></i> Sign up
+          <% end %>
+        <% end %>
+
+        <%= link_to cart_path, class: "btn btn-dark btn-lift ms-1 d-flex align-items-center gap-2" do %>
+          <i class="bi bi-bag"></i>
+          <span class="d-none d-sm-inline">Cart</span>
+          <span class="badge text-bg-light"><%= cart_count %></span>
+        <% end %>
+      </div>
     </div>
   </div>
-</div>
-
-
 </nav>
+
+
 
 
 

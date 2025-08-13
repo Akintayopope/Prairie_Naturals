@@ -1,0 +1,17 @@
+<!-- app/views/storefront/home/_hero.html.erb -->
+<section class="home-hero home-hero--gradient overflow-hidden">
+  <div class="container-xxl position-relative text-white py-4">
+    <div class="row">
+      <div class="col-12 col-lg-6">
+        <h1 class="fw-bold lh-1 mb-2 hero-heading text-shadow">Prairie Naturals</h1>
+        <p class="lead mb-3 opacity-90">Clean wellness, prairie-fresh.</p>
+        <div class="d-flex gap-2">
+          <%= link_to "Shop New Arrivals", storefront_products_path(sort: "newest"),
+              class: "btn btn-light btn-sm px-3 btn-lift" %>
+          <%= link_to "Browse all", storefront_products_path,
+              class: "btn btn-outline-light btn-sm px-3 btn-lift d-none d-sm-inline-flex" %>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

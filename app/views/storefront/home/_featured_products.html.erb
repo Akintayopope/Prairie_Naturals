@@ -1,0 +1,48 @@
+<!-- app/views/storefront/home/_featured_products.html.erb -->
+<section class="container-fluid px-3 px-xl-4 home-featured">
+  <div class="section-head d-flex align-items-baseline gap-3">
+    <h2 class="h6 mb-0">Featured products</h2>
+    <%= link_to "Browse all →", storefront_products_path, class: "link-quiet small" %>
+  </div>
+
+  <div class="section-body mt-2">
+    <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 g-2">
+      <% (@featured_products || []).each do |product| %>
+        <div class="col">
+          <div class="card h-100 product-card">
+            <div class="product-media">
+              <% if product.images.attached? %>
+                <%= image_tag product.images.first.variant(resize_to_limit: [1200,1200]),
+                              class: "product-img", alt: product.name %>
+              <% elsif product.image_url.present? %>
+                <%= image_tag product.image_url, class: "product-img", alt: product.name %>
+              <% else %>
+                <div class="product-img product-img--placeholder">No image</div>
+              <% end %>
+            </div>
+            <div class="card-body">
+              <h6 class="card-title clamp-2 mb-1">
+                <%= link_to product.name, storefront_product_path(product), class: "pn-link" %>
+              </h6>
+              <% sale = product.respond_to?(:sale_price) && product.sale_price.present? && product.sale_price.to_d < product.price.to_d rescue false %>
+              <div class="small">
+                <% if sale %>
+                  <span class="text-danger"><%= number_to_currency(product.sale_price) %></span>
+                  <span class="price-old"><%= number_to_currency(product.price) %></span>
+                <% else %>
+                  <%= number_to_currency(product.price || 0) %>
+                <% end %>
+              </div>
+            </div>
+            <div class="card-footer bg-white border-0 pt-0">
+              <%= button_to "Add to Cart",
+                    add_item_cart_path(product_id: product.id),
+                    method: :post,
+                    class: "btn btn-xs btn-dark w-100 rounded-3" %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</section>
