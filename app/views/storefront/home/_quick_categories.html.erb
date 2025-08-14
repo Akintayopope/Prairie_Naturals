@@ -1,24 +1,46 @@
-<!-- app/views/storefront/home/_quick_categories.html.erb -->
-<section class="container-fluid px-2 px-md-3 px-xl-4 home-categories">
-  <div class="section-head d-flex align-items-baseline gap-3">
-    <h2 class="h6 mb-0">Shop by category</h2>
-    <%= link_to "All products →", storefront_products_path, class: "link-quiet small" %>
-  </div>
+<%# If you passed @home_categories from the controller, use that list. %>
+<% names = (@home_categories.presence || %w[Vitamins Protein\ Supplements Digestive\ Health Hair\ Care Skin\ Care]) %>
 
-  <div class="section-body mt-2">
-    <div class="chips d-flex flex-wrap gap-2">
-      <% (@categories || Category.order(:name)).first(12).each do |c| %>
-        <% next if c.blank? %>
-        <%= link_to storefront_category_path(c), class: "chip chip-link" do %>
-          <%= c.name %>
-          <%# Prefer counter_cache to avoid loading associations; fallback if nil %>
-          <% count = c.try(:products_count) %>
-          <% count ||= c.respond_to?(:products) ? c.products.size : nil %>
-          <% if count.present? %>
-            (<%= count %>)
-          <% end %>
+<%# Presentation details per category %>
+<%
+meta = {
+  "Vitamins"             => { emoji: "🩺", bg: "linear-gradient(135deg, var(--sage), var(--primary-green))", desc: "Handpicked formulas for everyday wellness" },
+  "Protein Supplements"  => { emoji: "💪", bg: "linear-gradient(135deg, var(--soft-green), var(--primary-green))", desc: "Handpicked formulas for everyday wellness" },
+  "Digestive Health"     => { emoji: "🫶", bg: "linear-gradient(135deg, #a8b993, var(--primary-green))", desc: "Handpicked formulas for everyday wellness" },
+  "Hair Care"            => { emoji: "💇‍♀️", bg: "linear-gradient(135deg, #c49991, var(--earth-brown))", desc: "Natural solutions for healthy, vibrant hair" },
+  "Skin Care"            => { emoji: "✨", bg: "linear-gradient(135deg, #d4a574, var(--accent-gold))", desc: "Pure, gentle care for radiant skin" }
+}
+%>
+
+<section class="container-xxl home-section">
+  <header class="text-center mb-4">
+    <h2 class="pn-section-title">Shop by Category</h2>
+    <p class="text-muted mb-0">Explore essentials by need — quick, focused, and fuss-free.</p>
+  </header>
+
+  <div class="row g-3 row-cols-2 row-cols-md-3 row-cols-lg-5">
+    <% names.each do |name| %>
+      <% cat  = Category.find_by(name: name) %>
+      <% path = cat ? storefront_category_path(cat) : storefront_products_path(category: name) %>
+      <% cfg  = meta[name] || { emoji: "🌿", bg: "linear-gradient(135deg, var(--soft-green), var(--primary-green))", desc: "Handpicked formulas for everyday wellness" } %>
+
+      <div class="col">
+        <%= link_to path, class: "pn-cat d-block text-decoration-none" do %>
+          <div class="pn-cat__top" style="background: <%= cfg[:bg] %>;">
+            <span class="pn-cat-emoji"><%= cfg[:emoji] %></span>
+          </div>
+
+          <div class="pn-cat__body">
+            <div class="d-flex justify-content-between align-items-center">
+              <h3 class="h6 m-0 text-dark"><%= name %></h3>
+              <% if (count = cat&.try(:products_count) || (cat&.products&.size rescue nil)).present? %>
+                <span class="pn-badge"><%= count %></span>
+              <% end %>
+            </div>
+            <p class="text-muted small mb-0"><%= cfg[:desc] %></p>
+          </div>
         <% end %>
-      <% end %>
-    </div>
+      </div>
+    <% end %>
   </div>
 </section>

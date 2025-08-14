@@ -1,48 +1,54 @@
-<!-- app/views/storefront/home/_featured_products.html.erb -->
-<section class="container-fluid px-3 px-xl-4 home-featured">
-  <div class="section-head d-flex align-items-baseline gap-3">
-    <h2 class="h6 mb-0">Featured products</h2>
-    <%= link_to "Browse all →", storefront_products_path, class: "link-quiet small" %>
-  </div>
+<section>
+  <header class="text-center mb-4">
+    <h2 class="pn-section-title">Featured Products</h2>
+    <p class="text-muted mb-0">A curated selection from our catalog — pure, purposeful, and loved by our community.</p>
+  </header>
 
-  <div class="section-body mt-2">
-    <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 g-2">
-      <% (@featured_products || []).each do |product| %>
-        <div class="col">
-          <div class="card h-100 product-card">
-            <div class="product-media">
+  <div class="row g-3 row-cols-1 row-cols-md-2 row-cols-lg-3">
+    <% (@featured_products || []).each do |product| %>
+      <div class="col">
+        <article class="pn-feature-card h-100">
+          <div class="pn-feature-card__media">
+            <%= link_to storefront_product_path(product) do %>
               <% if product.images.attached? %>
-                <%= image_tag product.images.first.variant(resize_to_limit: [1200,1200]),
-                              class: "product-img", alt: product.name %>
+                <% img = product.images.first %>
+                <%= image_tag img.variant(resize_to_limit: [800,800]),
+                      alt: product.name, loading: "lazy", width: 800, height: 800 %>
               <% elsif product.image_url.present? %>
-                <%= image_tag product.image_url, class: "product-img", alt: product.name %>
+                <%= image_tag product.image_url, alt: product.name, loading: "lazy", width: 800, height: 800 %>
               <% else %>
-                <div class="product-img product-img--placeholder">No image</div>
+                <div class="pn-card__img pn-card__img--ph">No image</div>
+              <% end %>
+            <% end %>
+          </div>
+
+          <div class="pn-feature-card__body">
+            <% if (category_name = product.category&.name).present? %>
+              <span class="pn-badge"><%= category_name %></span>
+            <% end %>
+
+            <h3 class="pn-feature-card__title"><%= product.name %></h3>
+
+            <% sale = product.try(:sale_price).present? && product.sale_price.to_d < product.price.to_d rescue false %>
+            <div class="small mt-1 mb-2">
+              <% if sale %>
+                <span class="text-danger fw-semibold"><%= number_to_currency(product.sale_price) %></span>
+                <span class="price-old"><%= number_to_currency(product.price) %></span>
+              <% else %>
+                <span class="fw-semibold"><%= number_to_currency(product.price || 0) %></span>
               <% end %>
             </div>
-            <div class="card-body">
-              <h6 class="card-title clamp-2 mb-1">
-                <%= link_to product.name, storefront_product_path(product), class: "pn-link" %>
-              </h6>
-              <% sale = product.respond_to?(:sale_price) && product.sale_price.present? && product.sale_price.to_d < product.price.to_d rescue false %>
-              <div class="small">
-                <% if sale %>
-                  <span class="text-danger"><%= number_to_currency(product.sale_price) %></span>
-                  <span class="price-old"><%= number_to_currency(product.price) %></span>
-                <% else %>
-                  <%= number_to_currency(product.price || 0) %>
-                <% end %>
-              </div>
-            </div>
-            <div class="card-footer bg-white border-0 pt-0">
-              <%= button_to "Add to Cart",
-                    add_item_cart_path(product_id: product.id),
-                    method: :post,
-                    class: "btn btn-xs btn-dark w-100 rounded-3" %>
-            </div>
+
+            <%= link_to "Shop this product",
+                        storefront_product_path(product),
+                        class: "btn btn-lift" %>
           </div>
-        </div>
-      <% end %>
-    </div>
+        </article>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="text-center mt-4">
+    <%= link_to "View All Products", storefront_products_path, class: "btn btn-cta" %>
   </div>
 </section>
