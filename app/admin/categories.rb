@@ -12,7 +12,7 @@ ActiveAdmin.register Category do
 
   # Index
   includes :products # helps avoid N+1 in counts
-  config.sort_order = 'name_asc'
+  config.sort_order = "name_asc"
 
   filter :name
   filter :created_at
@@ -21,10 +21,10 @@ ActiveAdmin.register Category do
     selectable_column
     id_column
     column :name
-    if Category.column_names.include?('products_count')
-      column('Products') { |c| c.products_count }
+    if Category.column_names.include?("products_count")
+      column("Products") { |c| c.products_count }
     else
-      column('Products') { |c| c.products.size } # simple fallback
+      column("Products") { |c| c.products.size } # simple fallback
     end
     column :created_at
     actions
@@ -34,7 +34,7 @@ ActiveAdmin.register Category do
   csv do
     column :id
     column :name
-    column(:products_count) { |c| Category.column_names.include?('products_count') ? c.products_count : c.products.size }
+    column(:products_count) { |c| Category.column_names.include?("products_count") ? c.products_count : c.products.size }
     column :created_at
     column :updated_at
   end
@@ -61,7 +61,7 @@ ActiveAdmin.register Category do
             # guard variant availability and pick the first image
             img = p.images.first
             begin
-              image_tag url_for(img.variant(resize_to_limit: [60, 60]))
+              image_tag url_for(img.variant(resize_to_limit: [ 60, 60 ]))
             rescue
               image_tag url_for(img)
             end

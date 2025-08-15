@@ -11,7 +11,7 @@ puts "➡️ Seeding provinces..."
   { name: "British Columbia",         pst: 0.07,    gst: 0.05, hst: 0.00 },
   { name: "Manitoba",                 pst: 0.07,    gst: 0.05, hst: 0.00 },
   { name: "New Brunswick",            pst: 0.00,    gst: 0.00, hst: 0.15 },
-  { name: "Newfoundland and Labrador",pst: 0.00,    gst: 0.00, hst: 0.15 },
+  { name: "Newfoundland and Labrador", pst: 0.00,    gst: 0.00, hst: 0.15 },
   { name: "Nova Scotia",              pst: 0.00,    gst: 0.00, hst: 0.15 },
   { name: "Ontario",                  pst: 0.00,    gst: 0.00, hst: 0.13 },
   { name: "Prince Edward Island",     pst: 0.00,    gst: 0.00, hst: 0.15 },
@@ -68,42 +68,39 @@ csv_path = Rails.root.join("db/data/iherb_products.csv")
 if !File.exist?(csv_path)
   puts "⚠️ CSV not found at #{csv_path}"
 else
-  vitamins         = Category.find_or_create_by!(name: "Vitamins")
-  protein_supp     = Category.find_or_create_by!(name: "Protein Supplements")
-  digestive_health = Category.find_or_create_by!(name: "Digestive Health")
-
-  def map_csv_category(name, vitamins, protein_supp, digestive_health)
-    down = name.to_s.downcase
-    return vitamins         if down.include?("vitamin")
-    return protein_supp     if down.include?("protein") || down.include?("whey") || down.include?("collagen")
-    return digestive_health if down.include?("digest")  || down.include?("probiotic") || down.include?("fiber")
-    vitamins
-  end
-
-  require "csv"
-  require "open-uri"
-
   created = updated = skipped = 0
   headers = nil
 
   CSV.foreach(csv_path, headers: true).with_index(2) do |row, i|
-    headers ||= row.headers
-    name       = row["name"].to_s.strip
-    price_str  = row["price"].to_s
-    rating_str = row["rating"].to_s
-    link       = (row["link-href"].presence || row["link"].presence)
-    image_url  = (row["image-src"].presence || row["image_url"].presence)
+    headers    ||= row.headers
+    name         = row["name"].to_s.strip.presence || row["title"].to_s.strip
+    price_str    = row["price"].to_s
+    rating_str   = row["rating"].to_s
+    link         = (row["link-href"].presence || row["link"].presence)
+    image_url    = (row["image-src"].presence || row["image_url"].presence)
+    csv_category = row["category"].to_s.strip
 
     if name.blank?
       skipped += 1
       next
     end
 
-    price  = price_str.gsub(/[^\d\.]/, "").presence&.to_d || 0
-    rating = rating_str[/\d+(\.\d+)?/, 0].presence&.to_d
+    # --- Price ---
+    price = price_str.gsub(/[^\d\.]/, "").presence&.to_d || 0
 
-    category = map_csv_category(name, vitamins, protein_supp, digestive_health)
+    # --- Rating + Review Count ---
+    rating_value = rating_str[/\A\s*([\d.]+)/, 1]&.to_f
+    review_count = rating_str[/-\s*([\d,]+)\s+Reviews/i, 1]&.delete(",")&.to_i
 
+    # --- Category ---
+    category =
+      if csv_category.present?
+        Category.find_or_create_by!(name: csv_category)
+      else
+        map_csv_category(name, vitamins, protein_supp, digestive_health)
+      end
+
+    # --- Find or init the product ---
     product =
       if link.present?
         Product.find_or_initialize_by(link: link)
@@ -111,12 +108,15 @@ else
         Product.find_or_initialize_by(name: name, category_id: category.id)
       end
 
-    product.name       ||= name
-    product.price        = price
-    product.rating       = rating
-    product.image_url    = image_url if product.respond_to?(:image_url)
-    product.category_id  = category.id
+    # --- Assign attributes ---
+    product.name        ||= name
+    product.price         = price
+    product.rating        = (rating_value if rating_value&.positive?)
+    product.review_count  = review_count if review_count
+    product.image_url     = image_url if product.respond_to?(:image_url)
+    product.category_id   = category.id
 
+    # Save if new or changed
     if product.new_record?
       product.save!
       created += 1
@@ -127,7 +127,7 @@ else
       end
     end
 
-    # Attach image to ActiveStorage if available and not already attached
+    # --- Attach image ---
     if image_url.present? && product.respond_to?(:images) && !product.images.attached?
       begin
         file = URI.open(image_url, open_timeout: 8, read_timeout: 12)
@@ -143,6 +143,7 @@ else
 
   puts "✅ CSV import done. Created: #{created}, Updated: #{updated}, Skipped: #{skipped}"
 end
+
 
 # =========================
 # Products from Walmart API

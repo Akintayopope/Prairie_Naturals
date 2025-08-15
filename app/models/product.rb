@@ -35,6 +35,15 @@ class Product < ApplicationRecord
     avg ? avg.to_f.round(1) : 0.0
   end
 
+  def display_rating
+    (self.rating.presence || average_rating.to_f).to_f
+  end
+
+  # Prefer our own DB counter if present, else the imported CSV count
+  def total_reviews
+    (self.reviews_count.presence || self.review_count.to_i)
+  end
+
   # Ransack (ActiveAdmin)
   def self.ransackable_associations(_ = nil)
     %w[category order_items reviews images_attachments images_blobs]
@@ -46,6 +55,14 @@ class Product < ApplicationRecord
       rating image_url link created_at updated_at
     ]
   end
+
+    def self.ransackable_attributes(_ = nil)
+    %w[
+      id name slug title description price sale_price stock category_id
+      rating image_url link reviews_count review_count created_at updated_at
+    ]
+  end
+
 
   private
 

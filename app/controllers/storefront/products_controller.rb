@@ -62,7 +62,7 @@ module Storefront
       session[:recently_viewed].unshift(@product.id)
       session[:recently_viewed] = session[:recently_viewed].uniq.take(6)
 
-      recent_ids = session[:recently_viewed] - [@product.id]
+      recent_ids = session[:recently_viewed] - [ @product.id ]
       @recently_viewed_products = Product.where(id: recent_ids)
     end
   end

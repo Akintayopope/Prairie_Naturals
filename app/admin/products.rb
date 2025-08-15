@@ -26,7 +26,7 @@ ActiveAdmin.register Product do
       next unless p.images.attached?
       img = p.images.first
       begin
-        image_tag url_for(img.variant(resize_to_limit: [60, 60])), width: 60, height: 60
+        image_tag url_for(img.variant(resize_to_limit: [ 60, 60 ])), width: 60, height: 60
       rescue
         image_tag url_for(img), width: 60, height: 60
       end
@@ -59,7 +59,7 @@ ActiveAdmin.register Product do
           resource.images.each do |img|
             div do
               begin
-                concat image_tag url_for(img.variant(resize_to_limit: [300, 300]))
+                concat image_tag url_for(img.variant(resize_to_limit: [ 300, 300 ]))
               rescue
                 concat image_tag url_for(img)
               end
@@ -100,7 +100,7 @@ ActiveAdmin.register Product do
           f.object.images.each do |img|
             li do
               begin
-                span image_tag url_for(img.variant(resize_to_limit: [120, 120]))
+                span image_tag url_for(img.variant(resize_to_limit: [ 120, 120 ]))
               rescue
                 span image_tag url_for(img)
               end

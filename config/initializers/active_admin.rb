@@ -2,7 +2,7 @@
 ActiveAdmin.setup do |config|
   # ==== Branding ====
   config.site_title = "Prairie Naturals"
-   config.register_stylesheet 'active_admin_overrides.css'
+   config.register_stylesheet "active_admin_overrides.css"
   # ==== Namespace / URL ====
   # Put the entire admin under /internal instead of /admin
   # (security-by-obscurity helper; auth still required).
@@ -23,7 +23,7 @@ ActiveAdmin.setup do |config|
 
   # ==== General UX / safety ====
   config.comments = false                             # disable AA comments unless you actively use them
-  config.filter_attributes = [:encrypted_password, :password, :password_confirmation]
+  config.filter_attributes = [ :encrypted_password, :password, :password_confirmation ]
   config.localize_format = :long
   config.batch_actions = true
 

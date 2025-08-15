@@ -1,11 +1,12 @@
 # app/admin/orders.rb
 ActiveAdmin.register Order do
-  includes :user, :address, order_items: :product
+  # Preload to avoid N+1 in index/show
+  includes :user, :address, { order_items: :product }
 
   permit_params :user_id, :address_id, :subtotal, :tax, :total,
                 :status, :shipping_name, :shipping_address, :province
 
-  # Nice scopes for quick filtering
+  # ---------- Scopes ----------
   scope :all, default: true
   scope("Pending")    { |r| r.where(status: "pending") }
   scope("Paid")       { |r| r.where(status: "paid") }
@@ -14,22 +15,31 @@ ActiveAdmin.register Order do
   scope("Delivered")  { |r| r.where(status: "delivered") }
   scope("Cancelled")  { |r| r.where(status: "cancelled") }
 
+  # ---------- Index ----------
   index do
     selectable_column
     id_column
-    column("User")    { |o| o.user&.email }
-    column("Address") { |o| o.address&.full_address }
+
+    column("Customer") do |o|
+      # Link to the Customer page if you added ActiveAdmin.register User, as: "Customer"
+      if defined?(admin_customer_path) && o.user
+        link_to(o.user.email, admin_customer_path(o.user))
+      else
+        o.user&.email || "—"
+      end
+    end
+
+    column("Address") { |o| o.address&.full_address || "—" }
+    column("Items")   { |o| o.order_items.sum(:quantity) }
     column(:status)   { |o| status_tag o.status }
-    column(:subtotal) { |o| number_to_currency(o.subtotal) }
-    column(:tax)      { |o| number_to_currency(o.tax) }
-    column(:total)    { |o| number_to_currency(o.total) }
+    column(:subtotal) { |o| number_to_currency(o.subtotal || 0) }
+    column(:tax)      { |o| number_to_currency(o.tax || 0) }
+    column(:total)    { |o| number_to_currency(o.total || 0) }
     column :created_at
     actions
   end
 
-  # -------- One-click status changes on the show page (namespace-agnostic) --------
-  ns = ActiveAdmin.application.default_namespace # e.g., :internal
-
+  # ---------- Action buttons (one-click status changes) ----------
   action_item :mark_paid, only: :show, if: -> { resource.status != "paid" } do
     link_to "Mark Paid",
             send("mark_paid_#{ActiveAdmin.application.default_namespace}_order_path", resource),
@@ -60,7 +70,7 @@ ActiveAdmin.register Order do
             method: :patch, data: { turbo: false }
   end
 
-  # -------- Member actions (unchanged) --------
+  # ---------- Member actions ----------
   member_action :mark_paid,       method: :patch do
     resource.update!(status: "paid")
     redirect_to resource_path, notice: "Order marked as Paid."
@@ -86,24 +96,26 @@ ActiveAdmin.register Order do
     redirect_to resource_path, notice: "Order Cancelled."
   end
 
-  # Batch update status for many orders at once
+  # ---------- Batch action ----------
   batch_action :change_status, form: -> { { status: Order.statuses } } do |ids, inputs|
     Order.where(id: ids).update_all(status: inputs[:status], updated_at: Time.current)
     redirect_to collection_path, notice: "Updated #{ids.size} orders to #{inputs[:status]}."
   end
 
+  # ---------- Filters ----------
   filter :user,  label: "User (email)", as: :select,
          collection: -> { User.order(:email).pluck(:email, :id) }
   filter :status, as: :select, collection: -> { Order.statuses }
   filter :created_at
   filter :total
 
+  # ---------- Form ----------
   form do |f|
     f.semantic_errors
     f.inputs "Order" do
       f.input :user, label: "User (email)", collection: User.order(:email).pluck(:email, :id)
       f.input :address, label: "Address",
-              collection: Address.includes(:user, :province).map { |a| ["#{a.user&.email} — #{a.full_address}", a.id] }
+              collection: Address.includes(:user, :province).map { |a| [ "#{a.user&.email} — #{a.full_address}", a.id ] }
       f.input :status, as: :select, collection: Order.statuses
       f.input :subtotal
       f.input :tax
@@ -115,15 +127,22 @@ ActiveAdmin.register Order do
     f.actions
   end
 
+  # ---------- Show ----------
   show do
     attributes_table do
       row :id
-      row("User")    { |o| o.user&.email }
-      row("Address") { |o| o.address&.full_address }
+      row("Customer") do |o|
+        if defined?(admin_customer_path) && o.user
+          link_to(o.user.email, admin_customer_path(o.user))
+        else
+          o.user&.email || "—"
+        end
+      end
+      row("Address") { |o| o.address&.full_address || "—" }
       row(:status)   { status_tag resource.status }
-      row(:subtotal) { number_to_currency(resource.subtotal) }
-      row(:tax)      { number_to_currency(resource.tax) }
-      row(:total)    { number_to_currency(resource.total) }
+      row(:subtotal) { number_to_currency(resource.subtotal || 0) }
+      row(:tax)      { number_to_currency(resource.tax || 0) }
+      row(:total)    { number_to_currency(resource.total || 0) }
       row :shipping_name
       row :shipping_address
       row :province
@@ -132,11 +151,33 @@ ActiveAdmin.register Order do
     end
 
     panel "Items" do
-      table_for resource.order_items do
-        column(:product)     { |i| i.product&.name || "##{i.product_id}" }
+      items = resource.order_items.includes(:product)
+      table_for items do
+        column(:product) do |i|
+          i.product&.name || i.product&.title || "##{i.product_id}"
+        end
         column(:quantity)
-        column("Unit Price") { |i| number_to_currency(i.unit_price) }
-        column("Line Total") { |i| number_to_currency(i.unit_price * i.quantity) }
+        column("Unit Price") do |i|
+          unit = i.unit_price || i.product&.price || 0
+          number_to_currency(unit)
+        end
+        column("Line Total") do |i|
+          unit = i.unit_price || i.product&.price || 0
+          number_to_currency(unit.to_d * i.quantity.to_i)
+        end
+      end
+
+      # Small summary under the items table
+      div class: "mt-2" do
+        strong "Items subtotal: "
+        items_total = items.sum { |i| (i.unit_price || i.product&.price || 0).to_d * i.quantity.to_i }
+        span number_to_currency(items_total)
+        text_node " — "
+        strong "Order Tax: "
+        span number_to_currency(resource.tax || 0)
+        text_node " — "
+        strong "Order Total: "
+        span number_to_currency(resource.total || 0)
       end
     end
 

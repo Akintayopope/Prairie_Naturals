@@ -40,10 +40,10 @@ ActiveAdmin.register_page "Dashboard" do
 
         column("Status") do |o|
           status_class = case o.status.to_s.downcase
-                         when "paid" then "ok"
-                         when "cancelled", "failed", "0" then "error"
-                         else "warning"
-                         end
+          when "paid" then "ok"
+          when "cancelled", "failed", "0" then "error"
+          else "warning"
+          end
           status_tag(o.status.to_s.titleize, class: status_class)
         end
 

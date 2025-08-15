@@ -87,7 +87,7 @@ class DiscordNotifier
     def post(content)
       uri = URI.parse(webhook_url)
       # Ask Discord to return the created message JSON (useful while testing)
-      uri.query = [uri.query, "wait=true"].compact.join("&")
+      uri.query = [ uri.query, "wait=true" ].compact.join("&")
 
       req = Net::HTTP::Post.new(uri)
       req["Content-Type"] = "application/json"

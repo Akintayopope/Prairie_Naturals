@@ -64,7 +64,7 @@ ActiveAdmin.register StaticPage do
         link_to "View", storefront_page_path(p.slug), target: "_blank", rel: "noopener"
       else
         # Last resort: build a sensible path; convert underscores to hyphens for canonical URLs
-        fallback = "/storefront/#{p.slug.tr('_','-')}"
+        fallback = "/storefront/#{p.slug.tr('_', '-')}"
         link_to "View", fallback, target: "_blank", rel: "noopener"
       end
     end

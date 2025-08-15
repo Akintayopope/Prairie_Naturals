@@ -1,7 +1,7 @@
 # app/controllers/checkout_controller.rb
 class CheckoutController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_provinces, only: [:new, :create]
+  before_action :set_provinces, only: [ :new, :create ]
 
   # GET /checkout/new
   # Renders the preview page. Province selection updates totals live (via GET).
@@ -59,7 +59,7 @@ class CheckoutController < ApplicationController
     end
 
     stripe_session = Stripe::Checkout::Session.create(
-      payment_method_types: ["card"],
+      payment_method_types: [ "card" ],
       customer_email: current_user.email,
       line_items: line_items,
       mode: "payment",
@@ -69,7 +69,7 @@ class CheckoutController < ApplicationController
 
     order.update!(stripe_session_id: stripe_session.id)
     return redirect_to stripe_session.url, allow_other_host: true
-  end
+    end
 
   # --- existing cart checkout flow continues below ---
   cart_items = current_user.cart_items.includes(:product)
@@ -151,7 +151,7 @@ class CheckoutController < ApplicationController
       end
 
       stripe_session = Stripe::Checkout::Session.create(
-        payment_method_types: ["card"],
+        payment_method_types: [ "card" ],
         customer_email: current_user.email,
         line_items: line_items,
         mode: "payment",
