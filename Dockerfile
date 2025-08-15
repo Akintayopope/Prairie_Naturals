@@ -33,12 +33,15 @@ RUN --mount=type=cache,target=/usr/local/bundle/cache \
 # Bring in the app
 COPY . .
 
-# -------- Runtime stage --------
+# --- Runtime stage ---
 FROM ruby:3.3-slim
 WORKDIR /app
-ENV BUNDLE_PATH=/usr/local/bundle
 
-# ✅ Runtime libs (psych needs libyaml-0-2 at runtime)
+# ✅ Tell bundler we're in deployment mode and to skip dev/test at runtime too
+ENV BUNDLE_DEPLOYMENT=1 \
+    BUNDLE_WITHOUT="development test" \
+    BUNDLE_PATH=/usr/local/bundle
+
 RUN apt-get update -y && apt-get install -y --no-install-recommends \
       libyaml-0-2 libpq5 \
     && rm -rf /var/lib/apt/lists/*
