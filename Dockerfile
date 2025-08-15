@@ -1,34 +1,39 @@
 # syntax=docker/dockerfile:1
+FROM ruby:3.3-slim AS builder
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update -y && apt-get install -y --no-install-recommends \
+    build-essential git pkg-config libpq-dev libvips curl \
+  && rm -rf /var/lib/apt/lists/*
 
-ARG RUBY_VERSION=3.2
-FROM ruby:${RUBY_VERSION}-slim AS base
-ENV LANG=C.UTF-8 BUNDLE_PATH=/usr/local/bundle
+RUN gem update --system && gem install bundler -v 2.7.1
 
-# System deps: Postgres client, image processing, JS runtime
-RUN apt-get update -qq && apt-get install -y --no-install-recommends \
-    build-essential git curl pkg-config libpq-dev libvips nodejs npm && \
-    rm -rf /var/lib/apt/lists/*
-
+ENV BUNDLE_WITHOUT="development:test"
+ENV BUNDLE_DEPLOYMENT="1"
 WORKDIR /app
 
-# --- Builder: install gems + JS deps and precompile assets ---
-FROM base AS builder
+# Install gems with only Gemfile* to keep cache stable
 COPY Gemfile Gemfile.lock ./
-RUN bundle config set deployment 'true' && \
-    bundle config set without 'development test' && \
-    bundle install --jobs 4
+RUN bundle lock --add-platform ruby --add-platform x86_64-linux || true
+RUN bundle install --jobs 4
 
-COPY package.json package-lock.json* ./
-RUN test -f package.json && npm ci || true
-
+# Now copy the app and precompile
 COPY . .
-ENV RAILS_ENV=production
+ENV SECRET_KEY_BASE_DUMMY=1
 RUN bundle exec rake assets:precompile
 
-# --- Runtime: slim runtime image ---
-FROM base AS runtime
-ENV RAILS_ENV=production RAILS_LOG_TO_STDOUT=1 RAILS_SERVE_STATIC_FILES=1
+FROM ruby:3.3-slim
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update -y && apt-get install -y --no-install-recommends \
+    libpq-dev libvips \
+  && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
 COPY --from=builder /usr/local/bundle /usr/local/bundle
 COPY --from=builder /app /app
+
+ENV RAILS_ENV=production
+ENV BUNDLE_WITHOUT="development:test"
+ENV BUNDLE_DEPLOYMENT="1"
+
 EXPOSE 3000
-CMD bash -lc "bin/rails db:migrate && bin/rails server -b 0.0.0.0 -p 3000"
+CMD ["bin/rails", "server", "-b", "0.0.0.0", "-p", "3000"]
