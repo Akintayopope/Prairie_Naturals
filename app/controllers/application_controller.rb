@@ -1,5 +1,10 @@
 # app/controllers/application_controller.rb
 class ApplicationController < ActionController::Base
+before_action :set_is_homepage
+
+def set_is_homepage
+    @is_homepage = (request.path == root_path)
+  end
   # ❌ Do NOT force auth globally (breaks public storefront)
   before_action :authenticate_user!, unless: :devise_controller?
 

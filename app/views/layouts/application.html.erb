@@ -25,43 +25,32 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 
-
-
-
   </head>
 
   <body class="pn-body">
-  <!-- Unified Header -->
-<!-- Top Promo & Social Bar -->
-<div class="top-bar bg-black text-white py-1 small px-3 ">
-  <div class="d-flex align-items-center justify-content-between w-100">
+<header class="pn-header" role="banner">
+  <!-- Promo bar -->
+  <div class="pn-promo">
+    <div class="container d-flex align-items-center justify-content-between">
+      <div class="pn-promo__center mx-auto text-center">
+        <strong class="me-2">15% sitewide!</strong>
+        use promo code <span class="pn-promo__code">LOVE15</span>
+      </div>
 
-
-    <!-- Center: promo -->
-    <div class="text-center flex-grow-1">
-      <span class="fw-bold">15% sitewide!</span>
-      use promo code <span class="text-uppercase">LOVE15</span>
+      <div class="pn-promo__social d-none d-md-flex gap-2">
+        <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+        <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+        <a href="#" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
+        <a href="#" aria-label="X"><i class="bi bi-twitter-x"></i></a>
+      </div>
     </div>
-
-    <!-- Right: social -->
-    <div class="d-flex gap-3">
-      <a href="#" class="text-white"><i class="bi bi-instagram"></i></a>
-      <a href="#" class="text-white"><i class="bi bi-facebook"></i></a>
-      <a href="#" class="text-white"><i class="bi bi-youtube"></i></a>
-      <a href="#" class="text-white"><i class="bi bi-twitter-x"></i></a>
-    </div>
-
   </div>
-</div>
 
-
-  <!-- Your existing navbar starts here -->
-  <!-- NAVBAR: replace your existing <nav>...</nav> with this -->
-<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top pn-nav">
-  <div class="container">
+  <!-- Main navbar (note: no sticky-top here) -->
+  <nav class="navbar navbar-expand-lg pn-navbar">
+  <div class="container-fluid px-4">
     <!-- Brand -->
     <%= link_to root_path, class: "navbar-brand fw-bold d-flex align-items-center gap-2" do %>
-      <%= image_tag "logo.png", alt: "Prairie Naturals", height: 28, class: "rounded-2 shadow-sm" rescue nil %>
       <span class="brand-text">Prairie Naturals</span>
     <% end %>
 
@@ -72,147 +61,148 @@
     </button>
 
     <div id="mainNav" class="collapse navbar-collapse">
-      <!-- Left: primary links -->
-      <ul class="navbar-nav me-3">
-        <li class="nav-item"><%= link_to "Shop", storefront_products_path, class: "nav-link" %></li>
-        <li class="nav-item"><%= link_to "About", about_path, class: "nav-link" %></li>
-        <li class="nav-item"><%= link_to "Contact", contact_path, class: "nav-link" %></li>
-      </ul>
+      <!-- Use CSS Grid on lg+ to spread content -->
+      <div class="w-100 d-lg-grid align-items-center gap-3"
+           style="grid-template-columns: 1fr 1.4fr auto;">
 
-      <!-- Center: search (grows) -->
-      <div class="flex-grow-1 px-lg-2 my-2 my-lg-0">
-        <%= form_with url: storefront_products_path, method: :get, local: true, class: "pn-search" do %>
-          <i class="bi bi-search"></i>
-          <input type="search" name="q" value="<%= h(params[:q] || params[:search]) %>" class="form-control pn-search-input"
-                 placeholder="Search products…">
-        <% end %>
-      </div>
+        <!-- Primary links -->
+        <ul class="navbar-nav order-2 order-lg-1">
+          <li class="nav-item"><%= link_to "Shop", storefront_products_path, class: "nav-link" %></li>
+          <li class="nav-item"><%= link_to "About", about_path, class: "nav-link" %></li>
+          <li class="nav-item"><%= link_to "Contact", contact_path, class: "nav-link" %></li>
+        </ul>
 
-      <!-- Right: account + cart -->
-      <div class="d-flex align-items-center gap-2 ms-lg-2">
-        <% if user_signed_in? %>
-          <%= link_to orders_path, class: "btn btn-link px-2 pn-link" do %>
-            <i class="bi bi-person-check"></i> <span class="d-none d-md-inline">My Orders</span>
+        <!-- Search (grows in the middle) -->
+        <div class="order-3 order-lg-2 ms-lg-n3">
+          <%= form_with url: storefront_products_path, method: :get, local: true, class: "pn-search w-100" do %>
+            <i class="bi bi-search" aria-hidden="true"></i>
+            <input id="q" type="search" name="q" value="<%= h(params[:q] || params[:search]) %>"
+                   class="form-control pn-search-input w-100"
+                   placeholder="Search products…">
           <% end %>
-          <%= button_to "Logout", destroy_user_session_path, method: :delete, class: "btn btn-outline-secondary btn-sm btn-lift" %>
-        <% elsif admin_user_signed_in? %>
-  <%= link_to send("#{ActiveAdmin.application.default_namespace}_root_path"),
-              class: "btn btn-link px-2 pn-link" do %>
-    <i class="bi bi-speedometer2"></i> <span class="d-none d-md-inline">Admin</span>
-  <% end %>
-  <%= button_to "Logout", destroy_admin_user_session_path, method: :delete, class: "btn btn-outline-secondary btn-sm btn-lift" %>
+        </div>
 
-        <% else %>
-          <%= link_to new_user_session_path, class: "btn btn-outline-secondary btn-sm btn-lift" do %>
-            <i class="bi bi-box-arrow-in-right"></i> Log in
+        <!-- Right actions -->
+        <div class="order-1 order-lg-3 d-flex align-items-center justify-content-lg-end gap-2">
+          <% if user_signed_in? %>
+            <%= link_to orders_path, class: "btn btn-link px-2 pn-link" do %>
+              <i class="bi bi-person-check"></i> <span class="d-none d-md-inline">My Orders</span>
+            <% end %>
+            <%= button_to "Logout", destroy_user_session_path, method: :delete, class: "btn btn-outline-secondary btn-sm btn-lift" %>
+          <% elsif admin_user_signed_in? %>
+            <%= link_to send("#{ActiveAdmin.application.default_namespace}_root_path"),
+                        class: "btn btn-link px-2 pn-link" do %>
+              <i class="bi bi-speedometer2"></i> <span class="d-none d-md-inline">Admin</span>
+            <% end %>
+            <%= button_to "Logout", destroy_admin_user_session_path, method: :delete, class: "btn btn-outline-secondary btn-sm btn-lift" %>
+          <% else %>
+         <%= link_to new_user_session_path, class: "btn btn-outline-light-theme btn-sm btn-lift" do %>
+        <i class="bi bi-box-arrow-in-right"></i> Log in
           <% end %>
-          <%= link_to new_user_registration_path, class: "btn btn-primary btn-sm btn-lift" do %>
-            <i class="bi bi-person-plus"></i> Sign up
-          <% end %>
-        <% end %>
 
-        <%= link_to cart_path, class: "btn btn-dark btn-lift ms-1 d-flex align-items-center gap-2" do %>
-          <i class="bi bi-bag"></i>
-          <span class="d-none d-sm-inline">Cart</span>
-          <span class="badge text-bg-light"><%= cart_count %></span>
-        <% end %>
+
+            <%= link_to new_user_registration_path, class: "btn btn-primary btn-sm btn-lift" do %>
+              <i class="bi bi-person-plus"></i> Sign up
+            <% end %>
+          <% end %>
+
+          <%= link_to cart_path, class: "btn btn-dark btn-lift d-flex align-items-center gap-2" do %>
+            <i class="bi bi-bag"></i>
+            <span class="d-none d-sm-inline">Cart</span>
+            <span class="badge text-bg-light"><%= cart_count %></span>
+          <% end %>
+        </div>
       </div>
     </div>
   </div>
 </nav>
+</header>
 
+</nav>
+</header>
 
-
-
-
-    <!-- Flash -->
-    <div class="container mt-0">
-      <% if notice %><div class="alert alert-success shadow-sm"><%= notice %></div><% end %>
-      <% if alert  %><div class="alert alert-danger  shadow-sm"><%= alert  %></div><% end %>
+<% if @is_homepage %>
+  <section class="pn-hero">
+    <div class="container-xxl">
+      <div class="pn-hero__content text-center mx-auto">
+        <h1 class="pn-hero__title">Pure Nature, Pure Wellness</h1>
+        <p class="pn-hero__subtitle">
+          Discover our carefully curated collection…
+        </p>
+        <%= link_to "Explore Products", storefront_products_path, class: "btn btn-cta" %>
+      </div>
     </div>
+  </section>
+<% end %>
 
-    <!-- Page content -->
-    <%= yield %>
+<main class="container-xxl my-4">
+  <%= yield %>
+</main>
 
-    <!-- Floating cart -->
+
+<!-- Floating cart (unchanged) -->
 <div id="floating-cart" class="pn-floating-cart" aria-live="polite">
   🛒 <%= link_to 'Cart', cart_path, class: "text-white text-decoration-none" %>
   (<%= cart_count %> items — <%= number_to_currency(cart_total) %>)
 </div>
 
-<!-- Footer -->
-<footer class="bg-dark text-white pt-5 pb-4 mb-0">
-  <div class="container">
+<!-- FOOTER -->
+<footer class="pn-footer" role="contentinfo">
+  <div class="container-xxl">
     <div class="row gy-4">
 
-      <!-- Shop -->
-      <div class="col-6 col-md-3">
-        <h6 class="text-uppercase fw-bold mb-3">Shop</h6>
-        <ul class="list-unstyled mb-0">
-          <li><%= link_to "All Products", storefront_products_path,                   class: "text-white-50 text-decoration-none d-block py-1" %></li>
-          <li><%= link_to "New",          storefront_products_path(sort: "newest"),   class: "text-white-50 text-decoration-none d-block py-1" %></li>
-          <li><%= link_to "Best Sellers", storefront_products_path(sort: "bestsellers"), class: "text-white-50 text-decoration-none d-block py-1" %></li>
-          <li><%= link_to "Nature",       storefront_products_path(category: "Nature"), class: "text-white-50 text-decoration-none d-block py-1" %></li>
-        </ul>
-      </div>
-
-      <!-- Our Store -->
-      <div class="col-6 col-md-3">
-        <h6 class="text-uppercase fw-bold mb-3">Our Store</h6>
-        <address class="text-white-50 mb-3">
+      <!-- Contact / Store -->
+      <section class="col-12 col-md-4" aria-labelledby="footer-contact">
+        <h6 id="footer-contact" class="pn-footer__heading">Contact Us</h6>
+        <address class="pn-footer__text mb-3 not-italic">
           742 Prairie View Drive<br>
           Winnipeg, MB R3Z 5K2
         </address>
-        <div class="text-white-50 small mb-3">
+        <p class="pn-footer__text mb-2">
           Mon–Fri: 11am–10pm<br>
           Sat–Sun: 11am–12pm
-        </div>
-        <div class="text-white-50 small">
+        </p>
+        <p class="pn-footer__text mb-0">
           Tel: 123-456-7890<br>
           Email: info@prairienaturals.com
-        </div>
-      </div>
+        </p>
+      </section>
 
-      <!-- Policy -->
-      <div class="col-6 col-md-3">
-        <h6 class="text-uppercase fw-bold mb-3">Policy</h6>
-        <ul class="list-unstyled mb-0">
-          <li><%= link_to "Shipping & Returns", storefront_shipping_returns_path, class: "text-white-50 text-decoration-none d-block py-1" %></li>
-          <li><%= link_to "Store Policy",        storefront_store_policy_path,     class: "text-white-50 text-decoration-none d-block py-1" %></li>
-          <li><%= link_to "Payment Methods",     storefront_payment_methods_path,  class: "text-white-50 text-decoration-none d-block py-1" %></li>
-          <li><%= link_to "FAQ",                 storefront_faq_path,              class: "text-white-50 text-decoration-none d-block py-1" %></li>
+      <!-- Quick Links -->
+      <nav class="col-6 col-md-4" aria-labelledby="footer-quick-links">
+        <h6 id="footer-quick-links" class="pn-footer__heading">Quick Links</h6>
+        <ul class="list-unstyled pn-footer__list">
+          <li><%= link_to "All Products", storefront_products_path, class: "pn-footer__link" %></li>
+          <li><%= link_to "New", storefront_products_path(sort: "newest"), class: "pn-footer__link" %></li>
+          <li><%= link_to "Best Sellers", storefront_products_path(sort: "bestsellers"), class: "pn-footer__link" %></li>
+          <li><%= link_to "Shipping & Returns", storefront_shipping_returns_path, class: "pn-footer__link" %></li>
+          <li><%= link_to "Store Policy", storefront_store_policy_path, class: "pn-footer__link" %></li>
+          <li><%= link_to "Payment Methods", storefront_payment_methods_path, class: "pn-footer__link" %></li>
+          <li><%= link_to "FAQ", storefront_faq_path, class: "pn-footer__link" %></li>
         </ul>
-      </div>
+      </nav>
 
-      <!-- Customer Service -->
-      <div class="col-6 col-md-3">
-        <h6 class="text-uppercase fw-bold mb-3">Customer Service</h6>
-        <div class="text-white-50 small mb-3">
-          Tel: 123-456-7890<br>
-          Email: helpline@prairienaturals.com
-        </div>
-        <div class="d-flex align-items-center gap-3">
-          <a href="#" aria-label="Instagram" class="text-white-50 hover-text-white"><i class="bi bi-instagram fs-5"></i></a>
-          <a href="#" aria-label="Facebook"  class="text-white-50 hover-text-white"><i class="bi bi-facebook fs-5"></i></a>
-          <a href="#" aria-label="YouTube"   class="text-white-50 hover-text-white"><i class="bi bi-youtube fs-5"></i></a>
-          <a href="#" aria-label="Twitter X" class="text-white-50 hover-text-white"><i class="bi bi-twitter-x fs-5"></i></a>
-        </div>
-      </div>
+      <!-- Newsletter / Note (kept your sentence, removed social icons) -->
+      <section class="col-6 col-md-4" aria-labelledby="footer-news">
+        <h6 id="footer-news" class="pn-footer__heading">Newsletter</h6>
+        <p class="pn-footer__text mb-0">Join our newsletter for natural tips and offers.</p>
+      </section>
 
     </div>
 
-    <hr class="border-secondary my-4">
+    <hr class="pn-footer__rule my-4">
 
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
-      <p class="text-white-50 mb-0">© <%= Time.current.year %> Prairie Naturals. All rights reserved.</p>
+      <p class="pn-footer__muted mb-0">
+        © <%= Time.current.year %> Prairie Naturals. All rights reserved.
+      </p>
       <div class="d-flex gap-3 small">
-        <%= link_to "Privacy Policy", storefront_privacy_policy_path, class: "text-white-50 text-decoration-none" %>
-        <%= link_to "Terms of Service", storefront_terms_path, class: "text-white-50 text-decoration-none" %>
+        <%= link_to "Privacy Policy", storefront_privacy_policy_path, class: "pn-footer__link" %>
+        <%= link_to "Terms of Service", storefront_terms_path, class: "pn-footer__link" %>
       </div>
     </div>
   </div>
 </footer>
-
 
   </body>
 </html>

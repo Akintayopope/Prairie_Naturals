@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 module Storefront
   class StaticPagesController < ApplicationController
+    skip_before_action :authenticate_user!, raise: false
     # GET /storefront/about
     def about; end
 
