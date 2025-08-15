@@ -1283,10 +1283,75 @@ font-weight: 700 !important;
   padding-bottom: 0.5rem !important;
 }
 
+/* Sticky wrapper keeps the filter + info block beside the grid */
+.pn-sticky{position:sticky; top:1rem}
+
+/* Card frame */
+.pn-filter{
+  border-radius:18px; overflow:hidden; background:#fff;
+}
+
+/* Header: rounded top, solid/gradient green like your screenshot */
+.pn-filter__head{
+  padding:.9rem 1rem;
+  background: linear-gradient(180deg, #7fb482, #6aa869);
+  color:#fff;
+  border-top-left-radius:18px; border-top-right-radius:18px;
+}
+.pn-filter__title{font-weight:800; letter-spacing:.2px}
+.pn-filter__reset{color:#fff; opacity:.9; text-decoration:none; font-size:.92rem}
+.pn-filter__reset:hover{opacity:1}
+
+/* Body spacing */
+.pn-filter__body{ padding:1rem }
+
+/* Labels & inputs */
+.pn-label{ display:block; font-weight:700; font-size:.92rem; color:#2c2c2c; margin-bottom:.4rem }
+.pn-input,.pn-select{
+  border-radius:10px; height:44px; font-size:.95rem;
+  border:1px solid #e5e7eb; box-shadow: 0 1px 0 rgba(0,0,0,.02) inset;
+}
+.pn-input:focus,.pn-select:focus{
+  border-color:#7fb482; box-shadow:0 0 0 .2rem rgba(127,180,130,.15);
+}
+
+/* Apply button – full width look from the screenshot */
+.pn-filter__apply{
+  background:#7fb482; color:#fff; font-weight:700;
+  border:0; border-radius:12px; padding:.75rem 1rem; flex:1 1 auto;
+  box-shadow:0 8px 18px rgba(127,180,130,.25);
+  transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
+}
+.pn-filter__apply:hover{ background:#6aa869; transform:translateY(-1px); box-shadow:0 12px 28px rgba(127,180,130,.3) }
+
+/* Two-line Clear/All link */
+.pn-clear-all{
+  display:inline-flex; flex-direction:column; line-height:1.1;
+  text-decoration:none; color:#6b7280; font-weight:600;
+}
+.pn-clear-all:hover{ color:#111827 }
+
+/* Info block under filter */
+.pn-info{ background:#e8f5e9; padding:1rem }
+
+.pn-sticky{position:sticky; top:1rem}
 
 
 
 
+/* Make the aside actually sticky and behave nicely in flex/grid layouts */
+.plp-aside {
+  position: sticky;
+  top: calc(var(--header-offset, 72px) + 8px); /* adjust to your header height */
+  align-self: flex-start;                      /* critical for flex columns */
+  height: fit-content;                         /* prevents stretching that breaks sticky */
+  z-index: 2;                                  /* above backgrounds */
+}
+
+/* Sticky breaks if an ancestor has overflow not visible — ensure it’s visible */
+.pn-page, .container-xxl, .row, .col, .col-lg-3 {
+  overflow: visible; /* important */
+}
 
 
 
