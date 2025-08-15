@@ -110,8 +110,6 @@ GEM
       rack-test (>= 0.6.3)
       regexp_parser (>= 1.5, < 3.0)
       xpath (~> 3.2)
-    chart-js-rails (0.1.7)
-      railties (> 3.1)
     chartkick (5.2.0)
     childprocess (5.1.0)
       logger (~> 1.5)
@@ -295,9 +293,11 @@ GEM
       ast (~> 2.4.1)
       racc
     pdf-core (0.10.0)
-    pg (1.6.0)
-    pg (1.6.0-aarch64-linux)
-    pg (1.6.0-x86_64-linux)
+    pg (1.6.1)
+    pg (1.6.1-aarch64-linux)
+    pg (1.6.1-aarch64-linux-musl)
+    pg (1.6.1-x86_64-linux)
+    pg (1.6.1-x86_64-linux-musl)
     popper_js (2.11.8)
     pp (0.6.2)
       prettyprint
@@ -518,7 +518,6 @@ DEPENDENCIES
   bootstrap (~> 5.3.0)
   brakeman
   capybara
-  chart-js-rails
   chartkick (~> 5.2)
   debug
   devise
@@ -533,8 +532,8 @@ DEPENDENCIES
   kamal
   kaminari
   letter_opener
-  nokogiri (~> 1.18)
-  pg (~> 1.1)
+  nokogiri (~> 1.16)
+  pg (~> 1.5)
   prawn
   propshaft
   puma (>= 5.0)
