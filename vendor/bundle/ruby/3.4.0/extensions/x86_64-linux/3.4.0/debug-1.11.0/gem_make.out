@@ -1,0 +1,19 @@
+current directory: /home/akinpope/Prairie_Naturals/vendor/bundle/ruby/3.4.0/gems/debug-1.11.0/ext/debug
+/home/akinpope/.local/share/mise/installs/ruby/3.4.4/bin/ruby extconf.rb
+creating Makefile
+
+current directory: /home/akinpope/Prairie_Naturals/vendor/bundle/ruby/3.4.0/gems/debug-1.11.0/ext/debug
+make DESTDIR\= sitearchdir\=./.gem.20250814-79489-bvki6w sitelibdir\=./.gem.20250814-79489-bvki6w clean
+
+current directory: /home/akinpope/Prairie_Naturals/vendor/bundle/ruby/3.4.0/gems/debug-1.11.0/ext/debug
+make DESTDIR\= sitearchdir\=./.gem.20250814-79489-bvki6w sitelibdir\=./.gem.20250814-79489-bvki6w
+compiling debug.c
+compiling iseq_collector.c
+linking shared-object debug/debug.so
+
+current directory: /home/akinpope/Prairie_Naturals/vendor/bundle/ruby/3.4.0/gems/debug-1.11.0/ext/debug
+make DESTDIR\= sitearchdir\=./.gem.20250814-79489-bvki6w sitelibdir\=./.gem.20250814-79489-bvki6w install
+/usr/bin/install -c -m 0755 debug.so ./.gem.20250814-79489-bvki6w/debug
+
+current directory: /home/akinpope/Prairie_Naturals/vendor/bundle/ruby/3.4.0/gems/debug-1.11.0/ext/debug
+make DESTDIR\= sitearchdir\=./.gem.20250814-79489-bvki6w sitelibdir\=./.gem.20250814-79489-bvki6w clean

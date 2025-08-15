@@ -1,54 +1,276 @@
-<section>
-  <header class="text-center mb-4">
-    <h2 class="pn-section-title">Featured Products</h2>
-    <p class="text-muted mb-0">A curated selection from our catalog — pure, purposeful, and loved by our community.</p>
-  </header>
+<% content_for :title, (@is_homepage ? "Prairie Naturals" : "Discover everyday essentials") %>
 
-  <div class="row g-3 row-cols-1 row-cols-md-2 row-cols-lg-3">
-    <% (@featured_products || []).each do |product| %>
-      <div class="col">
-        <article class="pn-feature-card h-100">
-          <div class="pn-feature-card__media">
-            <%= link_to storefront_product_path(product) do %>
-              <% if product.images.attached? %>
-                <% img = product.images.first %>
-                <%= image_tag img.variant(resize_to_limit: [800,800]),
-                      alt: product.name, loading: "lazy", width: 800, height: 800 %>
-              <% elsif product.image_url.present? %>
-                <%= image_tag product.image_url, alt: product.name, loading: "lazy", width: 800, height: 800 %>
-              <% else %>
-                <div class="pn-card__img pn-card__img--ph">No image</div>
+<%# -------------------- HOMEPAGE -------------------- %>
+<% if @is_homepage %>
+  <%= render "storefront/home/hero" %>
+  <%= render "storefront/home/benefits" %>
+  <%= render "storefront/home/quick_categories", categories: (@categories || Category.order(:name)) %>
+  <%= render "storefront/home/featured_products" %>
+  <%= render "storefront/home/promo" %>
+
+<%# -------------------- PLP (LISTING, FULL-WIDTH) -------------------- %>
+<% else %>
+  <% total  = (@products.total_count rescue @products.size) %>
+  <% offset = (@products.respond_to?(:offset_value) ? @products.offset_value : ((@products.current_page - 1) * @products.limit_value rescue 0)) %>
+  <% first  = total.zero? ? 0 : offset + 1 %>
+  <% last   = [offset + @products.size, total].min %>
+  <% cat    = Category.find_by(id: params[:category_id]) %>
+
+  <!-- Full-width container -->
+  <div class="container-fluid px-3 px-xl-4 py-3">
+    <!-- Flex layout: fixed-width aside + fluid main -->
+    <div class="d-flex gap-3 gap-xl-4 align-items-start">
+
+      <!-- Sidebar (fixed width, sticky) -->
+      <aside style="width: 320px; min-width: 300px;">
+        <div class="filter-card sticky-sidebar" style="top: 1rem;">
+          <div class="filter-header d-flex align-items-center justify-content-between">
+            <h2 class="h6 mb-0 fw-semibold">Browse & Filter</h2>
+            <%= link_to "Reset", storefront_products_path, class: "filter-reset text-decoration-none" %>
+          </div>
+
+          <div class="filter-body">
+            <%= form_with url: storefront_products_path, method: :get, local: true do %>
+              <%# Preserve non-filter params (except page + the ones we control) %>
+              <% request.query_parameters.except(:q, :category_id, :filter, :sort, :page).each do |k, v| %>
+                <%= hidden_field_tag k, v %>
               <% end %>
+
+              <div class="filter-group">
+                <label class="filter-label">Search products…</label>
+                <%= text_field_tag :q, params[:q].presence || params[:search],
+                      class: "form-control",
+                      placeholder: "e.g., Vitamin C" %>
+              </div>
+
+              <div class="filter-group">
+                <label class="filter-label">Category</label>
+                <%= select_tag :category_id,
+                      options_for_select([["All Categories", ""]] + (@categories || Category.order(:name)).map { |c| [c.name, c.id] }, params[:category_id]),
+                      class: "form-select" %>
+              </div>
+
+              <div class="filter-group">
+                <label class="filter-label">Show</label>
+                <%= select_tag :filter,
+                      options_for_select([["All products", ""], ["On sale", "sale"], ["New", "new"], ["Recently updated", "recent"]], params[:filter].to_s),
+                      class: "form-select" %>
+              </div>
+
+              <div class="filter-group">
+                <label class="filter-label">Sort</label>
+                <%= select_tag :sort,
+                      options_for_select([["Name (A–Z)", ""], ["Price: Low → High", "price_asc"], ["Price: High → Low", "price_desc"], ["Rating", "rating"], ["Newest", "newest"]], params[:sort].to_s),
+                      class: "form-select" %>
+              </div>
+
+              <div class="d-flex flex-column gap-2">
+                <button type="submit" class="btn-filter-apply">Apply Filters</button>
+                <%= link_to "Clear All", storefront_products_path, class: "btn-filter-clear text-decoration-none" %>
+              </div>
             <% end %>
           </div>
 
-          <div class="pn-feature-card__body">
-            <% if (category_name = product.category&.name).present? %>
-              <span class="pn-badge"><%= category_name %></span>
-            <% end %>
-
-            <h3 class="pn-feature-card__title"><%= product.name %></h3>
-
-            <% sale = product.try(:sale_price).present? && product.sale_price.to_d < product.price.to_d rescue false %>
-            <div class="small mt-1 mb-2">
-              <% if sale %>
-                <span class="text-danger fw-semibold"><%= number_to_currency(product.sale_price) %></span>
-                <span class="price-old"><%= number_to_currency(product.price) %></span>
-              <% else %>
-                <span class="fw-semibold"><%= number_to_currency(product.price || 0) %></span>
-              <% end %>
+          <!-- Sidebar bottom: fills the blank space with helpful content -->
+          <div class="filter-footer mt-3">
+            <!-- Active filters summary -->
+            <div class="active-filters mb-3">
+              <div class="small text-muted mb-1">Active filters</div>
+              <div class="d-flex flex-wrap gap-2">
+                <% if params[:q].present? %>
+                  <%= link_to storefront_products_path(request.query_parameters.except(:q, :page)), class: "chip chip-link", title: "Remove search" do %>
+                    Search: <%= h(params[:q]) %> ×
+                  <% end %>
+                <% end %>
+                <% if (catname = cat&.name).present? %>
+                  <%= link_to storefront_products_path(request.query_parameters.except(:category_id, :page)), class: "chip chip-link", title: "Remove category" do %>
+                    Category: <%= catname %> ×
+                  <% end %>
+                <% end %>
+                <% if params[:filter].present? %>
+                  <%= link_to storefront_products_path(request.query_parameters.except(:filter, :page)), class: "chip chip-link", title: "Remove filter" do %>
+                    Show: <%= params[:filter].humanize %> ×
+                  <% end %>
+                <% end %>
+                <% if params[:sort].present? %>
+                  <%= link_to storefront_products_path(request.query_parameters.except(:sort, :page)), class: "chip chip-link", title: "Remove sort" do %>
+                    Sort: <%= params[:sort].humanize %> ×
+                  <% end %>
+                <% end %>
+                <% if !params.slice(:q, :category_id, :filter, :sort).values.any?(&:present?) %>
+                  <span class="text-muted small">None</span>
+                <% end %>
+              </div>
             </div>
 
-            <%= link_to "Shop this product",
-                        storefront_product_path(product),
-                        class: "btn btn-lift" %>
+            <!-- Help / trust block -->
+            <div class="help-card p-3">
+              <div class="d-flex align-items-start gap-2 mb-2">
+                <i class="bi bi-chat-dots"></i>
+                <div class="fw-semibold">Need help?</div>
+              </div>
+              <div class="small text-muted mb-2">
+                Questions about products, dosage, or availability? We’re here to help.
+              </div>
+              <div class="d-flex flex-column gap-1">
+                <%= link_to "Contact us", contact_path, class: "small text-decoration-none" %>
+                <%= link_to "Shipping & returns", storefront_shipping_returns_path, class: "small text-decoration-none" %>
+                <%= link_to "Store policy", storefront_store_policy_path, class: "small text-decoration-none" %>
+                <%= link_to "FAQ", storefront_faq_path, class: "small text-decoration-none" %>
+              </div>
+              <hr class="my-3">
+              <ul class="list-unstyled d-grid gap-2 small mb-0">
+                <li class="d-flex align-items-center gap-2"><i class="bi bi-shield-check"></i> Secure checkout</li>
+                <li class="d-flex align-items-center gap-2"><i class="bi bi-truck"></i> Fast, tracked shipping</li>
+                <li class="d-flex align-items-center gap-2"><i class="bi bi-arrow-repeat"></i> Easy returns</li>
+              </ul>
+            </div>
           </div>
-        </article>
-      </div>
-    <% end %>
-  </div>
+        </div>
+      </aside>
 
-  <div class="text-center mt-4">
-    <%= link_to "View All Products", storefront_products_path, class: "btn btn-cta" %>
+      <!-- Main content (flexes to fill remaining width) -->
+      <main style="flex: 1; min-width: 0;">
+        <!-- Header + quick sort -->
+        <div class="d-flex flex-wrap align-items-end justify-content-between gap-2 mb-2">
+          <div>
+            <h1 class="h5 mb-1">
+              <%= if cat&.name.present?
+                    "Explore #{cat.name}"
+                  elsif params[:q].present?
+                    "Results for “#{h(params[:q])}”"
+                  else
+                    "Discover everyday essentials"
+                  end %>
+            </h1>
+            <div class="text-muted small">Showing <%= first %>–<%= last %> of <%= total %> products</div>
+          </div>
+
+          <%= form_with url: storefront_products_path, method: :get, local: true, class: "d-flex align-items-center gap-2" do %>
+            <% request.query_parameters.except(:sort, :page).each { |k, v| %>
+              <%= hidden_field_tag k, v %>
+            <% } %>
+            <label class="small text-muted">Sort</label>
+            <%= select_tag :sort,
+                  options_for_select([["Name (A–Z)", ""], ["Price: Low → High", "price_asc"], ["Price: High → Low", "price_desc"], ["Rating", "rating"], ["Newest", "newest"]], params[:sort].to_s),
+                  class: "form-select form-select-sm", onchange: "this.form.submit()" %>
+          <% end %>
+        </div>
+
+        <!-- Active filter chips (kept here too for convenience) -->
+        <div class="plp-chips d-flex flex-wrap gap-2 mb-2">
+          <% if params[:q].present? %>
+            <%= link_to storefront_products_path(request.query_parameters.except(:q, :page)), class: "chip chip-link", title: "Remove search" do %>
+              Search: <%= h(params[:q]) %> ×
+            <% end %>
+          <% end %>
+          <% if cat&.name.present? %>
+            <%= link_to storefront_products_path(request.query_parameters.except(:category_id, :page)), class: "chip chip-link", title: "Remove category" do %>
+              Category: <%= cat.name %> ×
+            <% end %>
+          <% end %>
+          <% if params[:filter].present? %>
+            <%= link_to storefront_products_path(request.query_parameters.except(:filter, :page)), class: "chip chip-link", title: "Remove filter" do %>
+              Show: <%= params[:filter].humanize %> ×
+            <% end %>
+          <% end %>
+          <% if params[:sort].present? %>
+            <%= link_to storefront_products_path(request.query_parameters.except(:sort, :page)), class: "chip chip-link", title: "Remove sort" do %>
+              Sort: <%= params[:sort].humanize %> ×
+            <% end %>
+          <% end %>
+        </div>
+
+        <%# ===== GRID ===== %>
+        <% if @products.present? %>
+          <!-- More columns on wide screens to use full width -->
+          <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 row-cols-xxl-7 g-2">
+            <% @products.each do |product| %>
+              <% sale  = product.respond_to?(:sale_price) && product.sale_price.present? && product.sale_price.to_d < product.price.to_d rescue false %>
+              <% stock = product.try(:stock) %>
+              <% avg   =
+                   if product.respond_to?(:reviews) && product.reviews.any?
+                     product.reviews.average(:rating).to_f
+                   else
+                     (product.try(:average_rating) || product.try(:rating)).to_f
+                   end %>
+
+              <div class="col">
+                <article class="card h-100 position-relative product-card">
+                  <% if sale %>
+                    <span class="badge bg-danger position-absolute m-2">Sale</span>
+                  <% end %>
+
+                  <div class="product-media">
+                    <%= link_to storefront_product_path(product), class: "d-block" do %>
+                      <% if product.images.attached? %>
+                        <%= image_tag product.images.first.variant(resize_to_limit: [1200, 1200]),
+                                      class: "product-img", alt: product.name, loading: "lazy", decoding: "async", width: 800, height: 1000 %>
+                      <% elsif product.image_url.present? %>
+                        <%= image_tag product.image_url, class: "product-img", alt: product.name, loading: "lazy", decoding: "async", width: 800, height: 1000 %>
+                      <% else %>
+                        <span class="product-img product-img--placeholder text-muted">No image</span>
+                      <% end %>
+                    <% end %>
+                  </div>
+
+                  <div class="card-body d-flex flex-column p-2">
+                    <h3 class="card-title small mb-1 clamp-2">
+                      <%= link_to product.name, storefront_product_path(product), class: "pn-link text-decoration-none" %>
+                    </h3>
+
+                    <div class="d-flex align-items-center justify-content-between mb-1">
+                      <div class="rating small" aria-label="<%= (avg || 0).round(1) %> out of 5 stars">
+                        <% r = avg.positive? ? avg : 0 %>
+                        <span><%= "★" * r.round %><%= "☆" * (5 - r.round) %></span>
+                      </div>
+                      <% if !stock.nil? %>
+                        <% left = stock.to_i %>
+                        <span class="small <%= left <= 5 ? 'text-danger' : 'text-muted' %>">
+                          <%= left <= 5 ? "Only #{left} left" : "In stock: #{left}" %>
+                        </span>
+                      <% end %>
+                    </div>
+
+                    <div class="product-meta mb-2">
+                      <% if sale %>
+                        <div class="price">
+                          <span class="fw-semibold text-danger"><%= number_to_currency(product.sale_price) %></span>
+                          <span class="price-old small"><%= number_to_currency(product.price) %></span>
+                        </div>
+                      <% else %>
+                        <div class="price">
+                          <span class="fw-semibold"><%= number_to_currency(product.price || 0) %></span>
+                        </div>
+                      <% end %>
+                    </div>
+
+                    <div class="mt-auto">
+                      <%= button_to "Add to Cart",
+                            add_item_cart_path(product_id: product.id),
+                            method: :post,
+                            class: "btn btn-dark btn-sm w-100 btn-lift",
+                            form: { "data-turbo" => "false" } %>
+                    </div>
+                  </div>
+                </article>
+              </div>
+            <% end %>
+          </div>
+
+          <div class="mt-3 d-flex justify-content-center">
+            <%= paginate @products if defined?(paginate) %>
+          </div>
+        <% else %>
+          <div class="card border-0 shadow-sm">
+            <div class="card-body p-5 text-center">
+              <h2 class="h5 mb-2">No products found</h2>
+              <p class="text-muted mb-4">Try adjusting filters, changing your search, or browsing all products.</p>
+              <%= link_to "Browse all", storefront_products_path, class: "btn btn-dark btn-sm btn-lift" %>
+            </div>
+          </div>
+        <% end %>
+      </main>
+    </div>
   </div>
-</section>
+<% end %>

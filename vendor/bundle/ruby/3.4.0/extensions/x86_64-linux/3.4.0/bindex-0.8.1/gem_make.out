@@ -1,0 +1,18 @@
+current directory: /home/akinpope/Prairie_Naturals/vendor/bundle/ruby/3.4.0/gems/bindex-0.8.1/ext/skiptrace
+/home/akinpope/.local/share/mise/installs/ruby/3.4.4/bin/ruby extconf.rb
+creating Makefile
+
+current directory: /home/akinpope/Prairie_Naturals/vendor/bundle/ruby/3.4.0/gems/bindex-0.8.1/ext/skiptrace
+make DESTDIR\= sitearchdir\=./.gem.20250814-79489-a70t3z sitelibdir\=./.gem.20250814-79489-a70t3z clean
+
+current directory: /home/akinpope/Prairie_Naturals/vendor/bundle/ruby/3.4.0/gems/bindex-0.8.1/ext/skiptrace
+make DESTDIR\= sitearchdir\=./.gem.20250814-79489-a70t3z sitelibdir\=./.gem.20250814-79489-a70t3z
+compiling cruby.c
+linking shared-object skiptrace/internal/cruby.so
+
+current directory: /home/akinpope/Prairie_Naturals/vendor/bundle/ruby/3.4.0/gems/bindex-0.8.1/ext/skiptrace
+make DESTDIR\= sitearchdir\=./.gem.20250814-79489-a70t3z sitelibdir\=./.gem.20250814-79489-a70t3z install
+/usr/bin/install -c -m 0755 cruby.so ./.gem.20250814-79489-a70t3z/skiptrace/internal
+
+current directory: /home/akinpope/Prairie_Naturals/vendor/bundle/ruby/3.4.0/gems/bindex-0.8.1/ext/skiptrace
+make DESTDIR\= sitearchdir\=./.gem.20250814-79489-a70t3z sitelibdir\=./.gem.20250814-79489-a70t3z clean

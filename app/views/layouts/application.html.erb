@@ -118,23 +118,26 @@
 </nav>
 </header>
 
-<section class="pn-hero">
-  <div class="container-xxl">
-    <div class="pn-hero__content text-center mx-auto">
-      <h1 class="pn-hero__title">Pure Nature, Pure Wellness</h1>
-      <p class="pn-hero__subtitle">
-        Discover our carefully curated collection of natural products that
-        nurture your body and soul with the power of pure, sustainable
-        ingredients.
-      </p>
-      <%= link_to "Explore Products", storefront_products_path, class: "btn btn-cta" %>
+</nav>
+</header>
+
+<% if @is_homepage %>
+  <section class="pn-hero">
+    <div class="container-xxl">
+      <div class="pn-hero__content text-center mx-auto">
+        <h1 class="pn-hero__title">Pure Nature, Pure Wellness</h1>
+        <p class="pn-hero__subtitle">
+          Discover our carefully curated collection…
+        </p>
+        <%= link_to "Explore Products", storefront_products_path, class: "btn btn-cta" %>
+      </div>
     </div>
-  </div>
-</section>
+  </section>
+<% end %>
 
 <main class="container-xxl my-4">
-      <%= yield %>
-    </main>
+  <%= yield %>
+</main>
 
 
 <!-- Floating cart (unchanged) -->
