@@ -1,39 +1,51 @@
-# syntax=docker/dockerfile:1
+# syntax=docker/dockerfile:1.7-labs
 FROM ruby:3.3-slim AS builder
-ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update -y && apt-get install -y --no-install-recommends \
-    build-essential git pkg-config libpq-dev libvips curl \
-  && rm -rf /var/lib/apt/lists/*
 
-RUN gem update --system && gem install bundler -v 2.7.1
+# Match your lockfile's Bundler
+ENV BUNDLER_VERSION=2.6.9
+RUN gem install bundler -v "$BUNDLER_VERSION"
 
-ENV BUNDLE_WITHOUT="development:test"
-ENV BUNDLE_DEPLOYMENT="1"
+# Bundler installs into a real layer; we'll cache only tarballs
+ENV BUNDLE_DEPLOYMENT=1 \
+    BUNDLE_WITHOUT="development test" \
+    BUNDLE_PATH=/usr/local/bundle
+
 WORKDIR /app
 
-# Install gems with only Gemfile* to keep cache stable
+# ✅ Native build deps BEFORE bundle install
+# libyaml-dev (+pkg-config, build-essential) fixes psych (yaml.h)
+# libpq-dev is for pg; keep others minimal
+RUN apt-get update -y && apt-get install -y --no-install-recommends \
+      build-essential pkg-config git curl ca-certificates \
+      libyaml-dev libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Keep this layer cacheable
 COPY Gemfile Gemfile.lock ./
+
+# Ensure linux platforms are present for Docker builds
 RUN bundle lock --add-platform ruby --add-platform x86_64-linux || true
-RUN bundle install --jobs 4
 
-# Now copy the app and precompile
+# Cache only the gem tarballs; installed gems persist in image
+RUN --mount=type=cache,target=/usr/local/bundle/cache \
+    bundle _${BUNDLER_VERSION}_ install --jobs=${BUNDLE_JOBS:-4} --retry=${BUNDLE_RETRY:-3}
+
+# Bring in the app
 COPY . .
-ENV SECRET_KEY_BASE_DUMMY=1
-RUN bundle exec rake assets:precompile
 
+# -------- Runtime stage --------
 FROM ruby:3.3-slim
-ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update -y && apt-get install -y --no-install-recommends \
-    libpq-dev libvips \
-  && rm -rf /var/lib/apt/lists/*
-
 WORKDIR /app
+ENV BUNDLE_PATH=/usr/local/bundle
+
+# ✅ Runtime libs (psych needs libyaml-0-2 at runtime)
+RUN apt-get update -y && apt-get install -y --no-install-recommends \
+      libyaml-0-2 libpq5 \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY --from=builder /usr/local/bundle /usr/local/bundle
 COPY --from=builder /app /app
 
-ENV RAILS_ENV=production
-ENV BUNDLE_WITHOUT="development:test"
-ENV BUNDLE_DEPLOYMENT="1"
-
+ENV RAILS_ENV=production RACK_ENV=production RAILS_LOG_TO_STDOUT=1 PORT=3000
 EXPOSE 3000
-CMD ["bin/rails", "server", "-b", "0.0.0.0", "-p", "3000"]
+CMD ["bash","-lc","bundle exec rails server -b 0.0.0.0 -p ${PORT:-3000}"]
