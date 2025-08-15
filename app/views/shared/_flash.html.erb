@@ -1,0 +1,9 @@
+<% flash.each do |key, value| %>
+  <%# Map Rails flash keys to Bootstrap classes (or your own CSS) %>
+  <% cls = { notice: "info", alert: "danger", error: "danger",
+             success: "success", warning: "warning", info: "info" }[key.to_sym] || "secondary" %>
+
+  <div class="alert alert-<%= cls %> my-2" role="alert">
+    <%= value %>
+  </div>
+<% end %>

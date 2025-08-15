@@ -1,6 +1,6 @@
 module BreadcrumbsHelper
   def breadcrumb_trail(record: nil)
-    crumbs = [{ label: "Home", url: root_path }]
+    crumbs = [ { label: "Home", url: root_path } ]
 
     if controller_path == "storefront/products"
       case action_name
