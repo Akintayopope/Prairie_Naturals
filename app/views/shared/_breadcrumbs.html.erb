@@ -1,0 +1,16 @@
+<% trail = (local_assigns[:crumbs] || breadcrumb_trail).first(3) %>
+
+<nav class="container-xxl my-2" aria-label="breadcrumb">
+  <ol class="breadcrumb small mb-0">
+    <% trail.each_with_index do |c, i| %>
+      <% last = (i == trail.size - 1) %>
+      <li class="breadcrumb-item <%= 'active' if last %>" <%= 'aria-current="page"' if last %>>
+        <% if last %>
+          <span><%= c[:label] %></span>
+        <% else %>
+          <%= link_to c[:label], c[:url] %>
+        <% end %>
+      </li>
+    <% end %>
+  </ol>
+</nav>
