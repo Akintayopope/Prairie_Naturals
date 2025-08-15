@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: prairie-naturals
+    env: docker
+    dockerfilePath: ./Dockerfile    # change if your Dockerfile lives elsewhere
+    rootDir: .                      # change if your app is in a subfolder
+    autoDeploy: true
