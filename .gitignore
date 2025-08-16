@@ -38,3 +38,5 @@ node_modules
 /vendor/bundle/
 /vendor/bundle/
 .bundle/
+.env
+.env.*
