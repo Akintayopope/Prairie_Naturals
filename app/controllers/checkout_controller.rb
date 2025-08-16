@@ -1,16 +1,14 @@
 # app/controllers/checkout_controller.rb
 class CheckoutController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_provinces, only: [ :new, :create ]
+  before_action :set_provinces, only: [:new, :create]
 
   # GET /checkout/new
-  # Renders the preview page. Province selection updates totals live (via GET).
   def new
     if current_user.cart_items.none?
       redirect_to cart_path, alert: "Your cart is empty." and return
     end
 
-    # Transient order used for previewing totals (not saved here)
     @order      = Order.new(order_params)
     @cart_items = current_user.cart_items.includes(:product)
     @orders     = current_user.orders.order(created_at: :desc).limit(5)
@@ -27,54 +25,34 @@ class CheckoutController < ApplicationController
   end
 
   # POST /checkout
-  # Persists the order, creates line items, starts Stripe Checkout.
+  # - If params[:order_id] is present, pay an existing order snapshot.
+  # - Otherwise, build a new order from cart and pay that.
   def create
+    unless Stripe.api_key.present?
+      redirect_to cart_path, alert: "Payments unavailable (missing Stripe key)." and return
+    end
+
     if params[:order_id].present?
-    order = current_user.orders.includes(order_items: :product).find_by(id: params[:order_id])
-    return redirect_to orders_path, alert: "Order not found." unless order
-    return redirect_to order_path(order), notice: "This order is already paid." if order.status == "paid"
+      order = current_user.orders.includes(order_items: :product).find_by(id: params[:order_id])
+      return redirect_to orders_path, alert: "Order not found." unless order
+      return redirect_to order_path(order), notice: "This order is already paid." if order.status == "paid"
 
-    # Build Stripe line items from the order snapshot
-    line_items = order.order_items.map do |item|
-      {
-        price_data: {
-          currency: "cad",
-          product_data: { name: item.product&.name || "Product ##{item.product_id}" },
-          unit_amount: to_cents(item.unit_price)
-        },
-        quantity: item.quantity
-      }
+      line_items = build_line_items_from_order(order)
+      stripe_session = Stripe::Checkout::Session.create(
+        payment_method_types: ["card"],
+        customer_email: current_user.email,
+        line_items: line_items,
+        mode: "payment",
+        success_url: success_checkout_url + "?session_id={CHECKOUT_SESSION_ID}",
+        cancel_url:  cancel_checkout_url,
+        metadata: { order_id: order.id } # helps success/webhook find the order
+      )
+
+      order.update!(stripe_session_id: stripe_session.id)
+      return redirect_to stripe_session.url, allow_other_host: true
     end
 
-    tax_cents = to_cents(order.tax || 0)
-    if tax_cents > 0
-      line_items << {
-        price_data: {
-          currency: "cad",
-          product_data: { name: "Tax" },
-          unit_amount: tax_cents
-        },
-        quantity: 1
-      }
-    end
-
-    stripe_session = Stripe::Checkout::Session.create(
-      payment_method_types: [ "card" ],
-      customer_email: current_user.email,
-      line_items: line_items,
-      mode: "payment",
-      success_url: success_checkout_url + "?session_id={CHECKOUT_SESSION_ID}",
-      cancel_url:  cancel_checkout_url
-    )
-
-    order.update!(stripe_session_id: stripe_session.id)
-    return redirect_to stripe_session.url, allow_other_host: true
-    end
-
-  # --- existing cart checkout flow continues below ---
-  cart_items = current_user.cart_items.includes(:product)
-  return redirect_to(cart_path, alert: "Your cart is empty.") if cart_items.none?
-
+    # --- Build a new order from the user's cart ---
     cart_items = current_user.cart_items.includes(:product)
     return redirect_to(cart_path, alert: "Your cart is empty.") if cart_items.none?
 
@@ -84,11 +62,9 @@ class CheckoutController < ApplicationController
     province_record = Province.find_by(name: @order.province)
     return prepare_failed_new(cart_items, "Please choose a valid province.") unless province_record
 
-    # Extract address-only params (Order does not have these columns)
     city        = address_params[:city]
     postal_code = address_params[:postal_code]
 
-    # Upsert the user's shipping address
     address = current_user.address || current_user.build_address
     address.assign_attributes(
       line1:       @order.shipping_address,
@@ -109,54 +85,30 @@ class CheckoutController < ApplicationController
       tax_amount = subtotal * tax_rate
       total      = subtotal + tax_amount
 
-      # Snapshot monetary fields on the order
       @order.subtotal = subtotal
       @order.tax      = tax_amount
       @order.total    = total
-
       @order.save!
 
-      # Snapshot each cart line into order_items
       cart_items.find_each do |i|
         @order.order_items.create!(
           product:    i.product,
           quantity:   i.quantity,
-          unit_price: i.product.price # snapshot at purchase time
+          unit_price: i.product.price
         )
       end
       cart_items.destroy_all
 
-      # Build Stripe line items (products + a separate Tax line)
-      line_items = @order.order_items.map do |item|
-        {
-          price_data: {
-            currency: "cad",
-            product_data: { name: item.product.name },
-            unit_amount: to_cents(item.unit_price)
-          },
-          quantity: item.quantity
-        }
-      end
-
-      tax_cents = to_cents(@order.tax)
-      if tax_cents > 0
-        line_items << {
-          price_data: {
-            currency: "cad",
-            product_data: { name: "Tax" },
-            unit_amount: tax_cents
-          },
-          quantity: 1
-        }
-      end
+      line_items = build_line_items_from_order(@order)
 
       stripe_session = Stripe::Checkout::Session.create(
-        payment_method_types: [ "card" ],
+        payment_method_types: ["card"],
         customer_email: current_user.email,
         line_items: line_items,
         mode: "payment",
         success_url: success_checkout_url + "?session_id={CHECKOUT_SESSION_ID}",
-        cancel_url:  cancel_checkout_url
+        cancel_url:  cancel_checkout_url,
+        metadata: { order_id: @order.id }
       )
 
       @order.update!(stripe_session_id: stripe_session.id)
@@ -170,11 +122,25 @@ class CheckoutController < ApplicationController
 
   # GET /checkout/success
   def success
-    session = Stripe::Checkout::Session.retrieve(params[:session_id])
-    order   = Order.find_by(stripe_session_id: session.id)
-    if order && order.status != "paid"
-      order.update(status: "paid", stripe_payment_id: session.payment_intent)
+    if params[:session_id].blank?
+      redirect_to orders_path, alert: "Missing payment session." and return
     end
+
+    session = Stripe::Checkout::Session.retrieve(params[:session_id])
+    order   = Order.find_by(id: session.metadata["order_id"]) ||
+              Order.find_by(stripe_session_id: session.id)
+
+    unless order
+      redirect_to orders_path, alert: "Order not found for this payment." and return
+    end
+
+    if order.status != "paid" && session.payment_status == "paid"
+      order.update!(
+        status: "paid",
+        stripe_payment_id: session.payment_intent # e.g. "pi_..."
+      )
+    end
+
     redirect_to order_path(order), notice: "Payment successful!"
   end
 
@@ -184,7 +150,6 @@ class CheckoutController < ApplicationController
   end
 
   # GET /checkout/preview_receipt.pdf
-  # Generates a pro-forma PDF based on current cart + entered fields.
   def preview_receipt
     cart_items = current_user.cart_items.includes(:product)
     return redirect_to(new_checkout_path, alert: "Your cart is empty.") if cart_items.none?
@@ -205,7 +170,7 @@ class CheckoutController < ApplicationController
     pdf.move_down 8
     pdf.text "Date: #{Time.zone.now.strftime("%B %d, %Y")}"
     pdf.text "Customer: #{shipping_name.presence || current_user.email}"
-    ship_to = [ shipping_address, city, province_name, postal_code ].reject(&:blank?).join(", ")
+    ship_to = [shipping_address, city, province_name, postal_code].reject(&:blank?).join(", ")
     pdf.text "Ship To: #{ship_to}"
     pdf.move_down 10
     pdf.text "Items", style: :bold
@@ -229,34 +194,28 @@ class CheckoutController < ApplicationController
 
   private
 
-  # Use DB as source of truth for the dropdown (records, not strings)
   def set_provinces
     @provinces = Province.order(:name)
   end
 
-  # Only allow Order's real columns here
   def order_params
     params.fetch(:order, {}).permit(:shipping_name, :shipping_address, :province)
   end
 
-  # Address-only fields (NOT Order columns)
   def address_params
     params.require(:order).permit(:city, :postal_code)
   end
 
-  # Combine GST/PST/HST; handle nils safely
   def tax_rate_for(province_name)
     p = Province.find_by(name: province_name)
     return 0.to_d unless p
     p.hst.to_d + p.gst.to_d + p.pst.to_d
   end
 
-  # Convert a decimal dollar amount to integer cents (rounded)
   def to_cents(amount)
     ((amount.to_d * 100).round).to_i
   end
 
-  # Re-render :new with preserved context and message
   def prepare_failed_new(cart_items, message = nil)
     @cart_items = cart_items
     @orders     = current_user.orders.order(created_at: :desc).limit(5)
@@ -269,5 +228,33 @@ class CheckoutController < ApplicationController
     end
     flash.now[:alert] = message if message.present?
     render :new, status: :unprocessable_entity
+  end
+
+  # Build Stripe Checkout line items from an order snapshot.
+  def build_line_items_from_order(order)
+    items = order.order_items.map do |item|
+      {
+        price_data: {
+          currency: "cad",
+          product_data: { name: item.product&.name || "Product ##{item.product_id}" },
+          unit_amount: to_cents(item.unit_price)
+        },
+        quantity: item.quantity
+      }
+    end
+
+    tax_cents = to_cents(order.tax || 0)
+    if tax_cents > 0
+      items << {
+        price_data: {
+          currency: "cad",
+          product_data: { name: "Tax" },
+          unit_amount: tax_cents
+        },
+        quantity: 1
+      }
+    end
+
+    items
   end
 end

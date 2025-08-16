@@ -1,16 +1,19 @@
 # config/initializers/stripe.rb
+require "stripe"
 
-# Read keys from environment
-stripe_secret     = ENV["STRIPE_SECRET_KEY"].to_s
-stripe_publishable = ENV["STRIPE_PUBLISHABLE_KEY"].to_s
+secret_key = ENV["STRIPE_SECRET_KEY"].presence ||
+             Rails.application.credentials.dig(:stripe, :secret_key)
 
-if stripe_secret.empty? || stripe_publishable.empty?
-  Rails.logger.warn("⚠️ Stripe keys are missing — Stripe API is disabled.")
+publishable_key = ENV["STRIPE_PUBLISHABLE_KEY"].presence ||
+                  Rails.application.credentials.dig(:stripe, :publishable_key)
+
+if secret_key.blank?
+  msg = "Stripe secret key is missing. Set STRIPE_SECRET_KEY or credentials."
+  Rails.env.production? ? raise(msg) : Rails.logger.warn("⚠️ #{msg}")
 else
-  require "stripe"
-  Stripe.api_key = stripe_secret
+  Stripe.api_key = secret_key
   Rails.configuration.stripe = {
-    publishable_key: stripe_publishable,
-    secret_key:      stripe_secret
+    secret_key:      secret_key,
+    publishable_key: publishable_key
   }
 end

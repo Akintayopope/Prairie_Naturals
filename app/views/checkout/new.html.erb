@@ -40,13 +40,12 @@
   </div>
 
   <div>
-  <%= f.label :province %><br>
-  <%= f.collection_select :province,
-        @provinces, :name, :name,                      # value_method, text_method
-        { include_blank: "Select a province" },        # options
-        { onchange: "this.form.submit();" } %>
-</div>
-
+    <%= f.label :province %><br>
+    <%= f.collection_select :province,
+          @provinces, :name, :name,
+          { include_blank: "Select a province" },
+          { onchange: "this.form.submit();" } %>
+  </div>
 <% end %>
 
 <% if @cart_items.present? %>
@@ -84,7 +83,6 @@
     target: "_blank",
     rel: "noopener" %>
 
-
   <div style="margin-top: 16px;">
     <%= f.submit "Place Order", class: "button", disabled: @cart_items.blank? %>
   </div>
@@ -100,9 +98,25 @@
       <p><strong>Status:</strong> <%= order.status.to_s.titleize %></p>
       <p><strong>Date:</strong> <%= order.created_at.strftime("%B %d, %Y") %></p>
       <p><%= link_to "View Details", order_path(order) %></p>
+
+      <% if order.status != "paid" %>
+        <%= button_to "Pay this order",
+              pay_order_path(order),
+              method: :post,
+              class: "btn btn-outline-primary btn-sm mt-2" %>
+      <% end %>
+
       <hr>
     </div>
   <% end %>
 <% else %>
   <p>You have no past orders yet.</p>
+<% end %>
+
+<!-- Load Stripe.js (needed on checkout page only) -->
+<script src="https://js.stripe.com/v3/"></script>
+<% if Rails.configuration.stripe[:publishable_key].present? %>
+  <script>
+    const stripe = Stripe("<%= Rails.configuration.stripe[:publishable_key] %>");
+  </script>
 <% end %>
