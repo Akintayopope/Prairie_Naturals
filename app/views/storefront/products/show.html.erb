@@ -21,106 +21,211 @@
     <span><%= @product.name %></span>
   </nav>
 
-  <div class="row g-4">
-    <!-- LEFT • Gallery -->
-    <div class="col-12 col-lg-7">
-      <div class="pdp-gallery card border-0 shadow-sm">
-        <div class="card-body">
-          <div class="pdp-main ratio ratio-4x5 bg-white rounded-3 border">
-            <% if @product.images.attached? %>
-              <%= image_tag @product.images.first.variant(resize_to_limit: [1600, 2000]),
-                            id: "pdp-main-img",
-                            class: "pdp-main-img",
+<!-- Product Page: Gallery • Buy Box • Recently Viewed -->
+<!-- Product Page: Gallery • Buy Box • Recently Viewed -->
+<div class="row g-4">
+  <!-- LEFT • Gallery -->
+  <div class="col-12 col-lg-3">
+    <div class="pdp-gallery card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <!-- Main image (no crop, fast TTI, stable layout) -->
+        <div class="pdp-main bg-white rounded-3 border mb-3" style="min-height: 400px;">
+          <% if @product.images.attached? %>
+            <%= image_tag @product.images.first.variant(resize_to_limit: [1200, 1500]),
+                          id: "pdp-main-img",
+                          class: "w-100 h-100 object-fit-contain rounded-3",
+                          alt: @product.name,
+                          width: 1200, height: 1500,
+                          loading: "eager",
+                          decoding: "async",
+                          fetchpriority: "high",
+                          style: "min-height: 400px;" %>
+          <% elsif @product.image_url.present? %>
+            <%= image_tag @product.image_url,
+                          id: "pdp-main-img",
+                          class: "w-100 h-100 object-fit-contain rounded-3",
+                          alt: @product.name,
+                          loading: "eager",
+                          decoding: "async",
+                          fetchpriority: "high",
+                          style: "min-height: 400px;" %>
+          <% else %>
+            <div class="d-flex align-items-center justify-content-center h-100">
+              <div class="text-muted">No image available</div>
+            </div>
+          <% end %>
+        </div>
+
+        <% thumbs = @product.images.attached? ? @product.images : [] %>
+        <% if thumbs.any? %>
+          <div class="pdp-thumbs d-flex gap-2 flex-wrap">
+            <% thumbs.each do |img| %>
+              <%= image_tag img.variant(resize_to_limit: [300, 380]),
+                            class: "pdp-thumb rounded border",
                             alt: @product.name,
-                            loading: "eager",
-                            decoding: "async" %>
-            <% elsif @product.image_url.present? %>
-              <%= image_tag @product.image_url,
-                            id: "pdp-main-img",
-                            class: "pdp-main-img",
-                            alt: @product.name %>
-            <% else %>
-              <div class="pdp-main-placeholder d-flex align-items-center justify-content-center text-muted">
-                No image available
-              </div>
+                            width: 60, height: 75,
+                            loading: "lazy",
+                            decoding: "async",
+                            style: "cursor: pointer; flex-shrink: 0;",
+                            data: { target: "pdp.thumb",
+                                    src: url_for(img.variant(resize_to_limit: [1200, 1500])) } %>
             <% end %>
           </div>
-
-          <% thumbs = @product.images.attached? ? @product.images : [] %>
-          <% if thumbs.any? %>
-            <div class="pdp-thumbs mt-3 d-flex gap-2 flex-wrap">
-              <% thumbs.each do |img| %>
-                <%= image_tag img.variant(resize_to_limit: [300, 380]),
-                              class: "pdp-thumb",
-                              alt: @product.name,
-                              data: { target: "pdp.thumb", src: url_for(img.variant(resize_to_limit: [1600, 2000])) } %>
-              <% end %>
-            </div>
-          <% end %>
-        </div>
-      </div>
-    </div>
-
-    <!-- RIGHT • Buy box (sticky) -->
-    <div class="col-12 col-lg-5">
-      <div class="card border-0 shadow-sm pdp-buybox">
-        <div class="card-body">
-          <h1 class="h4 mb-1"><%= @product.name %></h1>
-
-          <%# Rating average (from model or reviews) %>
-          <% avg = if @product.respond_to?(:reviews) && @product.reviews.any?
-                     @product.reviews.average(:rating).to_f
-                   else
-                     (@product.try(:average_rating) || @product.try(:rating) || 0).to_f
-                   end %>
-          <div class="small text-muted mb-2">
-            <% r = avg.positive? ? avg.round : 0 %>
-            <span aria-label="<%= avg %> out of 5 stars"><%= "★" * r %><%= "☆" * (5 - r) %></span>
-            <% if @reviews.present? %> <%= pluralize(@reviews.size, "review") %> <% end %>
-          </div>
-
-          <% sale = @product.respond_to?(:sale_price) && @product.sale_price.present? && @product.sale_price.to_d < (@product.price || 0) %>
-          <div class="pdp-price h4 mb-2">
-            <% if sale %>
-              <span class="text-danger fw-semibold"><%= number_to_currency(@product.sale_price) %></span>
-              <span class="text-muted text-decoration-line-through ms-2 fs-6"><%= number_to_currency(@product.price) %></span>
-              <span class="badge bg-danger-subtle text-danger ms-2">Sale</span>
-            <% else %>
-              <span class="fw-semibold"><%= number_to_currency(@product.price || 0) %></span>
-            <% end %>
-          </div>
-
-          <% if @product.stock.present? %>
-            <% left = @product.stock.to_i %>
-            <div class="mb-2">
-              <span class="badge <%= left <= 5 ? 'text-bg-danger' : 'text-bg-success' %>">
-                <%= left <= 5 ? "Only #{left} left" : "In stock: #{left}" %>
-              </span>
-            </div>
-          <% end %>
-
-          <div class="d-flex align-items-center gap-2 mb-3">
-            <label for="pdp-qty" class="small text-muted">Qty</label>
-            <input id="pdp-qty" type="number" min="1" value="1" class="form-control form-control-sm" style="max-width: 96px;">
-          </div>
-
-          <div class="d-grid gap-2 mb-3">
-            <%= button_to "Add to Cart",
-                  add_item_cart_path(product_id: @product.id),
-                  method: :post,
-                  class: "btn btn-dark btn-lift",
-                  form: { "data-turbo" => "false", id: "pdp-add-form" } %>
-          </div>
-
-          <div class="pdp-trust small text-muted d-flex flex-wrap gap-3">
-            <span>🚚 Free shipping over $50</span>
-            <span>🔒 Secure checkout</span>
-            <span>↩️ 30-day returns</span>
-          </div>
-        </div>
+        <% end %>
       </div>
     </div>
   </div>
+
+<!-- Product Buy Box Card -->
+<div class="col-12 col-lg-4">
+  <div class="card border-0 shadow-sm pdp-buybox h-100">
+    <div class="card-body">
+
+      <!-- Product Name -->
+      <h1 class="h4 mb-2"><%= @product.name %></h1>
+
+      <!-- Price & Sale -->
+      <% sale = @product.respond_to?(:sale_price) && @product.sale_price.present? && @product.sale_price.to_d < (@product.price || 0) %>
+      <div class="pdp-price h4 mb-2">
+        <% if sale %>
+          <span class="text-danger fw-semibold"><%= number_to_currency(@product.sale_price) %></span>
+          <span class="text-muted text-decoration-line-through ms-2 fs-6"><%= number_to_currency(@product.price) %></span>
+          <span class="badge bg-danger-subtle text-danger ms-2 align-middle">Sale</span>
+        <% else %>
+          <span class="fw-semibold"><%= number_to_currency(@product.price || 0) %></span>
+        <% end %>
+      </div>
+
+      <!-- Stock -->
+      <% if @product.stock.present? %>
+        <% left = @product.stock.to_i %>
+        <div class="mb-3">
+          <span class="badge <%= left <= 5 ? 'bg-danger' : 'bg-success' %>">
+            <%= left <= 5 ? "Only #{left} left" : "In stock: #{left}" %>
+          </span>
+        </div>
+      <% end %>
+
+      <!-- Qty + Add to Cart (side-by-side) -->
+      <div class="d-flex align-items-stretch gap-2 mb-4">
+        <div class="d-flex align-items-center gap-2">
+          <label for="pdp-qty" class="small text-muted mb-0">Qty</label>
+          <input id="pdp-qty" type="number" min="1" value="1"
+                 class="form-control form-control-sm" style="max-width: 96px;">
+        </div>
+
+        <%= button_to "Add to Cart",
+              add_item_cart_path(product_id: @product.id),
+              method: :post,
+              class: "btn btn-lift w-100",
+              form: { "data-turbo" => "false",
+                      id: "pdp-add-form",
+                      class: "d-inline-flex flex-grow-1" } %>
+      </div>
+
+      <!-- Trust Badges -->
+      <div class="pdp-trust small text-muted d-flex flex-wrap gap-3 mb-3">
+        <span>🚚 Free shipping over $50</span>
+        <span>🔒 Secure checkout</span>
+        <span>↩️ 30-day returns</span>
+      </div>
+
+      <!-- Rating (pushed down) -->
+      <% r   = (@product.respond_to?(:display_rating) ? @product.display_rating : @product.try(:rating)).to_f %>
+      <% cnt = (@product.respond_to?(:total_reviews) ? @product.total_reviews : @product.try(:reviews_count)).to_i %>
+      <div class="pn-rating text-center mt-4"
+           aria-label="<%= r.round(1) %> out of 5 stars, <%= cnt %> <%= 'review'.pluralize(cnt) %>">
+        <div class="pn-stars mb-1">
+          <% full = r.floor; half = (r - full) >= 0.5 %>
+          <% 5.times do |i| %>
+            <% if i < full %>
+              <span class="star star-full">★</span>
+            <% elsif i == full && half %>
+              <span class="star star-half">★</span>
+            <% else %>
+              <span class="star star-empty">★</span>
+            <% end %>
+          <% end %>
+        </div>
+        <div class="pn-rating-meta small">
+          <span class="pn-rating-number fw-semibold"><%= number_with_precision(r, precision: 1) %></span>
+          <% if cnt > 0 %>
+            <span class="text-muted">• <%= number_with_delimiter(cnt) %> <%= 'review'.pluralize(cnt) %></span>
+          <% else %>
+            <span class="text-muted">• No reviews yet</span>
+          <% end %>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+
+  <!-- RIGHT • Recently Viewed (exactly 3 items) -->
+  <div class="col-12 col-lg-5">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h2 class="h6 mb-2">Recently viewed</h2>
+
+        <% products3 = Array(@recently_viewed_products).first(3) %>
+        <% if products3.any? %>
+          <div class="row row-cols-3 g-2">
+            <% products3.each do |p| %>
+              <div class="col">
+                <article class="card product-card h-100 border rounded-4 shadow-sm">
+                  <!-- Image frame -->
+                  <div class="product-media ratio ratio-1x1  d-flex align-items-center justify-content-center bg-white">
+                    <% if p.images.attached? %>
+                      <%= link_to image_tag(
+                                    p.images.first.variant(resize_to_limit: [600, 600]),
+                                    class: "w-100 h-100 object-fit-contain p-2 rounded-4",
+                                    alt: p.name,
+                                    width: 600, height: 600,
+                                    loading: "lazy",
+                                    decoding: "async"
+                                  ), storefront_product_path(p) %>
+                    <% elsif p.image_url.present? %>
+                      <%= link_to image_tag(
+                                    p.image_url,
+                                    class: "w-100 h-100 object-fit-contain p-2 rounded-4",
+                                    alt: p.name,
+                                    loading: "lazy",
+                                    decoding: "async"
+                                  ), storefront_product_path(p) %>
+                    <% else %>
+                      <%= link_to storefront_product_path(p), class: "d-flex align-items-center justify-content-center text-muted w-100 h-100 rounded-4" do %>
+                        No image
+                      <% end %>
+                    <% end %>
+                  </div>
+
+                  <!-- Card body -->
+                  <div class="card-body p-2">
+                    <h6 class="card-title clamp-2 lh-sm mb-1">
+                      <%= link_to p.name, storefront_product_path(p), class: "pn-link text-decoration-none fw-semibold" %>
+                    </h6>
+                    <div class="small fw-semibold text-dark">
+                      <%= number_to_currency(p.price || 0) %>
+                    </div>
+                  </div>
+                </article>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <p class="text-muted mb-0"><em>No recently viewed products.</em></p>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
 
   <!-- Tabs (sticky) -->
   <div class="pdp-tabs card border-0 shadow-sm mt-4">
@@ -225,42 +330,6 @@
     <% end %>
   </div>
 
-  <div class="mt-4">
-    <h2 class="h6 mb-2">Recently viewed</h2>
-    <% if @recently_viewed_products.present? && @recently_viewed_products.any? %>
-      <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-xl-6 g-2">
-        <% @recently_viewed_products.each do |p| %>
-          <div class="col">
-            <div class="card h-100 product-card">
-              <div class="product-media">
-                <% if p.images.attached? %>
-                  <%= link_to image_tag(p.images.first.variant(resize_to_limit: [1200, 1500]),
-                                        class: "product-img", alt: p.name),
-                              storefront_product_path(p) %>
-                <% elsif p.image_url.present? %>
-                  <%= link_to image_tag(p.image_url, class: "product-img", alt: p.name),
-                              storefront_product_path(p) %>
-                <% else %>
-                  <%= link_to storefront_product_path(p) do %>
-                    <div class="product-img product-img--placeholder">No image</div>
-                  <% end %>
-                <% end %>
-              </div>
-              <div class="card-body p-2">
-                <h6 class="card-title clamp-2 mb-1">
-                  <%= link_to p.name, storefront_product_path(p), class: "pn-link text-decoration-none" %>
-                </h6>
-                <div class="small"><%= number_to_currency(p.price || 0) %></div>
-              </div>
-            </div>
-          </div>
-        <% end %>
-      </div>
-    <% else %>
-      <p class="text-muted"><em>No recently viewed products.</em></p>
-    <% end %>
-  </div>
-</div>
 
 <%# Tiny JS: swap main image on thumb click + wire qty into the Add-to-Cart form %>
 <script>

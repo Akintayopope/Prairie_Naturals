@@ -1,8 +1,8 @@
 /* Page hero (text-only, flush) */
 .page-hero {
   background:
-    radial-gradient(1200px 400px at -10% -20%, #f7e9ec 0, transparent 60%),
-    linear-gradient(180deg, #faf6f7 0%, #f3f4f6 100%);
+   radial-gradient(1200px 600px at 50% 72%, rgba(0,0,0,0.08) 0%, transparent 60%),
+    linear-gradient(135deg, var(--cream) 0%, #cfd7c6 38%, #b0bf9a 100%);
   padding: clamp(18px, 4.2vw, 36px);
   margin-left: -1rem; margin-right: -1rem;
   border: 0; border-radius: 0; box-shadow: none;
@@ -50,3 +50,4 @@
 
 /* Payment method cards */
 .method-card .badge { font-weight: 500; }
+

@@ -193,7 +193,7 @@
             </h3>
 
           <!-- Rating (stacked) + Stock -->
-<div class="d-flex align-items-start justify-content-between mb-2">
+<div class="d-flex align-items-start justify-content-between  mb-2">
   <% r   = (product.respond_to?(:display_rating) ? product.display_rating : product.rating).to_f %>
   <% cnt = (product.respond_to?(:total_reviews) ? product.total_reviews : product.try(:reviews_count)).to_i %>
 
@@ -218,14 +218,14 @@
       <span class="pn-rating-number fw-semibold"><%= number_with_precision(r, precision: 1) %></span>
       <span class="text-muted">• <%= number_with_delimiter(cnt) %> <%= 'review'.pluralize(cnt) %></span>
     </div>
-  </div>
+   </div>
 
-  <!-- Stock (right) -->
-  <% if product.stock.present? %>
+   <!-- Stock (right) -->
+   <% if product.stock.present? %>
     <% left = product.stock.to_i %>
 
   <% end %>
-</div>
+ </div>
 
 
 

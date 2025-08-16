@@ -19,6 +19,8 @@ Rails.application.routes.draw do
   namespace :storefront do
     resources :products,   only: %i[index show]
     resources :categories, only: %i[show]
+    post "/stripe/webhook", to: "stripe/webhooks#create"
+
 
     # Static pages
     get  "about",            to: "static_pages#about",            as: :about
@@ -50,8 +52,12 @@ Rails.application.routes.draw do
 
   # === Orders (read-only history pages) ===
   resources :orders, only: %i[index show] do
-  member { post :pay, to: "checkout#pay" }   # NEW
+  member do
+    get  :receipt        # <- needed for the PDF link
+    post :pay, to: "checkout#pay"
+  end
 end
+get "checkout/success", to: "checkout#success"
 
   # === Checkout (protected in controller via before_action :authenticate_user!) ===
   resource :checkout, only: %i[new create], controller: "checkout" do
@@ -59,6 +65,21 @@ end
     get :cancel
     get :preview_receipt
   end
+
+  def receipt
+  @order = current_user.orders.find(params[:id])
+
+  respond_to do |format|
+    format.html { render :receipt }  # test this first: /orders/:id/receipt
+    format.pdf  do                   # then /orders/:id/receipt.pdf
+      render pdf: "Receipt-#{@order.id}",
+             template: "orders/receipt",
+             layout: "pdf",          # remove this if you don't have app/views/layouts/pdf.html.erb
+             disposition: "attachment"
+    end
+  end
+end
+
 
   # === API ===
   namespace :api do

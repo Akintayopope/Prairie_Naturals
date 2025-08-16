@@ -49,6 +49,7 @@ gem "sassc-rails"
 # XML/HTML, PDFs
 gem "nokogiri", "~> 1.16"          # "~> 1.18" doesn’t exist; 1.16.x is current/stable
 gem "prawn"
+gem "prawn-table"
 
 # Env
 gem "dotenv-rails"

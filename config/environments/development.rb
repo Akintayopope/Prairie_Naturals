@@ -36,6 +36,12 @@ Rails.application.configure do
 
   # Make template changes take effect immediately.
   config.action_mailer.perform_caching = false
+  config.hosts << "localhost"
+  config.hosts << "127.0.0.1"
+  config.action_controller.default_url_options = {
+    host: ENV.fetch("APP_HOST", "localhost:3000"),
+    protocol: ENV.fetch("APP_PROTOCOL", "http")
+  }
 
   # Set localhost to be used by links generated in mailer templates.
   config.action_mailer.default_url_options = { host: "localhost", port: 3000 }

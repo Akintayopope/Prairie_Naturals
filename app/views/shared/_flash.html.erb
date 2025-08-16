@@ -1,9 +1,38 @@
-<% flash.each do |key, value| %>
-  <%# Map Rails flash keys to Bootstrap classes (or your own CSS) %>
-  <% cls = { notice: "info", alert: "danger", error: "danger",
-             success: "success", warning: "warning", info: "info" }[key.to_sym] || "secondary" %>
-
-  <div class="alert alert-<%= cls %> my-2" role="alert">
-    <%= value %>
+<%# app/views/shared/_flash.html.erb %>
+<% flash.each do |type, message| %>
+  <% next if message.blank? %>
+  <% css =
+       case type.to_s
+       when "notice","success"        then "background:#e7f6ec;color:#135f2f;"
+       when "alert","error","danger"  then "background:#fde2e1;color:#7a1c1c;"
+       when "warning"                 then "background:#fff3cd;color:#7a5c00;"
+       else                                  "background:#eef2ff;color:#1e3a8a;"
+       end %>
+  <div class="flash-banner js-autodismiss"
+       data-timeout="4000"
+       style="<%= css %>padding:10px;border-radius:6px;margin-bottom:12px;">
+    <%= message %>
   </div>
 <% end %>
+
+<script>
+  (function () {
+    function run() {
+      document.querySelectorAll(".js-autodismiss").forEach(function (el) {
+        var ms = parseInt(el.dataset.timeout || el.getAttribute("data-flash-timeout-value") || "4000", 10);
+        setTimeout(function () {
+          el.style.transition = "opacity .25s ease";
+          el.style.opacity = "0";
+          el.addEventListener("transitionend", function () { el.remove(); }, { once: true });
+        }, isNaN(ms) ? 4000 : ms);
+      });
+    }
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", run);
+    } else {
+      run();
+    }
+    // Also handle Turbo navigations
+    document.addEventListener("turbo:load", run);
+  })();
+</script>

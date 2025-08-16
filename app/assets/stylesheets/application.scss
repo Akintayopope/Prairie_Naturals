@@ -449,6 +449,8 @@ font-weight: 700 !important;
   padding-bottom: 36px;
 }
 
+.text-brand { color: #54733b !important; } /* or: #169C4D */
+
 .pn-footer__heading {
   font-family: var(--font-heading);
   font-weight: 700;
@@ -621,19 +623,6 @@ font-weight: 700 !important;
   padding: 1.5rem;
 }
 
-/* Badge (shared) */
-// .pn-badge {
-//   display: inline-block;
-//   background: linear-gradient(135deg, var(--sage), var(--primary-green));
-//   color: #fff;
-//   padding: 0.4rem 1rem;
-//   border-radius: 20px;
-//   font-size: 0.8rem;
-//   font-weight: 600;
-//   text-transform: uppercase;
-//   letter-spacing: 0.5px;
-//   margin-bottom: 1rem;
-// }
 
 .pn-feature-card__title {
   font-size: 1.1rem;
@@ -942,6 +931,8 @@ font-weight: 700 !important;
   }
 }
 
+
+
 /* Product Cards */
 .pn-feature-card {
   background: var(--warm-white);
@@ -1129,7 +1120,7 @@ font-weight: 700 !important;
 
 .btn-lift {
   background: var(--text-dark);
-  color: white;
+  color: white !important;
   box-shadow: 0 4px 15px rgba(44, 62, 44, 0.3);
   margin-top: auto;
   position: relative;
@@ -1362,5 +1353,47 @@ font-weight: 700 !important;
 /* app/assets/stylesheets/components/_breadcrumbs.scss */
 .breadcrumb { gap: .25rem; }
 .breadcrumb-item + .breadcrumb-item::before { content: "›"; padding: 0 .25rem; }
+
+
+/* FIX CONTRAST: body copy dark, headers stay white */
+.accordion .accordion-item.faq-item .accordion-body{
+  background: #ECF8F2;           /* light green */
+  color: #123a26;                /* dark green text */
+}
+
+/* make sure everything inside inherits the dark color */
+.accordion .accordion-item.faq-item .accordion-body p,
+.accordion .accordion-item.faq-item .accordion-body li,
+.accordion .accordion-item.faq-item .accordion-body div,
+.accordion .accordion-item.faq-item .accordion-body a{
+  color: inherit;
+}
+
+/* links readable */
+.accordion .accordion-item.faq-item .accordion-body a{
+  text-decoration: underline;
+  font-weight: 600;
+}
+
+/* keep headers as you had them */
+.accordion .accordion-item.faq-item .accordion-button{
+  background:  #54733b; color:#fff;
+}
+.accordion .accordion-item.faq-item .accordion-button:not(.collapsed){
+  background:  #779b59; color:#fff;
+}
+.accordion .accordion-item.faq-item .accordion-button::after{ filter: invert(1); }
+
+
+
+
+
+
+
+
+
+
+
+
 
 

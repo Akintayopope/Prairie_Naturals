@@ -1,0 +1,97 @@
+<%# app/views/orders/receipt.html.erb %>
+<% subtotal = (@order.try(:subtotal) || @order.try(:subtotal_cents).to_i/100.0).to_f %>
+<% tax      = (@order.try(:tax)      || @order.try(:tax_cents).to_i/100.0).to_f %>
+<% total    = (@order.try(:total)    || @order.try(:total_cents).to_i/100.0).to_f %>
+<% paid_on  = @order.try(:paid_at) || (@order.status.to_s == "paid" ? @order.updated_at : nil) || @order.created_at %>
+
+<div style="font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; font-size: 14px; color: #222;">
+  <header style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;">
+    <div>
+      <h1 style="margin:0;font-size:22px;">Receipt</h1>
+      <div style="color:#666;">Order #<%= @order.id %></div>
+      <div style="color:#666;">Paid on: <%= paid_on.in_time_zone.strftime("%B %d, %Y %l:%M %p") %></div>
+    </div>
+    <div style="text-align:right;">
+      <strong>Prairie Naturals</strong><br>
+      support@prairie-naturals.example<br>
+      Winnipeg, MB, Canada
+    </div>
+  </header>
+
+  <section style="display:flex;gap:24px;margin-bottom:16px;">
+    <div style="flex:1;">
+      <h3 style="margin:0 0 6px;font-size:14px;">Billed To</h3>
+      <div><%= @order.shipping_name %></div>
+      <% if @order.address %>
+        <div><%= @order.address.full_address %></div>
+      <% else %>
+        <div><%= @order.shipping_address %></div>
+        <% if @order.city.present? %><div><%= @order.city %></div><% end %>
+        <% if @order.postal_code.present? %><div><%= @order.postal_code %></div><% end %>
+        <div><%= @order.province %>, Canada</div>
+      <% end %>
+    </div>
+    <div style="flex:1;">
+      <h3 style="margin:0 0 6px;font-size:14px;">Payment</h3>
+      <% brand  = @order.try(:payment_brand)  || @order.try(:card_brand) || "Card" %>
+      <% last4  = @order.try(:payment_last4)  || @order.try(:card_last4) || "••••" %>
+      <% intent = @order.try(:payment_intent_id) || @order.try(:stripe_payment_intent_id) %>
+      <% charge = @order.try(:charge_id)        || @order.try(:stripe_charge_id) %>
+      <div><%= brand.to_s.titleize %> •••• <%= last4 %></div>
+      <% if intent.present? %><div style="color:#666;">PI: <%= intent %></div><% end %>
+      <% if charge.present? %><div style="color:#666;">Charge: <%= charge %></div><% end %>
+      <div style="color:#666;">Currency: <%= (@order.currency || "CAD").upcase %></div>
+    </div>
+  </section>
+
+  <table style="width:100%;border-collapse:collapse;margin-bottom:12px;">
+    <thead>
+      <tr>
+        <th style="text-align:left;border-bottom:1px solid #ddd;padding:6px;">Item</th>
+        <th style="text-align:center;border-bottom:1px solid #ddd;padding:6px;">Qty</th>
+        <th style="text-align:right;border-bottom:1px solid #ddd;padding:6px;">Unit</th>
+        <th style="text-align:right;border-bottom:1px solid #ddd;padding:6px;">Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @order.order_items.each do |li| %>
+        <tr>
+          <td style="padding:6px;border-bottom:1px solid #f1f1f1;"><%= li.product_name || li.product&.name %></td>
+          <td style="padding:6px;text-align:center;border-bottom:1px solid #f1f1f1;"><%= li.quantity %></td>
+          <td style="padding:6px;text-align:right;border-bottom:1px solid #f1f1f1;"><%= number_to_currency(li.unit_price || 0) %></td>
+          <td style="padding:6px;text-align:right;border-bottom:1px solid #f1f1f1;"><%= number_to_currency(li.total_price || (li.unit_price.to_d * li.quantity)) %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <table style="margin-left:auto;border-collapse:collapse;min-width:320px;">
+    <tbody>
+      <tr>
+        <td style="padding:4px 8px;color:#666;">Subtotal</td>
+        <td style="padding:4px 8px;text-align:right;"><%= number_to_currency(subtotal) %></td>
+      </tr>
+      <tr>
+        <td style="padding:4px 8px;color:#666;">Tax <%= @order.province.present? ? "(#{@order.province})" : "" %></td>
+        <td style="padding:4px 8px;text-align:right;"><%= number_to_currency(tax) %></td>
+      </tr>
+
+      <%# Optional tax components if you have them %>
+      <% if @order.respond_to?(:gst_cents) || @order.respond_to?(:pst_cents) || @order.respond_to?(:hst_cents) %>
+        <% gst = @order.try(:gst_cents).to_i/100.0 %>
+        <% pst = @order.try(:pst_cents).to_i/100.0 %>
+        <% hst = @order.try(:hst_cents).to_i/100.0 %>
+        <% if gst.positive? %><tr><td style="padding:4px 8px;color:#888;">• GST</td><td style="padding:4px 8px;text-align:right;color:#888;"><%= number_to_currency(gst) %></td></tr><% end %>
+        <% if pst.positive? %><tr><td style="padding:4px 8px;color:#888;">• PST</td><td style="padding:4px 8px;text-align:right;color:#888;"><%= number_to_currency(pst) %></td></tr><% end %>
+        <% if hst.positive? %><tr><td style="padding:4px 8px;color:#888;">• HST</td><td style="padding:4px 8px;text-align:right;color:#888;"><%= number_to_currency(hst) %></td></tr><% end %>
+      <% end %>
+
+      <tr>
+        <td style="padding:6px 8px;border-top:1px solid #ccc;"><strong>Total Paid</strong></td>
+        <td style="padding:6px 8px;text-align:right;border-top:1px solid #ccc;"><strong><%= number_to_currency(total) %></strong></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p style="margin-top:16px;color:#666;">Thank you for your purchase!</p>
+</div>

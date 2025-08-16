@@ -7,15 +7,15 @@
   <!-- At-a-glance summary -->
   <div class="row g-3 mb-4">
     <% summaries = [
-      ["bi-clock-history", "Processing", "1–2 business days"],
+      ["bi-clock-history ", "Processing", "1–2 business days"],
       ["bi-truck", "Canada", "3–7 business days"],
       ["bi-truck", "USA", "5–10 business days"],
       ["bi-arrow-counterclockwise", "Returns", "30 days (unopened)"]
     ] %>
     <% summaries.each do |icon, title, text| %>
-      <div class="col-6 col-lg-3">
-        <div class="border rounded-4 p-3 h-100 d-flex align-items-center gap-3 bg-white shadow-sm">
-          <i class="bi <%= icon %> fs-3 text-primary"></i>
+      <div class="col-6 col-lg-3 ">
+        <div class="border rounded-4 p-3 h-100 d-flex align-items-center gap-3 bg-white shadow-sm ">
+          <i class="bi <%= icon %> fs-3 text-brand"></i>
           <div>
             <div class="small text-muted"><%= title %></div>
             <div class="fw-semibold"><%= text %></div>
@@ -32,7 +32,7 @@
         <div class="card-body p-4">
           <!-- Shipping -->
           <h2 class="h5 mb-3 d-flex align-items-center gap-2">
-            <i class="bi bi-truck text-primary"></i> Shipping
+            <i class="bi bi-truck text-brand"></i> Shipping
           </h2>
           <p class="small text-muted">
             We aim to dispatch orders within <strong>1–2 business days</strong>. You’ll receive an email with
@@ -75,7 +75,7 @@
 
           <!-- Returns -->
           <h2 class="h5 mb-3 d-flex align-items-center gap-2">
-            <i class="bi bi-arrow-counterclockwise text-primary"></i> Returns
+            <i class="bi bi-arrow-counterclockwise text-brand"></i> Returns
           </h2>
           <p class="small text-muted mb-2">
             We offer a <strong>30-day return window</strong> for <strong>unopened</strong> items in original
@@ -157,7 +157,7 @@
       <% faqs.each_with_index do |(q, a), i| %>
         <% h = "sr-h-#{i}" %>
         <% c = "sr-c-#{i}" %>
-        <div class="accordion-item">
+        <div class="accordion-item faq-item">
           <h3 class="accordion-header" id="<%= h %>">
             <button class="accordion-button <%= i.zero? ? '' : 'collapsed' %>" type="button"
                     data-bs-toggle="collapse" data-bs-target="#<%= c %>"

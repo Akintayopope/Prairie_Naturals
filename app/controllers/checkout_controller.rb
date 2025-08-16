@@ -3,6 +3,12 @@ class CheckoutController < ApplicationController
   before_action :authenticate_user!
   before_action :set_provinces, only: [:new, :create]
 
+  class << self
+    def action_methods
+      super + Set.new(%w[success])
+    end
+  end # <-- This was missing!
+
   # GET /checkout/new
   def new
     if current_user.cart_items.none?
@@ -25,8 +31,8 @@ class CheckoutController < ApplicationController
   end
 
   # POST /checkout
-  # - If params[:order_id] is present, pay an existing order snapshot.
-  # - Otherwise, build a new order from cart and pay that.
+  # If params[:order_id] exists, pay that existing order.
+  # Otherwise, build a new order from the cart and pay it.
   def create
     unless Stripe.api_key.present?
       redirect_to cart_path, alert: "Payments unavailable (missing Stripe key)." and return
@@ -37,22 +43,12 @@ class CheckoutController < ApplicationController
       return redirect_to orders_path, alert: "Order not found." unless order
       return redirect_to order_path(order), notice: "This order is already paid." if order.status == "paid"
 
-      line_items = build_line_items_from_order(order)
-      stripe_session = Stripe::Checkout::Session.create(
-        payment_method_types: ["card"],
-        customer_email: current_user.email,
-        line_items: line_items,
-        mode: "payment",
-        success_url: success_checkout_url + "?session_id={CHECKOUT_SESSION_ID}",
-        cancel_url:  cancel_checkout_url,
-        metadata: { order_id: order.id } # helps success/webhook find the order
-      )
-
+      stripe_session = create_checkout_session_for(order)
       order.update!(stripe_session_id: stripe_session.id)
       return redirect_to stripe_session.url, allow_other_host: true
     end
 
-    # --- Build a new order from the user's cart ---
+    # --- Create a brand-new order from the cart ---
     cart_items = current_user.cart_items.includes(:product)
     return redirect_to(cart_path, alert: "Your cart is empty.") if cart_items.none?
 
@@ -94,23 +90,12 @@ class CheckoutController < ApplicationController
         @order.order_items.create!(
           product:    i.product,
           quantity:   i.quantity,
-          unit_price: i.product.price
+          unit_price: i.product.price # snapshot price
         )
       end
       cart_items.destroy_all
 
-      line_items = build_line_items_from_order(@order)
-
-      stripe_session = Stripe::Checkout::Session.create(
-        payment_method_types: ["card"],
-        customer_email: current_user.email,
-        line_items: line_items,
-        mode: "payment",
-        success_url: success_checkout_url + "?session_id={CHECKOUT_SESSION_ID}",
-        cancel_url:  cancel_checkout_url,
-        metadata: { order_id: @order.id }
-      )
-
+      stripe_session = create_checkout_session_for(@order)
       @order.update!(stripe_session_id: stripe_session.id)
       redirect_to stripe_session.url, allow_other_host: true and return
     end
@@ -120,24 +105,45 @@ class CheckoutController < ApplicationController
     prepare_failed_new(current_user.cart_items.includes(:product), "Payment error: #{e.message}")
   end
 
+  # POST /orders/:id/pay
+  # Resume payment for an existing order
+  def pay
+    unless Stripe.api_key.present?
+      redirect_to orders_path, alert: "Payments unavailable (missing Stripe key)." and return
+    end
+
+    order = current_user.orders.includes(order_items: :product).find_by(id: params[:id])
+    return redirect_to orders_path, alert: "Order not found." unless order
+    return redirect_to order_path(order), notice: "This order is already paid." if order.status == "paid"
+
+    stripe_session = create_checkout_session_for(order)
+    order.update!(stripe_session_id: stripe_session.id)
+    redirect_to stripe_session.url, allow_other_host: true
+  rescue Stripe::StripeError => e
+    redirect_to order_path(order), alert: "Payment error: #{e.message}"
+  end
+
   # GET /checkout/success
   def success
     if params[:session_id].blank?
       redirect_to orders_path, alert: "Missing payment session." and return
+      @order ||= current_user.orders.where(status: :paid).order(created_at: :desc).first
+      redirect_to(@order ? order_path(@order) : orders_path, notice: "Payment successful")
+
     end
 
-    session = Stripe::Checkout::Session.retrieve(params[:session_id])
-    order   = Order.find_by(id: session.metadata["order_id"]) ||
-              Order.find_by(stripe_session_id: session.id)
+    s = Stripe::Checkout::Session.retrieve(params[:session_id])
+    order = Order.find_by(id: s.metadata["order_id"]) ||
+            Order.find_by(stripe_session_id: s.id)
 
     unless order
       redirect_to orders_path, alert: "Order not found for this payment." and return
     end
 
-    if order.status != "paid" && session.payment_status == "paid"
+    if order.status != "paid" && s.payment_status == "paid"
       order.update!(
         status: "paid",
-        stripe_payment_id: session.payment_intent # e.g. "pi_..."
+        stripe_payment_id: s.payment_intent # e.g. "pi_..."
       )
     end
 
@@ -198,24 +204,29 @@ class CheckoutController < ApplicationController
     @provinces = Province.order(:name)
   end
 
+  # Only Order's real columns
   def order_params
     params.fetch(:order, {}).permit(:shipping_name, :shipping_address, :province)
   end
 
+  # address-only (NOT Order columns)
   def address_params
     params.require(:order).permit(:city, :postal_code)
   end
 
+  # Combine GST/PST/HST; handle nils
   def tax_rate_for(province_name)
     p = Province.find_by(name: province_name)
     return 0.to_d unless p
     p.hst.to_d + p.gst.to_d + p.pst.to_d
   end
 
+  # dollars -> integer cents
   def to_cents(amount)
     ((amount.to_d * 100).round).to_i
   end
 
+  # rerender :new with context + error
   def prepare_failed_new(cart_items, message = nil)
     @cart_items = cart_items
     @orders     = current_user.orders.order(created_at: :desc).limit(5)
@@ -230,7 +241,7 @@ class CheckoutController < ApplicationController
     render :new, status: :unprocessable_entity
   end
 
-  # Build Stripe Checkout line items from an order snapshot.
+  # Build Stripe Checkout line items from an order snapshot, incl. Tax line.
   def build_line_items_from_order(order)
     items = order.order_items.map do |item|
       {
@@ -256,5 +267,18 @@ class CheckoutController < ApplicationController
     end
 
     items
+  end
+
+  # Create a Stripe Checkout Session for an existing order (snapshot).
+  def create_checkout_session_for(order)
+    Stripe::Checkout::Session.create(
+      payment_method_types: ["card"],
+      customer_email: current_user.email,
+      line_items: build_line_items_from_order(order),
+      mode: "payment",
+      success_url: success_checkout_url + "?session_id={CHECKOUT_SESSION_ID}",
+      cancel_url:  cancel_checkout_url,
+      metadata: { order_id: order.id }
+    )
   end
 end

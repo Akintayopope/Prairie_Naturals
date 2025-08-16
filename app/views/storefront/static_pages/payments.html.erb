@@ -22,7 +22,7 @@
         <div class="card h-100 border-0 shadow-sm rounded-4 method-card">
           <div class="card-body p-4 d-flex flex-column">
             <div class="d-flex align-items-center gap-2 mb-3">
-              <i class="bi <%= icon %> fs-3 text-primary"></i>
+              <i class="bi <%= icon %> fs-3 text-brand"></i>
               <h2 class="h6 fw-semibold mb-0"><%= title %></h2>
             </div>
             <p class="small text-muted flex-grow-1 mb-3"><%= blurb %></p>
@@ -40,7 +40,7 @@
   <!-- How checkout works -->
   <section class="mb-5">
     <h3 class="h5 d-flex align-items-center gap-2 mb-3">
-      <i class="bi bi-cart-check text-primary"></i> How checkout works
+      <i class="bi bi-cart-check text-brand"></i> How checkout works
     </h3>
     <ol class="list-group list-group-numbered rounded-4 shadow-sm">
       <li class="list-group-item">Add items to cart and proceed to checkout.</li>
@@ -53,7 +53,7 @@
   <!-- Security & Privacy -->
   <section class="mb-5">
     <h3 class="h5 d-flex align-items-center gap-2 mb-3">
-      <i class="bi bi-shield-check text-primary"></i> Security & privacy
+      <i class="bi bi-shield-check text-brand"></i> Security & privacy
     </h3>
     <div class="row g-3">
       <div class="col-12 col-lg-6">
@@ -82,7 +82,7 @@
   <!-- Billing, Currency & Pre-authorizations -->
   <section class="mb-5">
     <h3 class="h5 d-flex align-items-center gap-2 mb-3">
-      <i class="bi bi-cash-coin text-primary"></i> Billing & currency
+      <i class="bi bi-cash-coin text-brand"></i> Billing & currency
     </h3>
     <div class="row g-3">
       <div class="col-12 col-lg-6">
@@ -109,7 +109,7 @@
   <!-- Refunds & Adjustments -->
   <section class="mb-5">
     <h3 class="h5 d-flex align-items-center gap-2 mb-3">
-      <i class="bi bi-arrow-counterclockwise text-primary"></i> Refunds & adjustments
+      <i class="bi bi-arrow-counterclockwise text-brand"></i> Refunds & adjustments
     </h3>
     <div class="border rounded-4 p-4">
       <p class="small text-muted">
@@ -127,7 +127,7 @@
   <!-- Taxes & Receipts -->
   <section class="mb-5">
     <h3 class="h5 d-flex align-items-center gap-2 mb-3">
-      <i class="bi bi-receipt text-primary"></i> Taxes & receipts
+      <i class="bi bi-receipt text-brand"></i> Taxes & receipts
     </h3>
     <div class="border rounded-4 p-4">
       <ul class="small text-muted mb-0">
@@ -141,9 +141,9 @@
   <!-- Troubleshooting FAQ -->
   <section class="mb-5">
     <h3 class="h5 d-flex align-items-center gap-2 mb-3">
-      <i class="bi bi-life-preserver text-primary"></i> Payment troubleshooting
+      <i class="bi bi-life-preserver text-brand"></i> Payment troubleshooting
     </h3>
-    <div class="accordion" id="paymentHelp">
+    <div class="accordion accordion-brand" id="paymentHelp">
       <% help = [
         ["My card was declined—what should I do?",
          "Check that your card number, expiry, and CVC are correct. If the issue persists, contact your bank and ask them to approve the transaction. You can also try another card or PayPal."],
@@ -158,7 +158,7 @@
       <% help.each_with_index do |(q, a), i| %>
         <% h = "h-pay-#{i}" %>
         <% c = "c-pay-#{i}" %>
-        <div class="accordion-item">
+        <div class="accordion-item faq-item">
           <h4 class="accordion-header" id="<%= h %>">
             <button class="accordion-button <%= i.zero? ? "" : "collapsed" %>"
                     type="button"
