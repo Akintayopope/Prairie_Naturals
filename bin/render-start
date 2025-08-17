@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+echo "[render] rails db:prepare..."
+bundle exec rails db:prepare
+echo "[render] starting puma..."
+exec bundle exec puma -C config/puma.rb
