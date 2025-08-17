@@ -1,4 +1,3 @@
-# syntax=docker/dockerfile:1.7-labs
 FROM ruby:3.3-slim AS builder
 
 # Match your lockfile's Bundler
