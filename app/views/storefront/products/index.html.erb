@@ -170,20 +170,22 @@
           <% end %>
 
           <!-- Product Image -->
-          <div class="product-media">
-            <%= link_to storefront_product_path(product), class: "d-block" do %>
-              <% if product.images.attached? %>
-                <%= image_tag product.images.first.variant(resize_to_limit: [1200, 1200]),
-                              class: "product-img", alt: product.name,
-                              loading: "lazy", decoding: "async" %>
-              <% elsif product.image_url.present? %>
-                <%= image_tag product.image_url, class: "product-img", alt: product.name,
-                              loading: "lazy", decoding: "async" %>
-              <% else %>
-                <span class="product-img product-img--placeholder text-muted">No image</span>
-              <% end %>
-            <% end %>
-          </div>
+<div class="product-media">
+  <%= link_to storefront_product_path(product), class: "d-block" do %>
+    <% if product.image_url.present? %>
+      <%= image_tag product.image_url,
+                    class: "product-img", alt: product.name,
+                    loading: "lazy", decoding: "async" %>
+    <% elsif product.images.attached? %>
+      <%= image_tag product.images.first.variant(resize_to_limit: [1200, 1200]),
+                    class: "product-img", alt: product.name,
+                    loading: "lazy", decoding: "async" %>
+    <% else %>
+      <span class="product-img product-img--placeholder text-muted">No image</span>
+    <% end %>
+  <% end %>
+</div>
+
 
           <!-- Card Body -->
           <div class="card-body d-flex flex-column p-2">
