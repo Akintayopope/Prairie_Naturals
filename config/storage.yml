@@ -11,9 +11,3 @@ render_disk:
   # On Render, mount a Disk at /var/data (or set ACTIVE_STORAGE_ROOT to your mount)
   root: <%= ENV.fetch("ACTIVE_STORAGE_ROOT", "/var/data/active_storage") %>
 
-tigris:
-  service: S3
-  access_key_id: <%= ENV["AWS_ACCESS_KEY_ID"] %>
-  secret_access_key: <%= ENV["AWS_SECRET_ACCESS_KEY"] %>
-  endpoint: <%= ENV["AWS_ENDPOINT_URL_S3"] %>
-  bucket: <%= ENV["BUCKET_NAME"] %>
