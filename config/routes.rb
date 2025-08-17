@@ -1,6 +1,6 @@
 # config/routes.rb
 Rails.application.routes.draw do
-
+get "/debug/image_counts", to: "debug#image_counts"
   # === Health check ===
   get "up", to: "rails/health#show", as: :rails_health_check
 
@@ -84,5 +84,5 @@ Rails.application.routes.draw do
   # === Root (public)
   root to: "storefront/products#index"
 
-   get "debug/image_counts", to: "debug#image_counts"
+
 end
