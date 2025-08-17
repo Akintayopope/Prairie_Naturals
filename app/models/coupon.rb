@@ -3,9 +3,16 @@ class Coupon < ApplicationRecord
 
   before_validation { self.code = code.to_s.upcase.strip }
 
-  validates :code, presence: true, uniqueness: true, length: { maximum: 32 }
+  # ---- Validations ----
+  validates :code,
+            presence: true,
+            uniqueness: { case_sensitive: false },
+            length: { maximum: 32 },
+            format: { with: /\A[A-Z0-9\-]+\z/,
+                      message: "may only contain letters, numbers, and hyphens" }
+
   validates :discount_type, presence: true
-  validates :value, presence: true
+  validates :value, presence: true, numericality: true
 
   # Percent coupons: 1–100
   with_options if: :percent? do
@@ -22,7 +29,11 @@ class Coupon < ApplicationRecord
     }
   end
 
-  validates :max_uses, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
+  validates :max_uses, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, allow_nil: true
+  validates :uses_count, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, allow_nil: true
+
+  validate  :ends_after_starts
+  validate  :not_overused
 
   scope :active_now, -> {
     now = Time.current
@@ -51,5 +62,19 @@ class Coupon < ApplicationRecord
 
   def self.ransackable_scopes(_auth_object = nil)
     %i[active_now]
+  end
+
+  private
+
+  def ends_after_starts
+    return if starts_at.blank? || ends_at.blank?
+    errors.add(:ends_at, "must be after starts_at") if ends_at < starts_at
+  end
+
+  def not_overused
+    return if max_uses.blank? || uses_count.blank?
+    if uses_count > max_uses
+      errors.add(:uses_count, "cannot exceed max_uses")
+    end
   end
 end

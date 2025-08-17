@@ -1,24 +1,18 @@
-# app/models/category.rb
-# frozen_string_literal: true
-
 class Category < ApplicationRecord
   extend FriendlyId
   friendly_id :name, use: :slugged
 
-# --- Constants ---
-VALID_CATEGORY_NAMES = [
-  "Vitamins",
-  "Protein Supplements",
-  "Digestive Health",
-  "Skin Care",
-  "Hair Care"
-].freeze
+  # --- Constants ---
+  VALID_CATEGORY_NAMES = [
+    "Vitamins",
+    "Protein Supplements",
+    "Digestive Health",
+    "Skin Care",
+    "Hair Care"
+  ].freeze
 
   # --- Associations ---
   has_many :products, dependent: :restrict_with_error, inverse_of: :category
-  # If you add counter cache:
-  # has_many :products, dependent: :restrict_with_error, inverse_of: :category
-  # (and add products_count column + counter_cache: true on Product)
 
   # --- Callbacks ---
   before_validation :normalize_name!
@@ -30,6 +24,9 @@ VALID_CATEGORY_NAMES = [
             length: { maximum: 100 },
             inclusion: { in: VALID_CATEGORY_NAMES,
                          message: "must be one of: #{VALID_CATEGORY_NAMES.join(', ')}" }
+
+  # Optional: protect against accidental blank slugs
+  validates :slug, length: { maximum: 120 }, allow_blank: true
 
   # --- Scopes ---
   scope :alphabetical, -> { order(Arel.sql("LOWER(name) ASC")) }
@@ -50,7 +47,6 @@ VALID_CATEGORY_NAMES = [
   end
 
   # --- Utilities ---
-  # Seed helper you can call from seeds: Category.ensure_default_set!
   def self.ensure_default_set!
     VALID_CATEGORY_NAMES.each { |n| find_or_create_by!(name: n) }
   end
