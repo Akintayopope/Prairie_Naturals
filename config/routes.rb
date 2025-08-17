@@ -84,7 +84,5 @@ Rails.application.routes.draw do
   # === Root (public)
   root to: "storefront/products#index"
 
-  if Rails.env.production?
-    get "/debug/image_counts", to: "debug#image_counts"
-  end
+   get "debug/image_counts", to: "debug#image_counts"
 end
