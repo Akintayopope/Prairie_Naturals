@@ -68,6 +68,7 @@ Rails.application.configure do
   #   port: 587,
   #   authentication: :plain
   # }
+  config.active_storage.service = :render_disk
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).
