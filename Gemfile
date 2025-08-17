@@ -4,6 +4,7 @@ ruby File.read(".ruby-version").strip rescue nil
 
 gem "rails", "~> 8.0.2"
 gem "propshaft"
+gem "cloudinary"
 gem "activestorage-cloudinary-service"
 # DB / server
 gem "pg", "~> 1.5"                 # 1.1 is too old; use >=1.5 on Rails 8
