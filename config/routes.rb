@@ -10,10 +10,24 @@ Rails.application.routes.draw do
   # === Auth (customers) ===
   devise_for :users, controllers: { registrations: "users/registrations" }
 
-  # === Admin auth + admin UI under /internal ===
-  # ActiveAdmin::Devise.config picks up the namespace; we also merge the path to be explicit.
-  devise_for :admin_users, ActiveAdmin::Devise.config.merge(path: "internal")
-  ActiveAdmin.routes(self)  # will mount under /internal because of config.default_namespace
+  # === Admin (ALL admin routing is guarded here) ===
+  if !(defined?(DISABLE_ADMIN) && DISABLE_ADMIN)
+    begin
+      # Only mount ActiveAdmin if DB is reachable and a core table exists
+      if ActiveRecord::Base.connection.data_source_exists?(:users)
+        # If you use a custom namespace like :internal, ensure your ActiveAdmin
+        # initializer sets: config.default_namespace = :internal
+        devise_for :admin_users, ActiveAdmin::Devise.config.merge(path: "internal")
+
+      else
+        Rails.logger.warn("[AA] Skipping admin routes; users table not ready.")
+      end
+    rescue => e
+      Rails.logger.warn("[AA] Skipping admin routes; DB not ready (#{e.class}).")
+    end
+  else
+    Rails.logger.warn("[AA] Admin disabled (SAFE_MODE / DISABLE_ADMIN).")
+  end
 
   # === Storefront (public) ===
   namespace :storefront do
@@ -24,7 +38,6 @@ Rails.application.routes.draw do
     get  "about",            to: "static_pages#about",            as: :about
     get  "contact",          to: "static_pages#contact",          as: :contact
     post "contact",          to: "static_pages#contact_submit"
-
     get  "shipping_returns", to: "static_pages#shipping_returns", as: :shipping_returns
 
     get  "store_policy",     to: "static_pages#store_policy",     as: :store_policy
@@ -50,8 +63,8 @@ Rails.application.routes.draw do
 
   # === Orders (read-only history pages) ===
   resources :orders, only: %i[index show] do
-  member { post :pay, to: "checkout#pay" }   # NEW
-end
+    member { post :pay, to: "checkout#pay" }   # NEW
+  end
 
   # === Checkout (protected in controller via before_action :authenticate_user!) ===
   resource :checkout, only: %i[new create], controller: "checkout" do
