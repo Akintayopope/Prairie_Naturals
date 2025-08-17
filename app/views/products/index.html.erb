@@ -7,19 +7,37 @@
     <% @products.each do |product| %>
       <div class="col-6 col-md-4 col-lg-3">
         <div class="card h-100 shadow-sm">
-          <% if (img = product_main_image(product)) %>
-            <% thumb = product_variant(img, size: [400, 400]) %>
-            <%= image_tag url_for(thumb), alt: product.name, class: "card-img-top product-thumb", loading: "lazy" %>
+
+          <%# ---- IMAGE: prefer remote URL -> ActiveStorage -> placeholder ---- %>
+          <% if product.image_url.present? %>
+            <%= image_tag product.image_url,
+                          alt: product.name,
+                          class: "card-img-top product-thumb",
+                          loading: "lazy" %>
+          <% elsif product.images.attached? %>
+            <%= image_tag product.images.first.variant(resize_to_limit: [400, 400]),
+                          alt: product.name,
+                          class: "card-img-top product-thumb",
+                          loading: "lazy" %>
           <% else %>
-            <%= image_tag product_placeholder, alt: "No image", class: "card-img-top product-thumb", loading: "lazy" %>
+            <%= image_tag product_placeholder,
+                          alt: "No image",
+                          class: "card-img-top product-thumb",
+                          loading: "lazy" %>
           <% end %>
 
           <div class="card-body d-flex flex-column">
             <h6 class="card-title mb-1 text-truncate-2">
-              <%= link_to product.name, product_path(product), class: "stretched-link text-decoration-none" %>
+              <%= link_to product.name,
+                          [:storefront, product],
+                          class: "stretched-link text-decoration-none" %>
             </h6>
-            <div class="text-muted small mb-2"><%= product.category&.name || "Uncategorized" %></div>
-            <div class="fw-bold mb-3"><%= number_to_currency(product.price) %></div>
+            <div class="text-muted small mb-2">
+              <%= product.category&.name || "Uncategorized" %>
+            </div>
+            <div class="fw-bold mb-3">
+              <%= number_to_currency(product.price) %>
+            </div>
 
             <div class="mt-auto">
               <%= button_to "Add to Cart",
@@ -28,6 +46,7 @@
                             class: "btn btn-outline-primary w-100" %>
             </div>
           </div>
+
         </div>
       </div>
     <% end %>

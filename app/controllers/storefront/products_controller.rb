@@ -47,6 +47,14 @@ module Storefront
       @products = @products.page(params[:page]).per(18)
     end
 
+    # app/controllers/storefront/products_controller.rb
+def debug_image_counts
+  urls  = Product.where.not(image_url: [nil, ""]).count
+  total = Product.count
+  render plain: "Products=#{total}, image_url_present=#{urls}"
+end
+
+
     def show
       @product = Product.friendly.find(params[:id])
 
