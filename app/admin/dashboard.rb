@@ -4,32 +4,41 @@ ActiveAdmin.register_page "Dashboard" do
   menu priority: 1, label: "📊 Dashboard"
 
   content title: "Prairie Naturals Admin Dashboard" do
-    # ------------------ Welcome ------------------
     div class: "welcome-message" do
-      para "👋 Welcome back, #{current_admin_user.email}!"
-    end
+    name =
+      current_admin_user.try(:username).presence ||
+      current_admin_user.try(:first_name).presence ||
+      current_admin_user.try(:name).presence ||
+      current_admin_user.email.to_s.split("@").first.titleize
 
-    # ------------------ Top Metrics ------------------
-    div class: "top-metrics-wrapper" do
-      div class: "top-metrics" do
-        div class: "metric-card bg-indigo" do
-          h3 "🛒 Total Orders"
-          h2 Order.count
-        end
-        div class: "metric-card bg-green" do
-          h3 "💰 Total Revenue"
-          h2 number_to_currency(Order.sum(:total) || 0)
-        end
-        div class: "metric-card bg-yellow" do
-          h3 "📅 This Month's Orders"
-          h2 Order.where(created_at: Time.current.beginning_of_month..Time.current).count
-        end
-        div class: "metric-card bg-blue" do
-          h3 "👤 Total Users"
-          h2 User.count
-        end
-      end
+    para do
+      text_node "👋 Welcome back, "
+      strong name
+      text_node "!"
     end
+  end
+    # ------------------ Top Metrics ------------------
+div class: "top-metrics-wrapper" do
+  div class: "top-metrics", style: "display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-top:8px;" do
+    div class: "metric-card bg-indigo", style: "border-radius:12px;padding:14px 16px;" do
+      h3 "🛒 Total Orders"
+      h2 Order.count
+    end
+    div class: "metric-card bg-green", style: "border-radius:12px;padding:14px 16px;" do
+      h3 "💰 Total Revenue"
+      h2 number_to_currency(Order.sum(:total) || 0)
+    end
+    div class: "metric-card bg-yellow", style: "border-radius:12px;padding:14px 16px;" do
+      h3 "📅 This Month's Orders"
+      h2 Order.where(created_at: Time.current.beginning_of_month..Time.current).count
+    end
+    div class: "metric-card bg-blue", style: "border-radius:12px;padding:14px 16px;" do
+      h3 "👤 Total Users"
+      h2 User.count
+    end
+  end
+end
+
 
     # ------------------ Recent Orders ------------------
     panel "🧾 Recent Orders" do
