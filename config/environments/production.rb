@@ -70,6 +70,9 @@ Rails.application.configure do
   # }
   config.active_storage.service = (ENV["ACTIVE_STORAGE_SERVICE"] || :render_disk).to_sym
 
+  config.active_storage.service = :cloudinary
+
+
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).
   config.i18n.fallbacks = true

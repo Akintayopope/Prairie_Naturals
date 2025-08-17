@@ -11,3 +11,5 @@ render_disk:
   # On Render, mount a Disk at /var/data (or set ACTIVE_STORAGE_ROOT to your mount)
   root: <%= ENV.fetch("ACTIVE_STORAGE_ROOT", "/var/data/active_storage") %>
 
+cloudinary:
+  service: Cloudinary
