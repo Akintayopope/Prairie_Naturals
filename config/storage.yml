@@ -6,10 +6,17 @@ local:
   service: Disk
   root: <%= Rails.root.join("storage") %>
 
+
+cloudinary:
+  service: Cloudinary
+  cloud_name: <%= ENV["CLOUDINARY_CLOUD_NAME"] %>
+  api_key:    <%= ENV["CLOUDINARY_API_KEY"] %>
+  api_secret: <%= ENV["CLOUDINARY_API_SECRET"] %>
+  secure: true
+
+
 render_disk:
   service: Disk
   # On Render, mount a Disk at /var/data (or set ACTIVE_STORAGE_ROOT to your mount)
   root: <%= ENV.fetch("ACTIVE_STORAGE_ROOT", "/var/data/active_storage") %>
 
-cloudinary:
-  service: Cloudinary
