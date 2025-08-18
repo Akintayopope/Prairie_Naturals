@@ -51,8 +51,9 @@ gem "sassc-rails"
 gem "nokogiri", "~> 1.16"          # "~> 1.18" doesn’t exist; 1.16.x is current/stable
 gem "prawn"
 
-# Env
-gem "dotenv-rails"
+group :development, :test do
+  gem "dotenv-rails"
+end
 
 # Charts & helpers
 gem "chartkick", "~> 5.2"
