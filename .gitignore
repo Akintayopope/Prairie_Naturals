@@ -41,3 +41,8 @@ node_modules
 .env
 .env.*
 .env
+
+# secrets
+.env
+.env.*
+config/master.key

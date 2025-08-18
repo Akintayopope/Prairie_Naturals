@@ -12,7 +12,7 @@ Rails.application.routes.draw do
 
   # === Admin auth + admin UI under /internal ===
   # ActiveAdmin::Devise.config picks up the namespace; we also merge the path to be explicit.
-  devise_for :admin_users, ActiveAdmin::Devise.config.merge(path: "internal")
+  devise_for :admin_users, ActiveAdmin::Devise.config
   ActiveAdmin.routes(self)  # will mount under /internal because of config.default_namespace
 
   # === Storefront (public) ===
