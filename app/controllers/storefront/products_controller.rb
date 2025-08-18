@@ -56,6 +56,7 @@ end
 
 
     def show
+
       @product = Product.friendly.find(params[:id])
 
       # If you removed review-writing, it's safe to skip loading them:

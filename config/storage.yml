@@ -1,2 +1,17 @@
-cloudinary:
-  service: Cloudinary
+# Active Storage services
+# Supabase uses an S3-compatible API.
+# Make sure the bucket exists in Supabase and is public if you want public URLs.
+
+supabase:
+  service: S3
+  access_key_id:     <%= ENV["SUPABASE_KEY"] %>
+  secret_access_key: <%= ENV["SUPABASE_KEY"] %>   # Supabase uses the same service_role key for both
+  region: "us-east-1"                              # Dummy region is fine for custom endpoints
+  bucket: <%= ENV["SUPABASE_BUCKET"] %>
+  endpoint: <%= ENV["SUPABASE_URL"] %>/storage/v1/s3
+  force_path_style: true                           # Required for most S3-compatible endpoints
+  public: true                                     # Use unsigned, CDN-style URLs for public buckets
+  # Optional: tune upload timeouts etc.
+  # upload:
+  #   http_open_timeout: 15
+  #   http_read_timeout: 30

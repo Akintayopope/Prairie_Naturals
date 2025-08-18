@@ -1,23 +1,64 @@
+# db/seeds.rb
 require "csv"
 require "open-uri"
+require "mime/types"
 
 puts "🌱 Seeding database..."
+
+# -----------------------------------------------------------------------------
+# Image helpers (used by both CSV and API imports)
+# -----------------------------------------------------------------------------
+def sanitized_filename_from(url, fallback: "image.jpg")
+  uri = URI.parse(url)
+  name = File.basename(uri.path.presence || fallback)
+  name = "image.jpg" if name.blank? || name == "/" || name.include?("?")
+  ext  = File.extname(name).downcase
+  name += ".jpg" if ext.blank?
+  name
+rescue
+  fallback
+end
+
+def detect_content_type(url)
+  ext = File.extname(URI.parse(url).path).downcase rescue ""
+  return "image/jpeg" if [".jpg", ".jpeg"].include?(ext)
+  return "image/png"  if ext == ".png"
+  return "image/webp" if ext == ".webp"
+  MIME::Types.type_for(ext).first&.content_type || "image/jpeg"
+end
+
+def attach_remote_image!(record, url)
+  return if url.blank?
+  return unless record.respond_to?(:images)
+  return if record.images.attached?
+
+  URI.open(url, open_timeout: 8, read_timeout: 12) do |io|
+    fname = sanitized_filename_from(url)
+    ctype = detect_content_type(url)
+    record.images.attach(io: io, filename: fname, content_type: ctype)
+  end
+
+  puts "✅ Image attached for: #{record.try(:name) || record.id}"
+rescue => e
+  warn "⚠️ Image failed for: #{record.try(:name) || record.id} – #{e.class}: #{e.message}"
+  record.update_column(:image_url, url) if record.respond_to?(:image_url) && record.persisted?
+end
 
 # ===============================
 # Provinces (idempotent upserts)
 # ===============================
 puts "➡️ Seeding provinces..."
 [
-  { name: "Alberta",                  pst: 0.00,    gst: 0.05, hst: 0.00 },
-  { name: "British Columbia",         pst: 0.07,    gst: 0.05, hst: 0.00 },
-  { name: "Manitoba",                 pst: 0.07,    gst: 0.05, hst: 0.00 },
-  { name: "New Brunswick",            pst: 0.00,    gst: 0.00, hst: 0.15 },
+  { name: "Alberta",                   pst: 0.00,    gst: 0.05, hst: 0.00 },
+  { name: "British Columbia",          pst: 0.07,    gst: 0.05, hst: 0.00 },
+  { name: "Manitoba",                  pst: 0.07,    gst: 0.05, hst: 0.00 },
+  { name: "New Brunswick",             pst: 0.00,    gst: 0.00, hst: 0.15 },
   { name: "Newfoundland and Labrador", pst: 0.00,    gst: 0.00, hst: 0.15 },
-  { name: "Nova Scotia",              pst: 0.00,    gst: 0.00, hst: 0.15 },
-  { name: "Ontario",                  pst: 0.00,    gst: 0.00, hst: 0.13 },
-  { name: "Prince Edward Island",     pst: 0.00,    gst: 0.00, hst: 0.15 },
-  { name: "Quebec",                   pst: 0.09975, gst: 0.05, hst: 0.00 },
-  { name: "Saskatchewan",             pst: 0.06,    gst: 0.05, hst: 0.00 }
+  { name: "Nova Scotia",               pst: 0.00,    gst: 0.00, hst: 0.15 },
+  { name: "Ontario",                   pst: 0.00,    gst: 0.00, hst: 0.13 },
+  { name: "Prince Edward Island",      pst: 0.00,    gst: 0.00, hst: 0.15 },
+  { name: "Quebec",                    pst: 0.09975, gst: 0.05, hst: 0.00 },
+  { name: "Saskatchewan",              pst: 0.06,    gst: 0.05, hst: 0.00 }
 ].each do |prov|
   Province.find_or_create_by!(name: prov[:name]) do |p|
     p.pst = prov[:pst]
@@ -52,7 +93,6 @@ if defined?(Coupon)
     c.active    = true
   end
 end
-
 
 # =========================
 # Categories (final 5)
@@ -98,6 +138,7 @@ else
       if csv_category.present?
         Category.find_or_create_by!(name: csv_category)
       else
+        # Keeps your existing mapping logic (assumes these exist in your codebase)
         map_csv_category(name, vitamins, protein_supp, digestive_health)
       end
 
@@ -118,26 +159,14 @@ else
     product.category_id   = category.id
 
     # Save if new or changed
-    if product.new_record?
+    if product.new_record? || product.changed?
       product.save!
-      created += 1
-    else
-      if product.changed?
-        product.save!
-        updated += 1
-      end
+      product.new_record? ? created += 1 : updated += 1
     end
 
-    # --- Attach image ---
-    if image_url.present? && product.respond_to?(:images) && !product.images.attached?
-      begin
-        file = URI.open(image_url, open_timeout: 8, read_timeout: 12)
-        fname = File.basename(URI(image_url).path.presence || "image.jpg")
-        product.images.attach(io: file, filename: fname)
-      rescue => e
-        Rails.logger.warn("CSV image attach failed for #{product.id}: #{e.message}")
-      end
-    end
+    # --- Attach image (updated helper used here) ---
+    attach_remote_image!(product, image_url)
+
   rescue => e
     puts "❌ Row #{i} failed (headers: #{headers.inspect}): #{e.class} – #{e.message}"
   end
@@ -145,11 +174,11 @@ else
   puts "✅ CSV import done. Created: #{created}, Updated: #{updated}, Skipped: #{skipped}"
 end
 
-
 # =========================
 # Products from Walmart API
 # =========================
 puts "➡️ Importing Walmart API products..."
+# Keep your existing task; inside that task, call `attach_remote_image!(product, image_url)`
 system('KEYWORDS="ashwagandha,turmeric,lavender oil" LIMIT=90 bin/rake seed:walmart')
 
 # =========================
@@ -183,6 +212,5 @@ if AdminUser.any? && Product.any?
 else
   puts "⚠️ No AdminUser or Product found — skipping comment seeding."
 end
-
 
 puts "✅ Seeding completed!"

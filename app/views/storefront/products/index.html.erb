@@ -158,108 +158,111 @@
 <% if @products.present? %>
   <div class="row row-cols-2 row-cols-md-4 g-3">
     <% @products.each do |product| %>
-      <% sale  = product.sale_price.present? && product.sale_price.to_d < product.price.to_d rescue false %>
-      <% stock = product.stock %>
-      <% r     = product.display_rating.to_f %>
-      <% cnt   = product.total_reviews.to_i %>
-
+      <%# ——— guard all card content so one bad image doesn't nuke the card ——— %>
       <div class="col d-flex">
         <article class="card h-100 flex-fill position-relative product-card">
-          <% if sale %>
-            <span class="badge bg-danger position-absolute m-2">Sale</span>
-          <% end %>
+          <% begin %>
+            <% sale  = product.sale_price.present? && product.price.present? && product.sale_price.to_d < product.price.to_d %>
+            <% r     = (product.respond_to?(:display_rating) ? product.display_rating : product.try(:rating)).to_f %>
+            <% cnt   = (product.respond_to?(:total_reviews) ? product.total_reviews : product.try(:reviews_count)).to_i %>
 
-          <!-- Product Image -->
-<div class="product-media">
-  <%= link_to storefront_product_path(product), class: "d-block" do %>
-    <% if product.image_url.present? %>
-      <%= image_tag product.image_url,
-                    class: "product-img", alt: product.name,
-                    loading: "lazy", decoding: "async" %>
-    <% elsif product.images.attached? %>
-      <%= image_tag product.images.first.variant(resize_to_limit: [1200, 1200]),
-                    class: "product-img", alt: product.name,
-                    loading: "lazy", decoding: "async" %>
+            <% if sale %>
+              <span class="badge bg-danger position-absolute m-2">Sale</span>
+            <% end %>
+
+            <!-- Product Image (attachment-first; fallback to image_url; no variants right now) -->
+<div class="product-media ratio ratio-4x5 bg-white rounded-top d-flex align-items-center justify-content-center" style="position:relative">
+  <% begin %>
+    <% src =
+         if product.images.attached?
+           # Use Active Storage helper (no variants while Cloudinary is being fixed)
+           url_for(product.images.first)
+         elsif product.respond_to?(:image_url) && product.image_url.present?
+           product.image_url.to_s.sub(/^http:/, "https:")
+         end %>
+
+    <% if src.present? %>
+      <%= link_to storefront_product_path(product) do %>
+        <%= image_tag src,
+              class: "product-img img-fluid",
+              alt: product.name,
+              loading: "lazy", decoding: "async",
+              style: "width:100%;height:100%;object-fit:contain;display:block" %>
+      <% end %>
     <% else %>
-      <span class="product-img product-img--placeholder text-muted">No image</span>
+      <%= link_to storefront_product_path(product) do %>
+        <div class="product-img product-img--placeholder text-muted d-flex align-items-center justify-content-center" style="width:100%;height:100%">No image</div>
+      <% end %>
+    <% end %>
+  <% rescue %>
+    <%= link_to storefront_product_path(product) do %>
+      <div class="product-img product-img--placeholder text-muted d-flex align-items-center justify-content-center" style="width:100%;height:100%">No image</div>
     <% end %>
   <% end %>
 </div>
 
 
-          <!-- Card Body -->
-          <div class="card-body d-flex flex-column p-2">
-            <!-- Product Name -->
-            <h3 class="card-title small mb-1 clamp-2">
-              <%= link_to product.name, storefront_product_path(product), class: "pn-link text-decoration-none" %>
-            </h3>
+            <!-- Card Body -->
+            <div class="card-body d-flex flex-column p-2">
+              <h3 class="card-title small mb-1 clamp-2">
+                <%= link_to product.name, storefront_product_path(product), class: "pn-link text-decoration-none" %>
+              </h3>
 
-          <!-- Rating (stacked) + Stock -->
-<div class="d-flex align-items-start justify-content-between mb-2">
-  <% r   = (product.respond_to?(:display_rating) ? product.display_rating : product.rating).to_f %>
-  <% cnt = (product.respond_to?(:total_reviews) ? product.total_reviews : product.try(:reviews_count)).to_i %>
-
-  <!-- Stars + rating + reviews (stacked, centered) -->
-  <div class="pn-rating text-center flex-grow-1 me-2"
-       aria-label="<%= r.round(1) %> out of 5 stars, <%= cnt %> <%= 'review'.pluralize(cnt) %>">
-
-    <div class="pn-stars mb-1">
-      <% full = r.floor; half = (r - full) >= 0.5 %>
-      <% 5.times do |i| %>
-        <% if i < full %>
-          <span class="star star-full">★</span>
-        <% elsif i == full && half %>
-          <span class="star star-half">★</span>
-        <% else %>
-          <span class="star star-empty">★</span>
-        <% end %>
-      <% end %>
-    </div>
-
-    <div class="pn-rating-meta small">
-      <span class="pn-rating-number fw-semibold"><%= number_with_precision(r, precision: 1) %></span>
-      <span class="text-muted">• <%= number_with_delimiter(cnt) %> <%= 'review'.pluralize(cnt) %></span>
-    </div>
-  </div>
-
-  <!-- Stock (right) -->
-  <% if product.stock.present? %>
-    <% left = product.stock.to_i %>
-
-  <% end %>
-</div>
-
-
-
-            <!-- Price -->
-            <div class="product-meta mb-2">
-              <% if sale %>
-                <div class="price">
-                  <span class="fw-semibold text-danger"><%= number_to_currency(product.sale_price) %></span>
-                  <span class="price-old small"><%= number_to_currency(product.price) %></span>
+              <div class="d-flex align-items-start justify-content-between mb-2">
+                <div class="pn-rating text-center flex-grow-1 me-2"
+                     aria-label="<%= r.round(1) %> out of 5 stars, <%= cnt %> <%= 'review'.pluralize(cnt) %>">
+                  <div class="pn-stars mb-1">
+                    <% full = r.floor; half = (r - full) >= 0.5 %>
+                    <% 5.times do |i| %>
+                      <% if i < full %>
+                        <span class="star star-full">★</span>
+                      <% elsif i == full && half %>
+                        <span class="star star-half">★</span>
+                      <% else %>
+                        <span class="star star-empty">★</span>
+                      <% end %>
+                    <% end %>
+                  </div>
+                  <div class="pn-rating-meta small">
+                    <span class="pn-rating-number fw-semibold"><%= number_with_precision(r, precision: 1) %></span>
+                    <span class="text-muted">• <%= number_with_delimiter(cnt) %> <%= 'review'.pluralize(cnt) %></span>
+                  </div>
                 </div>
-              <% else %>
-                <div class="price">
-                  <span class="fw-semibold"><%= number_to_currency(product.price || 0) %></span>
-                </div>
-              <% end %>
-            </div>
+              </div>
 
-            <!-- Add to Cart -->
-            <div class="mt-auto">
-              <%= button_to "Add to Cart",
-                    add_item_cart_path(product_id: product.id),
-                    method: :post,
-                    class: "btn-lift w-100",
-                    form: { "data-turbo" => "false" } %>
+              <div class="product-meta mb-2">
+                <% if sale %>
+                  <div class="price">
+                    <span class="fw-semibold text-danger"><%= number_to_currency(product.sale_price) %></span>
+                    <span class="price-old small"><%= number_to_currency(product.price) %></span>
+                  </div>
+                <% else %>
+                  <div class="price">
+                    <span class="fw-semibold"><%= number_to_currency(product.price || 0) %></span>
+                  </div>
+                <% end %>
+              </div>
+
+              <div class="mt-auto">
+                <%= button_to "Add to Cart",
+                      add_item_cart_path(product_id: product.id),
+                      method: :post,
+                      class: "btn-lift w-100",
+                      form: { "data-turbo" => "false" } %>
+              </div>
             </div>
-          </div>
+          <% rescue => e %>
+            <%# If any error occurs inside the card, keep the card visible and show a tiny debug line %>
+            <div class="card-body">
+              <div class="text-danger small">Render error: <%= e.class %> — <%= e.message %></div>
+              <div class="text-muted small">Product ID: <%= product.id %></div>
+            </div>
+          <% end %>
         </article>
       </div>
     <% end %>
   </div>
 
-  <!-- Pagination -->
   <div class="mt-3 d-flex justify-content-center">
     <%= paginate @products if defined?(paginate) %>
   </div>
@@ -271,9 +274,4 @@
       <%= link_to "Browse all", storefront_products_path, class: "btn btn-dark btn-sm btn-lift" %>
     </div>
   </div>
-<% end %>
-
-      </main>
-    </div>
-  </section>
 <% end %>
