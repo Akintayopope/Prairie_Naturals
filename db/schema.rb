@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_15_155038) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_17_060957) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -103,7 +103,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_15_155038) do
     t.string "slug"
     t.integer "products_count", default: 0, null: false
     t.index ["slug"], name: "index_categories_on_slug", unique: true
-    t.check_constraint "name::text = ANY (ARRAY['Vitamins'::character varying, 'Protein Supplements'::character varying, 'Digestive Health'::character varying, 'Skin Care'::character varying, 'Hair Care'::character varying]::text[])", name: "categories_name_whitelist"
+    t.check_constraint "name::text = ANY (ARRAY['Vitamins'::character varying::text, 'Protein Supplements'::character varying::text, 'Digestive Health'::character varying::text, 'Skin Care'::character varying::text, 'Hair Care'::character varying::text])", name: "categories_name_whitelist"
   end
 
   create_table "coupons", force: :cascade do |t|
