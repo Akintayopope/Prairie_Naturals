@@ -16,11 +16,12 @@
     "@testing-library/cypress": "^10.0.3",
     "cypress": "^14.5.4"
   },
-  "scripts": {
-    "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "cypress:open": "cypress open",
-    "cypress:run": "cypress run --browser chrome --headless"
+ "scripts": {
+  "start": "node server.js",
+  "worker": "node worker.js",
+  "test": "echo \"Error: no test specified\" && exit 1",
+  "cypress:open": "cypress open",
+  "cypress:run": "cypress run --browser chrome --headless"
   },
   "keywords": [],
   "author": "",
