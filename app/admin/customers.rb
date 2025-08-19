@@ -9,7 +9,7 @@ if ActiveRecord::Base.connection.data_source_exists?("users")
                   :province_id, :notes,
                   :password, :password_confirmation,
                   tags: [], images: [],
-                  addresses_attributes: [:id, :line1, :line2, :city, :province_id, :postal_code, :country, :_destroy]
+                  addresses_attributes: [ :id, :line1, :line2, :city, :province_id, :postal_code, :country, :_destroy ]
 
     # ----- Scopes -----
     scope :all, default: true
@@ -81,12 +81,12 @@ if ActiveRecord::Base.connection.data_source_exists?("users")
       end
     end
 
-    # Quick action to send reset email anytime
-    # inside ActiveAdmin.register User, as: "Customer" do
+# Quick action to send reset email anytime
+# inside ActiveAdmin.register User, as: "Customer" do
 
 action_item :reset_password, only: :show do
   if resource.respond_to?(:send_reset_password_instructions)
-    path = url_for([:reset_password, :admin, resource]) rescue "#{resource_path(resource)}/reset_password"
+    path = url_for([ :reset_password, :admin, resource ]) rescue "#{resource_path(resource)}/reset_password"
     link_to "Send Reset Password Email", path, data: { turbo_method: :post }
   end
 end
@@ -122,7 +122,7 @@ end
         row("Province")     { |u| u.province&.name }
         row("Total Orders") { |u| u.orders.count }
         row("Lifetime Tax") { |u| number_to_currency(u.orders.sum(:tax) || 0) }
-        row("Lifetime Total"){ |u| number_to_currency(u.orders.sum(:total) || 0) }
+        row("Lifetime Total") { |u| number_to_currency(u.orders.sum(:total) || 0) }
       end
 
       panel "Orders" do

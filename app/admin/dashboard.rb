@@ -17,7 +17,7 @@ ActiveAdmin.register_page "Dashboard" do
       text_node "!"
     end
   end
-    # ------------------ Top Metrics ------------------
+# ------------------ Top Metrics ------------------
 div class: "top-metrics-wrapper" do
   div class: "top-metrics", style: "display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-top:8px;" do
     div class: "metric-card bg-indigo", style: "border-radius:12px;padding:14px 16px;" do

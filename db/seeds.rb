@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require "csv"
 
 puts "🌱 Seeding database..."
@@ -147,7 +148,7 @@ begin
   require Rails.root.join("app/services/walmart_serpapi_importer")
   importer = WalmartSerpapiImporter.new
 
-  keywords = ["ashwagandha", "turmeric", "lavender oil"]
+  keywords = [ "ashwagandha", "turmeric", "lavender oil" ]
   limit    = 90
 
   prev_adapter = ActiveJob::Base.queue_adapter

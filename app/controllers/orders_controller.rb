@@ -101,7 +101,7 @@ end
               disposition: "inline"
   end
 
-  # app/controllers/orders_controller.rb
+# app/controllers/orders_controller.rb
 private
 
 def build_receipt_pdf(order)
@@ -144,7 +144,7 @@ def build_receipt_pdf(order)
       left << order.address.full_address.to_s
     else
       left << order.shipping_address.to_s
-      left << [order.try(:city), order.try(:postal_code), order.try(:province)].compact.join(", ")
+      left << [ order.try(:city), order.try(:postal_code), order.try(:province) ].compact.join(", ")
     end
 
     right = []
@@ -160,12 +160,12 @@ def build_receipt_pdf(order)
     right_w = (pdf.bounds.width - col_gap) * 0.4
 
     y0 = pdf.cursor
-    pdf.bounding_box([pdf.bounds.left, y0], width: left_w)  { left.each  { |l| pdf.text l } }
-    pdf.bounding_box([pdf.bounds.left + left_w + col_gap, y0], width: right_w) { right.each { |r| pdf.text r } }
+    pdf.bounding_box([ pdf.bounds.left, y0 ], width: left_w)  { left.each  { |l| pdf.text l } }
+    pdf.bounding_box([ pdf.bounds.left + left_w + col_gap, y0 ], width: right_w) { right.each { |r| pdf.text r } }
     pdf.move_down 16
 
-    # Line items (monospace for alignment)
-    # Line items (monospace for alignment)
+# Line items (monospace for alignment)
+# Line items (monospace for alignment)
 pdf.font("Courier")
 
 def row_line(name, qty, unit, total)
@@ -220,16 +220,16 @@ pdf.font("Helvetica")
 
     # Totals block aligned to the right
     right_box_w = 220
-    pdf.bounding_box([pdf.bounds.right - right_box_w, pdf.cursor], width: right_box_w) do
+    pdf.bounding_box([ pdf.bounds.right - right_box_w, pdf.cursor ], width: right_box_w) do
       lines = []
-      lines << ["Subtotal", h.number_to_currency(subtotal)]
+      lines << [ "Subtotal", h.number_to_currency(subtotal) ]
       tax_label = "Tax"
       tax_label += " (#{order.province})" if order.province.present?
-      lines << [tax_label, h.number_to_currency(tax)]
-      lines << ["• GST", h.number_to_currency(gst)] if gst.positive?
-      lines << ["• PST", h.number_to_currency(pst)] if pst.positive?
-      lines << ["• HST", h.number_to_currency(hst)] if hst.positive?
-      lines << ["Total Paid", h.number_to_currency(total)]
+      lines << [ tax_label, h.number_to_currency(tax) ]
+      lines << [ "• GST", h.number_to_currency(gst) ] if gst.positive?
+      lines << [ "• PST", h.number_to_currency(pst) ] if pst.positive?
+      lines << [ "• HST", h.number_to_currency(hst) ] if hst.positive?
+      lines << [ "Total Paid", h.number_to_currency(total) ]
 
       # simple two-column right-aligned second column
       lines.each_with_index do |(label, val), i|
