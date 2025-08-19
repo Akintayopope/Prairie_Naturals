@@ -7,7 +7,21 @@ default: &default
   host:     <%= ENV["POSTGRES_HOST"] || "127.0.0.1" %>
   port:     <%= ENV["POSTGRES_PORT"] || 5432 %>
 
+development:
+  primary:
+    <<: *default
+    database: <%= ENV["POSTGRES_DB"] || "prairie_naturals_development" %>
+
 test:
   primary:
     <<: *default
     database: <%= ENV["POSTGRES_DB"] || "prairie_naturals_test" %>
+
+production:
+  primary:
+    <<: *default
+    url: postgres://u55no7co7t1eov:p4d7350071c68d0dbb4d7b1c3f4f43e088a099f624b5e2cb526e42fd913b3b59d@c3v5n5ajfopshl.cluster-czrs8kj4isg7.us-east-1.rds.amazonaws.com:5432/d7uffdvt9v7q96
+
+  cable:
+    <<: *default
+    url: postgres://u55no7co7t1eov:p4d7350071c68d0dbb4d7b1c3f4f43e088a099f624b5e2cb526e42fd913b3b59d@c3v5n5ajfopshl.cluster-czrs8kj4isg7.us-east-1.rds.amazonaws.com:5432/d7uffdvt9v7q96
