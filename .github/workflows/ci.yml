@@ -23,10 +23,12 @@ jobs:
 
     env:
       RAILS_ENV: test
+      # Ensure Rails uses env-driven config, not a stray DATABASE_URL
+      DATABASE_URL: ""
       POSTGRES_USER: prairie_user
       POSTGRES_PASSWORD: password
       POSTGRES_DB: prairie_naturals_test
-      POSTGRES_HOST: postgres   # service hostname (NOT localhost)
+      POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432
 
     steps:
@@ -37,13 +39,30 @@ jobs:
           ruby-version: "3.4"
           bundler-cache: true
 
+      # pg_isready is not guaranteed on the runner; install client tools.
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      # Explicitly wait for the Postgres service to accept connections.
+      - name: Wait for Postgres
+        run: |
+          for i in {1..40}; do
+            pg_isready -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" -U "$POSTGRES_USER" -d "$POSTGRES_DB" && exit 0
+            echo "Postgres not ready yet... ($i)"
+            sleep 2
+          done
+          echo "Postgres failed to become ready in time."
+          exit 1
+
       - name: Prepare DB
-        run: bundle exec rails db:prepare
+        run: bundle exec rails db:prepare --trace
 
       - name: RuboCop
         run: bundle exec rubocop -A
 
       - name: Run tests (Minitest)
         run: DISABLE_BOOTSNAP=1 bin/rails test --backtrace
-        # If you use RSpec instead, replace the line above with:
+        # If you use RSpec instead:
         # run: DISABLE_BOOTSNAP=1 bundle exec rspec --format documentation
