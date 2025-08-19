@@ -1,5 +1,4 @@
 # app/controllers/storefront/categories_controller.rb
-module Storefront
   class CategoriesController < ApplicationController
     # Keep category browsing public. 'raise: false' prevents errors if the callback isn't defined.
     skip_before_action :authenticate_user!, only: :show, raise: false
@@ -47,4 +46,4 @@ module Storefront
       render "storefront/products/index"
     end
   end
-end
+
