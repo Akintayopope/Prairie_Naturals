@@ -8,6 +8,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    # Postgres service container
     services:
       postgres:
         image: postgres:16
@@ -15,23 +16,27 @@ jobs:
           POSTGRES_USER: prairie_user
           POSTGRES_PASSWORD: password
           POSTGRES_DB: prairie_naturals_test
+        # Publish 5432 to the host so the job (outside the Docker network)
+        # can reach it via 127.0.0.1
         ports:
-          - "5432:5432"
+          - 5432:5432
         options: >-
           --health-cmd="pg_isready -U prairie_user -d prairie_naturals_test"
           --health-interval=5s
           --health-timeout=5s
-          --health-retries=30
+          --health-retries=60   # ~5 minutes of health probing
 
     env:
       RAILS_ENV: test
-      DATABASE_URL: ""                 # ensure Rails uses env-driven config
+      # Force Rails to use database.yml + env (ignore any stray DATABASE_URL)
+      DATABASE_URL: ""
+      # DB connection settings used by Rails and our wait script
       POSTGRES_USER: prairie_user
       POSTGRES_PASSWORD: password
       POSTGRES_DB: prairie_naturals_test
-      POSTGRES_HOST: postgres          # IMPORTANT: service hostname
+      POSTGRES_HOST: 127.0.0.1           # IMPORTANT: connect via localhost
       POSTGRES_PORT: 5432
-      PGPASSWORD: password
+      PGPASSWORD: password               # so psql/pg_isready won’t prompt
 
     steps:
       - uses: actions/checkout@v4
@@ -46,10 +51,17 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y postgresql-client
 
+      # Helpful when debugging timeouts
+      - name: Show Postgres service health (pre-wait)
+        run: |
+          docker inspect ${{ job.services.postgres.id }} \
+            --format '{{json .State.Health}}' || true
+
+      # Robust wait: longer window + real SQL check
       - name: Wait for Postgres (pg_isready + SQL)
         run: |
           echo "Waiting for Postgres on $POSTGRES_HOST:$POSTGRES_PORT..."
-          for i in {1..120}; do  # ~4 minutes
+          for i in {1..240}; do  # ~8 minutes
             if pg_isready -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" -U "$POSTGRES_USER" -d "$POSTGRES_DB" >/dev/null 2>&1; then
               if psql "host=$POSTGRES_HOST port=$POSTGRES_PORT dbname=$POSTGRES_DB user=$POSTGRES_USER sslmode=disable" -c "SELECT 1" >/dev/null 2>&1; then
                 echo "Postgres is ready (attempt $i)."
@@ -62,6 +74,8 @@ jobs:
           echo "Postgres failed to become ready in time."
           exit 1
 
+      # If the wait step fails above, this step won't run; but if db:prepare fails,
+      # dump container health & logs to quickly see why.
       - name: Prepare DB
         run: bundle exec rails db:prepare --trace
 
@@ -70,5 +84,15 @@ jobs:
 
       - name: Run tests (Minitest)
         run: DISABLE_BOOTSNAP=1 bin/rails test --backtrace
-        # If you use RSpec instead:
+        # For RSpec users:
         # run: DISABLE_BOOTSNAP=1 bundle exec rspec --format documentation
+
+      # Post-run diagnostics (only on failure)
+      - name: Dump Postgres health & logs (on failure)
+        if: failure()
+        run: |
+          echo "== Service health =="
+          docker inspect ${{ job.services.postgres.id }} \
+            --format '{{json .State.Health}}' || true
+          echo "== Service logs (tail) =="
+          docker logs --tail=200 ${{ job.services.postgres.id }} || true
