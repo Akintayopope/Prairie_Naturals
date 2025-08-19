@@ -19,8 +19,8 @@ jobs:
         # Publish 5432 to the host so the job (outside the Docker network)
         # can reach it via 127.0.0.1
         ports:
-          - 5432:5432
-        options: >-
+          - "5432:5432"
+       options: >-
           --health-cmd="pg_isready -U prairie_user -d prairie_naturals_test"
           --health-interval=5s
           --health-timeout=5s
