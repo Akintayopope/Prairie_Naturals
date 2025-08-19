@@ -43,8 +43,6 @@ Rails.application.configure do
   # Prevent health checks from clogging up the logs.
   config.silence_healthcheck_path = "/up"
 
-  config.active_storage.service = :cloudinary
-
   # Don't log any deprecations.
   config.active_support.report_deprecations = false
 
