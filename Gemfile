@@ -82,3 +82,6 @@ group :test do
 end
 
 gem 'sidekiq'
+
+gem "cloudinary"
+gem "activestorage-cloudinary-service"

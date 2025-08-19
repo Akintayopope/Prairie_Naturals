@@ -6,10 +6,6 @@ local:
   service: Disk
   root: <%= Rails.root.join("storage") %>
 
-  cloudinary:
-  service: Cloudinary
-  folder: prairie_naturals # any folder/prefix you like (optional)
-
 
 # Use bin/rails credentials:edit to set the AWS secrets (as aws:access_key_id|secret_access_key)
 # amazon:
@@ -37,3 +33,9 @@ local:
 #   service: Mirror
 #   primary: local
 #   mirrors: [ amazon, google, microsoft ]
+
+cloudinary:
+  service: Cloudinary
+  cloud_name: dhbg1zltx
+  api_key: 719627817655356
+  api_secret: SLvftj2lb_M3dk0ty0r0bxc3b2E
