@@ -1,0 +1,28 @@
+version: "3.9"
+
+services:
+  web:
+    build: .
+    env_file: .env.dev
+    command: bash -lc "bin/docker-entrypoint"
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    volumes:
+      - storage_data:/app/storage   # keep uploads locally between restarts
+    restart: unless-stopped
+
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  pg_data:
+  storage_data:

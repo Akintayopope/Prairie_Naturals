@@ -13,15 +13,4 @@ test:
   database: <%= ENV.fetch("POSTGRES_DB", "pn_production") %>_test
 
 production:
-  primary:
-    <<: *default
-    url: <%= ENV.fetch("DATABASE_URL") %>
-  queue:
-    <<: *default
-    url: <%= ENV.fetch("DATABASE_URL") %>
-  cache:
-    <<: *default
-    url: <%= ENV.fetch("DATABASE_URL") %>
-  cable:
-    <<: *default
-    url: <%= ENV.fetch("DATABASE_URL") %>
+  url: <%= ENV.fetch("DATABASE_URL") %>

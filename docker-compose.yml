@@ -1,31 +1,42 @@
 services:
   db:
     image: postgres:16
+    env_file: .env.dev
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: prairie_naturals_production
-    ports: ["5432:5432"]
-    volumes: [pgdata:/var/lib/postgresql/data]
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\" || exit 1"]
       interval: 5s
       timeout: 3s
-      retries: 20
+      retries: 30
 
   web:
-    build: .
-    environment:
-      RAILS_ENV: production
-      RAILS_MASTER_KEY: ${RAILS_MASTER_KEY}
-      DATABASE_URL: postgres://postgres:postgres@db:5432/prairie_naturals_production
-      RAILS_LOG_TO_STDOUT: "1"
-      RAILS_SERVE_STATIC_FILES: "1"
-    ports: ["3000:3000"]
+    build:
+      context: .
+      # If you *really* need RAILS_MASTER_KEY at build time, keep args below.
+      # Otherwise remove the whole 'args:' block.
+      # args:
+      #   RAILS_MASTER_KEY: ${RAILS_MASTER_KEY}
+    env_file: .env.dev
     depends_on:
       db:
         condition: service_healthy
-    command: bash -lc "bin/rails db:prepare && bin/rails s -b 0.0.0.0 -p 3000"
+    ports:
+      - "3000:3000"      # use "80:3000" on a VPS for direct IP access
+    volumes:
+      - storage_data:/app/storage   # fine for dev; not needed if using Cloudinary/S3 in prod
+    restart: unless-stopped
+    # OPTION A (recommended): let Dockerfile ENTRYPOINT+CMD run. No 'command:' here.
+    # OPTION B: if you prefer, explicitly call the script:
+    # command: bash -lc 'bin/docker-entrypoint.sh'
 
 volumes:
-  pgdata:
+  pg_data:
+  storage_data:

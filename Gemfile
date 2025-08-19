@@ -51,8 +51,10 @@ gem "nokogiri", "~> 1.16"          # "~> 1.18" doesn’t exist; 1.16.x is curren
 gem "prawn"
 gem "prawn-table"
 
-# Env
-gem "dotenv-rails"
+group :development, :test do
+  gem "dotenv-rails"
+end
+
 
 # Charts & helpers
 gem "chartkick", "~> 5.2"
