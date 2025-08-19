@@ -4,8 +4,8 @@ default: &default
   pool: <%= ENV.fetch("RAILS_MAX_THREADS", 5) %>
   username: <%= ENV["POSTGRES_USER"] || "postgres" %>
   password: <%= ENV["POSTGRES_PASSWORD"] || "" %>
-  host:     <%= ENV["POSTGRES_HOST"] || "127.0.0.1" %>
-  port:     <%= ENV["POSTGRES_PORT"] || 5432 %>
+  host: <%= ENV["POSTGRES_HOST"] || "127.0.0.1" %>
+  port: <%= ENV["POSTGRES_PORT"] || 5432 %>
 
 development:
   primary:
@@ -20,18 +20,13 @@ test:
 production:
   primary:
     <<: *default
-    url: postgres://u55no7co7t1eov:p4d7350071c68d0dbb4d7b1c3f4f43e088a099f624b5e2cb526e42fd913b3b59d@c3v5n5ajfopshl.cluster-czrs8kj4isg7.us-east-1.rds.amazonaws.com:5432/d7uffdvt9v7q96
-
+    url: <%= ENV["DATABASE_URL"] %>
   cable:
     <<: *default
-    url: postgres://u55no7co7t1eov:p4d7350071c68d0dbb4d7b1c3f4f43e088a099f624b5e2cb526e42fd913b3b59d@c3v5n5ajfopshl.cluster-czrs8kj4isg7.us-east-1.rds.amazonaws.com:5432/d7uffdvt9v7q96
-
+    url: <%= ENV["DATABASE_URL"] %>
   queue:
     <<: *default
-    url: postgres://u55no7co7t1eov:p4d7350071c68d0dbb4d7b1c3f4f43e088a099f624b5e2cb526e42fd913b3b59d@c3v5n5ajfopshl.cluster-czrs8kj4isg7.us-east-1.rds.amazonaws.com:5432/d7uffdvt9v7q96
-
-
-
+    url: <%= ENV["DATABASE_URL"] %>
   cache:
     <<: *default
-    url: postgres://u55no7co7t1eov:p4d7350071c68d0dbb4d7b1c3f4f43e088a099f624b5e2cb526e42fd913b3b59d@c3v5n5ajfopshl.cluster-czrs8kj4isg7.us-east-1.rds.amazonaws.com:5432/d7uffdvt9v7q96
+    url: <%= ENV["DATABASE_URL"] %>
