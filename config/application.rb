@@ -2,9 +2,6 @@ require_relative "boot"
 
 require "rails/all"
 
-# config/application.rb
-config.active_job.queue_adapter = :solid_queue
-
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
@@ -26,5 +23,8 @@ module PrairieNaturals
     #
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
+    config.active_job.queue_adapter = :solid_queue
   end
+
+
 end
