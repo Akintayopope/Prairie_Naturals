@@ -18,11 +18,11 @@ class WalmartSerpapiImporter
   ].freeze
 
   CATEGORY_MAP = [
-    [/ashwagandha|turmeric|ginseng|supplement|vitamin|capsule|tablet/i, "Vitamins"],
-    [/protein|whey|casein|collagen|gainer/i,                           "Protein Supplements"],
-    [/digest|probiotic|enzyme|fiber|prebiotic/i,                       "Digestive Health"],
-    [/skin|serum|face|cream|lotion|retinol|hyaluronic|sunscreen/i,     "Skin Care"],
-    [/hair|shampoo|conditioner|biotin|keratin|scalp/i,                 "Hair Care"]
+    [ /ashwagandha|turmeric|ginseng|supplement|vitamin|capsule|tablet/i, "Vitamins" ],
+    [ /protein|whey|casein|collagen|gainer/i,                           "Protein Supplements" ],
+    [ /digest|probiotic|enzyme|fiber|prebiotic/i,                       "Digestive Health" ],
+    [ /skin|serum|face|cream|lotion|retinol|hyaluronic|sunscreen/i,     "Skin Care" ],
+    [ /hair|shampoo|conditioner|biotin|keratin|scalp/i,                 "Hair Care" ]
   ].freeze
 
   def initialize(api_key: ENV["SERPAPI_KEY"])
@@ -152,7 +152,7 @@ class WalmartSerpapiImporter
   end
 
   def resolve_category(keyword:, serpapi_item:, title:)
-    text  = [keyword, serpapi_item["category"], title].compact.join(" ")
+    text  = [ keyword, serpapi_item["category"], title ].compact.join(" ")
     match = CATEGORY_MAP.find { |(rx, _)| rx.match?(text) }
     (match && match.last) || "Vitamins" # safe default within whitelist
   end
@@ -210,7 +210,7 @@ class WalmartSerpapiImporter
   def unique_name_for(product, title, product_id)
     return title unless Product.where.not(id: product.id).exists?(name: title)
     suffix = " (#{product_id})"
-    base   = title[0, [0, 200 - suffix.length].max]
+    base   = title[0, [ 0, 200 - suffix.length ].max]
     "#{base}#{suffix}"
   end
 

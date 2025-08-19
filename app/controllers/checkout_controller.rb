@@ -1,7 +1,7 @@
 # app/controllers/checkout_controller.rb
 class CheckoutController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_provinces, only: [:new, :create]
+  before_action :set_provinces, only: [ :new, :create ]
 
   class << self
     def action_methods
@@ -176,7 +176,7 @@ class CheckoutController < ApplicationController
     pdf.move_down 8
     pdf.text "Date: #{Time.zone.now.strftime("%B %d, %Y")}"
     pdf.text "Customer: #{shipping_name.presence || current_user.email}"
-    ship_to = [shipping_address, city, province_name, postal_code].reject(&:blank?).join(", ")
+    ship_to = [ shipping_address, city, province_name, postal_code ].reject(&:blank?).join(", ")
     pdf.text "Ship To: #{ship_to}"
     pdf.move_down 10
     pdf.text "Items", style: :bold
@@ -272,7 +272,7 @@ class CheckoutController < ApplicationController
   # Create a Stripe Checkout Session for an existing order (snapshot).
   def create_checkout_session_for(order)
     Stripe::Checkout::Session.create(
-      payment_method_types: ["card"],
+      payment_method_types: [ "card" ],
       customer_email: current_user.email,
       line_items: build_line_items_from_order(order),
       mode: "payment",
