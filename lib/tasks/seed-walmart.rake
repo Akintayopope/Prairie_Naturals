@@ -5,7 +5,7 @@ namespace :seed do
   desc "Import products via SerpApi Walmart. Args: KEYWORDS=comma,list LIMIT=30"
   task walmart: :environment do
     # Keywords mapped to your 5 categories
-    keywords = (ENV["KEYWORDS"] || "ashwagandha,turmeric,lavender essential oil,hair growth serum,protein powder")
+    keywords = (ENV["KEYWORDS"] || "ashwagandha,turmeric,lavender essential oil,hair growth serum,protein powder,hair oil,rosemary oil hair,castor oil hair,biotin shampoo,argan oil hair,keratin shampoo,dandruff shampoo,hair conditioner,hair serum")
                .split(",").map(&:strip)
     limit = (ENV["LIMIT"] || 30).to_i
 

@@ -2,6 +2,9 @@ require_relative "boot"
 
 require "rails/all"
 
+# config/application.rb
+config.active_job.queue_adapter = :solid_queue
+
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
