@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker';
 
 describe('User Sign-Up & Sign-In', () => {
-  // Adjust these to your routes (Devise often uses /users/sign_up and /users/sign_in)
+
   const SIGNUP_PATH = '/signup';        // or '/users/sign_up'
   const LOGIN_PATH  = '/login';         // or '/users/sign_in'
 

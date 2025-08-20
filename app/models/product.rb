@@ -1,14 +1,13 @@
-# app/models/product.rb
 class Product < ApplicationRecord
   extend FriendlyId
   friendly_id :name, use: :slugged
 
   # Associations
   belongs_to :category, counter_cache: true, inverse_of: :products
-  has_many   :order_items,    dependent: :restrict_with_error
-  has_many   :reviews,        dependent: :destroy
-  has_many   :cart_items,     dependent: :destroy
-  has_many   :wishlist_items, dependent: :destroy
+  has_many :order_items, dependent: :restrict_with_error
+  has_many :reviews, dependent: :destroy
+  has_many :cart_items, dependent: :destroy
+  has_many :wishlist_items, dependent: :destroy
   has_many_attached :images
 
   # Normalization
@@ -16,13 +15,29 @@ class Product < ApplicationRecord
 
   # Validations
   validates :category, presence: true
-  validates :name,  presence: true, uniqueness: { case_sensitive: false }, length: { maximum: 200 }
-  validates :price, presence: true, numericality: { greater_than_or_equal_to: 0 }
-  validates :stock, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, allow_nil: true
+  validates :name,
+            presence: true,
+            uniqueness: {
+              case_sensitive: false
+            },
+            length: {
+              maximum: 200
+            }
+  validates :price,
+            presence: true,
+            numericality: {
+              greater_than_or_equal_to: 0
+            }
+  validates :stock,
+            numericality: {
+              only_integer: true,
+              greater_than_or_equal_to: 0
+            },
+            allow_nil: true
 
   # Scopes
   scope :alphabetical, -> { order(Arel.sql("LOWER(name) ASC")) }
-  scope :in_stock,     -> { where("stock IS NULL OR stock > 0") }
+  scope :in_stock, -> { where("stock IS NULL OR stock > 0") }
 
   # FriendlyId: refresh slug when name changes
   def should_generate_new_friendly_id?
@@ -39,30 +54,53 @@ class Product < ApplicationRecord
     (self.rating.presence || average_rating.to_f).to_f
   end
 
-  # Prefer our own DB counter if present, else the imported CSV count
   def total_reviews
     (self.reviews_count.presence || self.review_count.to_i)
   end
 
-  # Ransack (ActiveAdmin)
   def self.ransackable_associations(_ = nil)
     %w[category order_items reviews images_attachments images_blobs]
   end
 
   def self.ransackable_attributes(_ = nil)
     %w[
-      id name slug title description price sale_price stock category_id
-      rating image_url link created_at updated_at
+      id
+      name
+      slug
+      title
+      description
+      price
+      sale_price
+      stock
+      category_id
+      rating
+      image_url
+      link
+      created_at
+      updated_at
     ]
   end
 
-    def self.ransackable_attributes(_ = nil)
+  def self.ransackable_attributes(_ = nil)
     %w[
-      id name slug title description price sale_price stock category_id
-      rating image_url link reviews_count review_count created_at updated_at
+      id
+      name
+      slug
+      title
+      description
+      price
+      sale_price
+      stock
+      category_id
+      rating
+      image_url
+      link
+      reviews_count
+      review_count
+      created_at
+      updated_at
     ]
   end
-
 
   private
 

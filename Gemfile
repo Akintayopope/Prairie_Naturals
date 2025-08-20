@@ -81,7 +81,16 @@ group :test do
   gem "selenium-webdriver"
 end
 
-gem 'sidekiq'
+gem "sidekiq"
 
 gem "cloudinary"
 gem "activestorage-cloudinary-service"
+gem "htmlbeautifier", "~> 1.4"
+
+group :development do
+  gem "ruby-lsp", require: false
+  gem "syntax_tree", "~> 6.0"
+  # OR instead of syntax_tree, you can use one of these:
+  # gem "rubocop", require: false
+  # gem "standard", require: false
+end

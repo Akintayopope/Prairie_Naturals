@@ -1,24 +1,18 @@
-# app/models/category.rb
-# frozen_string_literal: true
-
 class Category < ApplicationRecord
   extend FriendlyId
   friendly_id :name, use: :slugged
 
-# --- Constants ---
-VALID_CATEGORY_NAMES = [
-  "Vitamins",
-  "Protein Supplements",
-  "Digestive Health",
-  "Skin Care",
-  "Hair Care"
-].freeze
+  # --- Constants ---
+  VALID_CATEGORY_NAMES = [
+    "Vitamins",
+    "Protein Supplements",
+    "Digestive Health",
+    "Skin Care",
+    "Hair Care"
+  ].freeze
 
   # --- Associations ---
   has_many :products, dependent: :restrict_with_error, inverse_of: :category
-  # If you add counter cache:
-  # has_many :products, dependent: :restrict_with_error, inverse_of: :category
-  # (and add products_count column + counter_cache: true on Product)
 
   # --- Callbacks ---
   before_validation :normalize_name!
@@ -26,14 +20,20 @@ VALID_CATEGORY_NAMES = [
   # --- Validations ---
   validates :name,
             presence: true,
-            uniqueness: { case_sensitive: false },
-            length: { maximum: 100 },
-            inclusion: { in: VALID_CATEGORY_NAMES,
-                         message: "must be one of: #{VALID_CATEGORY_NAMES.join(', ')}" }
+            uniqueness: {
+              case_sensitive: false
+            },
+            length: {
+              maximum: 100
+            },
+            inclusion: {
+              in: VALID_CATEGORY_NAMES,
+              message: "must be one of: #{VALID_CATEGORY_NAMES.join(", ")}"
+            }
 
   # --- Scopes ---
   scope :alphabetical, -> { order(Arel.sql("LOWER(name) ASC")) }
-  scope :defaults,     -> { where(name: VALID_CATEGORY_NAMES) }
+  scope :defaults, -> { where(name: VALID_CATEGORY_NAMES) }
 
   # --- FriendlyId ---
   def should_generate_new_friendly_id?
@@ -58,8 +58,14 @@ VALID_CATEGORY_NAMES = [
   private
 
   def normalize_name!
-    self.name = name.to_s.strip.squeeze(" ")
-                      .gsub(/\s+/, " ")
-                      .split.map(&:capitalize).join(" ")
+    self.name =
+      name
+        .to_s
+        .strip
+        .squeeze(" ")
+        .gsub(/\s+/, " ")
+        .split
+        .map(&:capitalize)
+        .join(" ")
   end
 end

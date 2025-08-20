@@ -9,39 +9,56 @@ class Coupon < ApplicationRecord
 
   # Percent coupons: 1–100
   with_options if: :percent? do
-    validates :value, numericality: {
-      greater_than_or_equal_to: 1,
-      less_than_or_equal_to: 100
-    }
+    validates :value,
+              numericality: {
+                greater_than_or_equal_to: 1,
+                less_than_or_equal_to: 100
+              }
   end
 
   # Amount coupons: >= 0.01
   with_options if: :amount? do
-    validates :value, numericality: {
-      greater_than_or_equal_to: 0.01
-    }
+    validates :value, numericality: { greater_than_or_equal_to: 0.01 }
   end
 
-  validates :max_uses, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
+  validates :max_uses,
+            numericality: {
+              greater_than_or_equal_to: 0
+            },
+            allow_nil: true
 
-  scope :active_now, -> {
-    now = Time.current
-    where("(starts_at IS NULL OR starts_at <= ?) AND (ends_at IS NULL OR ends_at >= ?) AND active = TRUE", now, now)
-  }
+  scope :active_now,
+        -> do
+          now = Time.current
+          where(
+            "(starts_at IS NULL OR starts_at <= ?) AND (ends_at IS NULL OR ends_at >= ?) AND active = TRUE",
+            now,
+            now
+          )
+        end
 
   def active_now?
-    active && (starts_at.nil? || starts_at <= Time.current) && (ends_at.nil? || ends_at >= Time.current)
+    active && (starts_at.nil? || starts_at <= Time.current) &&
+      (ends_at.nil? || ends_at >= Time.current)
   end
 
   def usage_string
-    "#{uses_count || 0} / #{max_uses || '∞'}"
+    "#{uses_count || 0} / #{max_uses || "∞"}"
   end
 
-  # 🔎 Ransack 4 allowlists
   def self.ransackable_attributes(_auth_object = nil)
     %w[
-      id code discount_type value max_uses uses_count active
-      starts_at ends_at created_at updated_at
+      id
+      code
+      discount_type
+      value
+      max_uses
+      uses_count
+      active
+      starts_at
+      ends_at
+      created_at
+      updated_at
     ]
   end
 

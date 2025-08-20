@@ -1,0 +1,33 @@
+{
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.formatOnSave": true,
+
+  // Ruby files (.rb, Rails code)
+  "[ruby]": {
+    "editor.defaultFormatter": "Shopify.ruby-lsp"
+  },
+
+  // Rails view templates (.erb)
+
+   "[erb]": {
+    "editor.defaultFormatter": "aliariff.vscode-erb-beautify"
+  },
+
+  // YAML files (config, database.yml, etc.)
+  "[yaml]": {
+    "editor.defaultFormatter": "redhat.vscode-yaml",
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  },
+
+   "rubyLsp.useBundler": true,
+  "rubyLsp.formatter": "syntax_tree",  // or "rubocop" or "standard"
+  "[ruby]": { "editor.defaultFormatter": "Shopify.ruby-lsp" },
+
+  // Make sure VS Code recognizes Rails’ erb files
+  "files.associations": {
+    "*.html.erb": "erb",
+    "*.text.erb": "erb"
+  }
+}

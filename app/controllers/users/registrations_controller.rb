@@ -1,14 +1,11 @@
-# app/controllers/users/registrations_controller.rb
 class Users::RegistrationsController < Devise::RegistrationsController
-  skip_before_action :authenticate_user!, only: [ :new, :create ], raise: false
-  before_action :set_provinces, only: [ :new, :create, :edit, :update ]
-  before_action :configure_sign_up_params, only: [ :create ]
-  before_action :configure_account_update_params, only: [ :update ]
+  skip_before_action :authenticate_user!, only: %i[new create], raise: false
+  before_action :set_provinces, only: %i[new create edit update]
+  before_action :configure_sign_up_params, only: [:create]
+  before_action :configure_account_update_params, only: [:update]
 
   def new
-    super do |resource|
-      resource.build_address unless resource.address
-    end
+    super { |resource| resource.build_address unless resource.address }
   end
 
   protected
@@ -22,7 +19,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
       :sign_up,
       keys: [
         :username,
-        { address_attributes: [ :line1, :line2, :city, :province_id, :postal_code ] }
+        { address_attributes: %i[line1 line2 city province_id postal_code] }
       ]
     )
   end
@@ -32,7 +29,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
       :account_update,
       keys: [
         :username,
-        { address_attributes: [ :id, :line1, :line2, :city, :province_id, :postal_code ] }
+        { address_attributes: %i[id line1 line2 city province_id postal_code] }
       ]
     )
   end
@@ -41,7 +38,8 @@ class Users::RegistrationsController < Devise::RegistrationsController
 
   def set_provinces
     @provinces =
-      if defined?(Province) && Province.respond_to?(:order) && Province.column_names.include?("name")
+      if defined?(Province) && Province.respond_to?(:order) &&
+           Province.column_names.include?("name")
         Province.order(:name)
       else
         []

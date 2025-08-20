@@ -1,6 +1,6 @@
 module BreadcrumbsHelper
   def breadcrumb_trail(record: nil)
-    crumbs = [ { label: "Home", url: root_path } ]
+    crumbs = [{ label: "Home", url: root_path }]
 
     if controller_path == "storefront/products"
       case action_name
@@ -10,22 +10,26 @@ module BreadcrumbsHelper
           crumbs << { label: "Featured Products", url: root_path }
         elsif defined?(@category) && @category.present?
           # Home → Category (filtered PLP)
-          crumbs << { label: @category.name, url: storefront_products_path(category_id: @category.id) }
+          crumbs << {
+            label: @category.name,
+            url: storefront_products_path(category_id: @category.id)
+          }
         else
-          # Home → Products (unfiltered PLP)
+          # Home → Products
           crumbs << { label: "Products", url: storefront_products_path }
         end
-
       when "show"
         product = record || @product
         if product&.category
-          crumbs << { label: product.category.name, url: storefront_products_path(category_id: product.category_id) }
+          crumbs << {
+            label: product.category.name,
+            url: storefront_products_path(category_id: product.category_id)
+          }
         else
           crumbs << { label: "Products", url: storefront_products_path }
         end
         crumbs << { label: product&.name.to_s, url: request.path }
       end
-
     else
       title = content_for?(:title) ? content_for(:title) : action_name.humanize
       crumbs << { label: title, url: request.path }

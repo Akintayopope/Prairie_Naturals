@@ -1,12 +1,10 @@
 class ProductsController < ApplicationController
   before_action :set_product, only: %i[show edit update destroy]
 
-  # GET /products
   def index
     @categories = Category.order(:name)
     @products = Product.includes(:category).order(created_at: :desc)
 
-    # Optional category filter
     if params[:category_id].present?
       @products = @products.where(category_id: params[:category_id])
     end
@@ -15,16 +13,15 @@ class ProductsController < ApplicationController
     @products = @products.page(params[:page]).per(12)
   end
 
-  # GET /products/:id
   def index
-    @products = Product.includes(images_attachments: :blob).order(created_at: :desc)
+    @products =
+      Product.includes(images_attachments: :blob).order(created_at: :desc)
   end
 
   def show
     @product = Product.includes(images_attachments: :blob).find(params[:id])
   end
 
-  # GET /products/new
   def new
     @product = Product.new
   end
@@ -39,11 +36,15 @@ class ProductsController < ApplicationController
 
     respond_to do |format|
       if @product.save
-        format.html { redirect_to @product, notice: "Product was successfully created." }
+        format.html do
+          redirect_to @product, notice: "Product was successfully created."
+        end
         format.json { render :show, status: :created, location: @product }
       else
         format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @product.errors, status: :unprocessable_entity }
+        format.json do
+          render json: @product.errors, status: :unprocessable_entity
+        end
       end
     end
   end
@@ -52,11 +53,15 @@ class ProductsController < ApplicationController
   def update
     respond_to do |format|
       if @product.update(product_params)
-        format.html { redirect_to @product, notice: "Product was successfully updated." }
+        format.html do
+          redirect_to @product, notice: "Product was successfully updated."
+        end
         format.json { render :show, status: :ok, location: @product }
       else
         format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @product.errors, status: :unprocessable_entity }
+        format.json do
+          render json: @product.errors, status: :unprocessable_entity
+        end
       end
     end
   end
@@ -65,7 +70,11 @@ class ProductsController < ApplicationController
   def destroy
     @product.destroy!
     respond_to do |format|
-      format.html { redirect_to products_path, notice: "Product was successfully destroyed.", status: :see_other }
+      format.html do
+        redirect_to products_path,
+                    notice: "Product was successfully destroyed.",
+                    status: :see_other
+      end
       format.json { head :no_content }
     end
   end
@@ -79,6 +88,12 @@ class ProductsController < ApplicationController
 
   # Strong parameters
   def product_params
-    params.require(:product).permit(:name, :description, :price, :image, :category_id)
+    params.require(:product).permit(
+      :name,
+      :description,
+      :price,
+      :image,
+      :category_id
+    )
   end
 end

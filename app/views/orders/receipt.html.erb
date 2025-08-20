@@ -1,4 +1,4 @@
-<%# app/views/orders/receipt.html.erb %>
+
 <% subtotal = (@order.try(:subtotal) || @order.try(:subtotal_cents).to_i/100.0).to_f %>
 <% tax      = (@order.try(:tax)      || @order.try(:tax_cents).to_i/100.0).to_f %>
 <% total    = (@order.try(:total)    || @order.try(:total_cents).to_i/100.0).to_f %>

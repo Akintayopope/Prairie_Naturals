@@ -1,63 +1,74 @@
-# frozen_string_literal: true
-
 ActiveAdmin.register_page "Dashboard" do
   menu priority: 1, label: "📊 Dashboard"
 
   content title: "Prairie Naturals Admin Dashboard" do
     div class: "welcome-message" do
-    name =
-      current_admin_user.try(:username).presence ||
-      current_admin_user.try(:first_name).presence ||
-      current_admin_user.try(:name).presence ||
-      current_admin_user.email.to_s.split("@").first.titleize
+      name =
+        current_admin_user.try(:username).presence ||
+          current_admin_user.try(:first_name).presence ||
+          current_admin_user.try(:name).presence ||
+          current_admin_user.email.to_s.split("@").first.titleize
 
-    para do
-      text_node "👋 Welcome back, "
-      strong name
-      text_node "!"
+      para do
+        text_node "👋 Welcome back, "
+        strong name
+        text_node "!"
+      end
     end
-  end
-# ------------------ Top Metrics ------------------
-div class: "top-metrics-wrapper" do
-  div class: "top-metrics", style: "display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-top:8px;" do
-    div class: "metric-card bg-indigo", style: "border-radius:12px;padding:14px 16px;" do
-      h3 "🛒 Total Orders"
-      h2 Order.count
+    # ------------------ Top Metrics ------------------
+    div class: "top-metrics-wrapper" do
+      div class: "top-metrics",
+          style:
+            "display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-top:8px;" do
+        div class: "metric-card bg-indigo",
+            style: "border-radius:12px;padding:14px 16px;" do
+          h3 "🛒 Total Orders"
+          h2 Order.count
+        end
+        div class: "metric-card bg-green",
+            style: "border-radius:12px;padding:14px 16px;" do
+          h3 "💰 Total Revenue"
+          h2 number_to_currency(Order.sum(:total) || 0)
+        end
+        div class: "metric-card bg-yellow",
+            style: "border-radius:12px;padding:14px 16px;" do
+          h3 "📅 This Month's Orders"
+          h2 Order.where(
+               created_at: Time.current.beginning_of_month..Time.current
+             ).count
+        end
+        div class: "metric-card bg-blue",
+            style: "border-radius:12px;padding:14px 16px;" do
+          h3 "👤 Total Users"
+          h2 User.count
+        end
+      end
     end
-    div class: "metric-card bg-green", style: "border-radius:12px;padding:14px 16px;" do
-      h3 "💰 Total Revenue"
-      h2 number_to_currency(Order.sum(:total) || 0)
-    end
-    div class: "metric-card bg-yellow", style: "border-radius:12px;padding:14px 16px;" do
-      h3 "📅 This Month's Orders"
-      h2 Order.where(created_at: Time.current.beginning_of_month..Time.current).count
-    end
-    div class: "metric-card bg-blue", style: "border-radius:12px;padding:14px 16px;" do
-      h3 "👤 Total Users"
-      h2 User.count
-    end
-  end
-end
-
 
     # ------------------ Recent Orders ------------------
     panel "🧾 Recent Orders" do
       table_for Order.order(created_at: :desc).limit(5) do
         # Use auto_link so links work regardless of namespace (:internal, :admin, etc.)
         column("Order #") { |o| auto_link(o, o.id) }
-        column("Customer") { |o| o.user ? auto_link(o.user, o.user.email) : "N/A" }
+        column("Customer") do |o|
+          o.user ? auto_link(o.user, o.user.email) : "N/A"
+        end
 
         column("Status") do |o|
-          status_class = case o.status.to_s.downcase
-          when "paid" then "ok"
-          when "cancelled", "failed", "0" then "error"
-          else "warning"
-          end
+          status_class =
+            case o.status.to_s.downcase
+            when "paid"
+              "ok"
+            when "cancelled", "failed", "0"
+              "error"
+            else
+              "warning"
+            end
           status_tag(o.status.to_s.titleize, class: status_class)
         end
 
         column("Total") { |o| number_to_currency(o.total || 0) }
-        column("Date")  { |o| l(o.created_at, format: :short) }
+        column("Date") { |o| l(o.created_at, format: :short) }
       end
 
       # Namespace-aware "View all" button (works for :internal or any future rename)
@@ -85,9 +96,11 @@ end
     # ------------------ Recent Products ------------------
     panel "🆕 Recently Added Products" do
       table_for Product.order(created_at: :desc).limit(5) do
-        column("Name")      { |p| auto_link(p, p.name) }
-        column("Category")  { |p| p.try(:category).try(:name) || "Uncategorized" }
-        column("Price")     { |p| number_to_currency(p.price || 0) }
+        column("Name") { |p| auto_link(p, p.name) }
+        column("Category") do |p|
+          p.try(:category).try(:name) || "Uncategorized"
+        end
+        column("Price") { |p| number_to_currency(p.price || 0) }
         column("Stock Left") do |p|
           stock = (p.respond_to?(:stock) && p.stock) ? p.stock.to_i : 0
           css_class = stock > 10 ? "ok" : stock > 0 ? "warning" : "error"

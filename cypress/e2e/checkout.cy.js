@@ -14,15 +14,14 @@ describe('Cart & Checkout', () => {
     cy.dc('cart-update').click();
     cy.contains(/updated|cart/i).should('exist');
 
-    // Stub your checkout session route if you redirect to Stripe
+
     cy.intercept('POST', '/checkout/sessions', (req) => {
       req.reply({ statusCode: 200, body: { redirect_url: '/checkout/success' } });
     }).as('createSession');
 
     cy.dc('checkout-btn').click();
 
-    // Shipping page
-    cy.dc('ship-name').type('Jane Doe');
+      cy.dc('ship-name').type('Jane Doe');
     cy.dc('ship-address').type('123 Main St');
     cy.dc('ship-city').type('Winnipeg');
     cy.dc('ship-postal').type('R3C1A1');

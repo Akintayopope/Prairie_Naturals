@@ -1,4 +1,3 @@
-# app/admin/admin_users.rb
 ActiveAdmin.register AdminUser do
   permit_params :email, :password, :password_confirmation
 
@@ -13,15 +12,18 @@ ActiveAdmin.register AdminUser do
     column("Created At", :created_at)
 
     actions defaults: true do |admin_user|
-      ns = ActiveAdmin.application.default_namespace # e.g., :internal
-      helper = :"reset_password_#{ns}_admin_user_path" # -> reset_password_internal_admin_user_path
+      ns = ActiveAdmin.application.default_namespace
+      helper = :"reset_password_#{ns}_admin_user_path"
 
       if helpers.respond_to?(helper)
         item "Reset Password",
              send(helper, admin_user),
              method: :put,
              class: "member_link",
-             data: { turbo: false, confirm: "Send reset instructions to #{admin_user.email}?" }
+             data: {
+               turbo: false,
+               confirm: "Send reset instructions to #{admin_user.email}?"
+             }
       end
     end
   end
@@ -48,7 +50,10 @@ ActiveAdmin.register AdminUser do
     f.inputs "Admin User Details" do
       f.input :email
       f.input :password, input_html: { autocomplete: "new-password" }
-      f.input :password_confirmation, input_html: { autocomplete: "new-password" }
+      f.input :password_confirmation,
+              input_html: {
+                autocomplete: "new-password"
+              }
     end
     f.actions
   end
@@ -56,6 +61,7 @@ ActiveAdmin.register AdminUser do
   # Safer: send Devise reset instructions (requires :recoverable on AdminUser)
   member_action :reset_password, method: :put do
     resource.send_reset_password_instructions
-    redirect_to resource_path, notice: "Password reset email sent to #{resource.email}."
+    redirect_to resource_path,
+                notice: "Password reset email sent to #{resource.email}."
   end
 end

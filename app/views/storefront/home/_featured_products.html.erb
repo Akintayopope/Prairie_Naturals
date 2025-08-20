@@ -1,22 +1,17 @@
-<%# app/views/storefront/home/_featured_products.html.erb %>
 <section class="container-xxl home-section">
   <header class="text-center mb-4">
     <h2 class="pn-section-title">Featured Products</h2>
     <p class="text-muted mb-0">A curated selection from our catalog — pure, purposeful, and loved by our community.</p>
   </header>
-
   <% products = (@featured_products || []) %>
-
   <% if products.any? %>
     <div class="row g-3 row-cols-1 row-cols-md-2 row-cols-lg-3">
       <% products.each do |product| %>
         <% sale = product.respond_to?(:sale_price) && product.sale_price.present? && product.sale_price.to_d < product.price.to_d rescue false %>
         <% category_name = product.try(:category)&.name %>
-
         <div class="col">
           <article class="pn-feature-card h-100" itemscope itemtype="https://schema.org/Product">
             <meta itemprop="name" content="<%= product.name %>">
-
             <div class="pn-feature-card__media">
               <%= link_to storefront_product_path(product), class: "d-block", aria: { label: product.name } do %>
                 <% if product.images.attached? %>
@@ -30,7 +25,6 @@
                 <% end %>
               <% end %>
             </div>
-
             <div class="pn-feature-card__body">
               <% if category_name.present? %>
                 <%= link_to category_name,
@@ -38,11 +32,9 @@
                             class: "pn-badge is-link",
                             aria: { label: "More in #{category_name}" } %>
               <% end %>
-
               <h3 class="pn-feature-card__title clamp-2">
                 <%= link_to product.name, storefront_product_path(product), class: "pn-link-plain" %>
               </h3>
-
               <div class="small mt-1 mb-3">
                 <% if sale %>
                   <span class="text-danger fw-semibold" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
@@ -61,7 +53,6 @@
                   </span>
                 <% end %>
               </div>
-
               <div class="d-grid">
                 <%= link_to "Shop this product",
                             storefront_product_path(product),
@@ -72,7 +63,6 @@
         </div>
       <% end %>
     </div>
-
     <div class="text-center mt-4">
       <%= link_to "View All Products", storefront_products_path, class: "btn btn-cta" %>
     </div>
@@ -86,4 +76,3 @@
     </div>
   <% end %>
 </section>
-

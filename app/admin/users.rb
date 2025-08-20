@@ -1,7 +1,7 @@
 ActiveAdmin.register User do
   permit_params :email, :password, :password_confirmation, :role
 
-   menu label: "Users", parent: "Users", priority: 2
+  menu label: "Users", parent: "Users", priority: 2
 
   index do
     selectable_column

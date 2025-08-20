@@ -1,17 +1,13 @@
-# app/admin/categories.rb
 ActiveAdmin.register Category do
-  # Strong params
   permit_params :name
 
-  # Use FriendlyId if present
   controller do
     def find_resource
       scoped_collection.friendly.find(params[:id])
     end
   end
 
-  # Index
-  includes :products # helps avoid N+1 in counts
+  includes :products
   config.sort_order = "name_asc"
 
   filter :name
@@ -24,17 +20,22 @@ ActiveAdmin.register Category do
     if Category.column_names.include?("products_count")
       column("Products") { |c| c.products_count }
     else
-      column("Products") { |c| c.products.size } # simple fallback
+      column("Products") { |c| c.products.size }
     end
     column :created_at
     actions
   end
 
-  # CSV export
   csv do
     column :id
     column :name
-    column(:products_count) { |c| Category.column_names.include?("products_count") ? c.products_count : c.products.size }
+    column(:products_count) do |c|
+      if Category.column_names.include?("products_count")
+        c.products_count
+      else
+        c.products.size
+      end
+    end
     column :created_at
     column :updated_at
   end
@@ -49,20 +50,23 @@ ActiveAdmin.register Category do
     end
 
     panel "Products" do
-      # eager-load attachments to avoid N+1 and speed up thumbnails
-      products = resource.products.with_attached_images.order(created_at: :desc).limit(50)
+      products =
+        resource
+          .products
+          .with_attached_images
+          .order(created_at: :desc)
+          .limit(50)
 
       table_for products do
-        column("Name")    { |p| auto_link(p, p.name) }   # namespace-agnostic link
-        column("Price")   { |p| number_to_currency(p.price || 0) }
-        column("Stock")   { |p| p.respond_to?(:stock) ? p.stock : "-" }
+        column("Name") { |p| auto_link(p, p.name) } # namespace-agnostic link
+        column("Price") { |p| number_to_currency(p.price || 0) }
+        column("Stock") { |p| p.respond_to?(:stock) ? p.stock : "-" }
         column("Image") do |p|
           if p.images.attached?
-            # guard variant availability and pick the first image
             img = p.images.first
             begin
-              image_tag url_for(img.variant(resize_to_limit: [ 60, 60 ]))
-            rescue
+              image_tag url_for(img.variant(resize_to_limit: [60, 60]))
+            rescue StandardError
               image_tag url_for(img)
             end
           else
@@ -71,8 +75,7 @@ ActiveAdmin.register Category do
         end
       end
 
-      # “View all products” button, namespace-safe
-      ns = ActiveAdmin.application.default_namespace # e.g., :internal
+      ns = ActiveAdmin.application.default_namespace
       index_helper = "#{ns}_products_path"
       if helpers.respond_to?(index_helper)
         div { link_to "View all products", send(index_helper), class: "button" }
@@ -80,7 +83,6 @@ ActiveAdmin.register Category do
     end
   end
 
-  # Sidebar with quick stats
   sidebar "Category Stats", only: :show do
     ul do
       li "Total Products: #{resource.products.size}"
@@ -92,7 +94,4 @@ ActiveAdmin.register Category do
       end
     end
   end
-
-  # Optional: nice scopes (if you later add flags like featured, hidden, etc.)
-  # scope :all, default: true
 end
