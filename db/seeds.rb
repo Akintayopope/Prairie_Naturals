@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "csv"
+require "open-uri" # NEW: needed for URI.open timeouts
 
 puts "🌱 Seeding database..."
 
@@ -63,6 +64,38 @@ puts "➡️ Creating categories..."
 end
 
 # ---------------------------
+# Helpers
+# ---------------------------
+def attach_remote_image!(record, url)
+  return false if url.blank?
+  fname = File.basename(URI(url).path.presence || "image.jpg")
+  URI.open(url, open_timeout: 8, read_timeout: 12) do |io|
+    if record.respond_to?(:image)
+      record.image.attach(io: io, filename: fname, content_type: io.content_type)
+    elsif record.respond_to?(:images)
+      record.images.attach(io: io, filename: fname, content_type: io.content_type)
+    end
+  end
+  true
+rescue => e
+  Rails.logger.warn("Image attach failed for #{record.class}##{record.id}: #{e.class} #{e.message}")
+  false
+end
+
+def product_has_image?(p)
+  (p.respond_to?(:image)  && p.image.attached?) ||
+  (p.respond_to?(:images) && p.images.attached?)
+end
+
+def product_price_value(p)
+  if p.respond_to?(:price_cents)
+    p.price_cents.to_i
+  else
+    (p.price || 0).to_f
+  end
+end
+
+# ---------------------------
 # Products from CSV
 # ---------------------------
 puts "➡️ Importing products from CSV..."
@@ -70,7 +103,7 @@ csv_path = Rails.root.join("db/data/iherb_products.csv")
 if !File.exist?(csv_path)
   puts "⚠️ CSV not found at #{csv_path}"
 else
-  created = updated = skipped = 0
+  created = updated = skipped = kept = dropped = 0
   headers = nil
 
   CSV.foreach(csv_path, headers: true).with_index(2) do |row, i|
@@ -107,12 +140,17 @@ else
       end
 
     product.name          ||= name[0, 200]
-    product.price           = price
+    if product.respond_to?(:price_cents)
+      product.price_cents    = (price * 100).to_i
+    else
+      product.price          = price
+    end
     product.rating          = (rating_value if rating_value&.positive?)
     product.review_count    = review_count if review_count
     product.image_url       = image_url if product.respond_to?(:image_url)
     product.category_id     = category.id
 
+    # Save (create/update)
     if product.new_record?
       product.save!
       created += 1
@@ -123,24 +161,30 @@ else
       end
     end
 
-    if image_url.present? && product.respond_to?(:images) && !product.images.attached?
-      begin
-        fname = File.basename(URI(image_url).path.presence || "image.jpg")
-        file  = URI.open(image_url, open_timeout: 8, read_timeout: 12)
-        product.images.attach(io: file, filename: fname)
-      rescue => e
-        Rails.logger.warn("CSV image attach failed for #{product.id}: #{e.message}")
-      end
+    # Try to attach exactly one image if none yet
+    if image_url.present? && !product_has_image?(product)
+      attached_ok = attach_remote_image!(product, image_url)
+      Rails.logger.info("Attached image to Product##{product.id}") if attached_ok
+    end
+
+    # ENFORCE RULE: must have price > 0 and at least one image
+    has_img   = product_has_image?(product)
+    price_val = product_price_value(product)
+    if !has_img || price_val <= 0
+      product.destroy
+      dropped += 1
+    else
+      kept += 1
     end
   rescue => e
     puts "❌ Row #{i} failed (headers: #{headers.inspect}): #{e.class} – #{e.message}"
   end
 
-  puts "✅ CSV import done. Created: #{created}, Updated: #{updated}, Skipped: #{skipped}"
+  puts "✅ CSV import done. Created: #{created}, Updated: #{updated}, Skipped rows: #{skipped}, Kept: #{kept}, Dropped(no image/price): #{dropped}"
 end
 
 # ---------------------------
-# Walmart API (inline, no system())
+# Walmart API (inline)
 # ---------------------------
 puts "➡️ Importing Walmart API products..."
 
@@ -148,7 +192,7 @@ begin
   require Rails.root.join("app/services/walmart_serpapi_importer")
   importer = WalmartSerpapiImporter.new
 
-  keywords = [ "ashwagandha", "turmeric", "lavender oil" ]
+  keywords = ["ashwagandha", "turmeric", "lavender oil"]
   limit    = 90
 
   prev_adapter = ActiveJob::Base.queue_adapter
@@ -164,16 +208,26 @@ ensure
   ActiveJob::Base.queue_adapter = prev_adapter
 end
 
-puts "📊 Import Summary:"
+# ---------------------------
+# Final cleanup & report
+# ---------------------------
+puts "🧹 Final cleanup: dropping any product left without image or price..."
+removed = 0
+Product.find_each do |p|
+  price_val = product_price_value(p)
+  unless product_has_image?(p) && price_val > 0
+    p.destroy
+    removed += 1
+  end
+end
+puts "🧹 Removed #{removed} post-import stragglers."
+
+puts "📊 Import Summary by Category:"
 %w[Vitamins Protein\ Supplements Digestive\ Health Skin\ Care Hair\ Care].each do |cat|
   c = Category.find_by(name: cat)
   puts "   #{cat}: #{c&.products&.count || 0} products"
 end
-puts "🎯 Walmart import completed!"
 
-# ---------------------------
-# Admin + sample comments
-# ---------------------------
 puts "➡️ Seeding admin user..."
 admin_email    = ENV.fetch("ADMIN_EMAIL", "admin@prairienaturals.com")
 admin_password = ENV.fetch("ADMIN_PASSWORD", "prairienaturals")
