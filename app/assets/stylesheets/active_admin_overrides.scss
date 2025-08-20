@@ -1,2 +1,125 @@
-/* CANARY: remove after verifying */
-body.active_admin { outline: 3px solid transparent; }
+.active_admin_admin_user .panel,
+.active_admin_products .panel,
+.active_admin_orders .panel,
+body.active_admin .panel,
+#active_admin .panel {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(34, 197, 94, 0.1);
+  margin-bottom: 1.5rem;
+  border: 1px solid rgba(34, 197, 94, 0.1);
+}
+
+.active_admin_admin_user .panel h3,
+.active_admin_products .panel h3,
+.active_admin_orders .panel h3,
+body.active_admin .panel h3,
+#active_admin .panel h3 {
+  background: linear-gradient(135deg, #38c898 0%, #54733b  100%);
+  color: white;
+  padding: 1.5rem 2rem;
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.active_admin_admin_user table.index_table,
+.active_admin_products table.index_table,
+.active_admin_orders table.index_table,
+body.active_admin table.index_table,
+#active_admin table.index_table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.active_admin_admin_user table.index_table th,
+.active_admin_products table.index_table th,
+.active_admin_orders table.index_table th,
+body.active_admin table.index_table th,
+#active_admin table.index_table th {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  padding: 1rem 1.5rem;
+  text-align: left;
+  font-weight: 600;
+  color: #065f46;
+  border-bottom: 2px solid #bbf7d0;
+}
+
+.active_admin_admin_user table.index_table td,
+.active_admin_products table.index_table td,
+.active_admin_orders table.index_table td,
+body.active_admin table.index_table td,
+#active_admin table.index_table td {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #f0fdf4;
+}
+
+.active_admin_admin_user table.index_table tr:hover,
+.active_admin_products table.index_table tr:hover,
+.active_admin_orders table.index_table tr:hover,
+body.active_admin table.index_table tr:hover,
+#active_admin table.index_table tr:hover {
+  background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+}
+
+body.active_admin .status_tag.error,
+#active_admin .status_tag.error {
+  background: #fde2e1;
+  color: #7a1c1c;
+  border-color: #f7c1bf;
+}
+
+body.active_admin .status_tag.warning,
+body.active_admin .status_tag.pending,
+#active_admin .status_tag.warning,
+#active_admin .status_tag.pending {
+  background: #fff3cd;
+  color: #7a5c00;
+  border-color: #f7df8a;
+}
+
+.attributes_table {
+  overflow: visible !important;
+}
+
+.index_table,
+.panel table {
+  overflow: visible !important;
+}
+
+#wrapper {
+  background: #f8fafc;
+}
+
+body.active_admin .status_tag.ok        { background:#e7f6ec; color:#135f2f; border-color:#c8efd6; }
+body.active_admin .status_tag.error     { background:#fde2e1; color:#7a1c1c; border-color:#f7c1bf; }
+body.active_admin .status_tag.warning   { background:#fff3cd; color:#7a5c00; border-color:#f7df8a; }
+body.active_admin .status_tag.pending   { background:#fff3cd; color:#7a5c00; border-color:#f7df8a; }
+body.active_admin .status_tag.paid      { background:#e7f6ec; color:#135f2f; border-color:#c8efd6; }
+body.active_admin .status_tag.processing{ background:#fff3cd; color:#7a5c00; border-color:#f7df8a; }
+body.active_admin .status_tag.shipped   { background:#eff6ff; color:#0b4d91; border-color:#cfe3ff; }
+body.active_admin .status_tag.delivered { background:#ecfdf5; color:#065f46; border-color:#c9f5e6; }
+body.active_admin .status_tag.cancelled { background:#eceff3; color:#475569; border-color:#d7dce3; }
+
+@media (max-width: 1024px) {
+  body.active_admin .charts-container { grid-template-columns: 1fr; }
+  body.active_admin .chart-panel { min-height: 350px; }
+}
+@media (max-width: 768px) {
+  body.active_admin { padding: 1rem; } /* was 2rem; make smaller on small screens */
+  body.active_admin .admin-table { font-size: 0.85rem; }
+  body.active_admin .admin-table th,
+  body.active_admin .admin-table td { padding: 1rem 1.5rem; }
+  body.active_admin .panel-header { padding: 1.5rem 2rem; font-size: 1.2rem; }
+  body.active_admin .chart-content { padding: 2rem; }
+  body.active_admin .chart-panel { min-height: 300px; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes gentleFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}

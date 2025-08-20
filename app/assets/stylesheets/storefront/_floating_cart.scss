@@ -3,7 +3,7 @@
   position: fixed;
   right: clamp(12px, 2.5vw, 20px);
   bottom: calc(clamp(12px, 2.5vw, 20px) + env(safe-area-inset-bottom, 0px));
-  z-index: 2000; /* above navbar/dropdowns; below modal (1050) is fine, 2000 is safer */
+  z-index: 2000;
 
   display: inline-flex;
   align-items: center;
@@ -33,7 +33,7 @@
 
 @media (max-width: 576px) {
   .pn-floating-cart {
-    padding: .6rem 1rem;           /* bigger tap target */
+    padding: .6rem 1rem;
     font-size: .95rem;
   }
 }

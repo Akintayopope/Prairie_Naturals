@@ -1,0 +1,179 @@
+/* Sidebar styles for storefront products page */
+
+$sticky-offset: 72px !default;
+
+/* Sticky sidebar */
+.sticky-sidebar {
+  position: sticky;
+  top: $sticky-offset;
+  background: #f7f2f3;
+  border-right: 1px solid #eee;
+  border-radius: .75rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,.03);
+}
+
+/* Alternative sticky sidebar (variant) */
+.sticky-sidebar.alt {
+  background: #faf6f7;
+  border: 1px solid #eee;
+  border-radius: 14px;
+  box-shadow: 0 6px 24px rgba(0,0,0,.04);
+}
+
+/* Sidebar filters */
+.sidebar-filters {
+  max-height: calc(100vh - #{$sticky-offset} - 2rem);
+  overflow-y: auto;
+  padding-right: .25rem;
+}
+
+.sidebar-filters h5 {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: .2px;
+}
+
+.sidebar-filters .form-label {
+  font-weight: 500;
+  color: #6c757d;
+}
+
+.sidebar-filters .form-control,
+.sidebar-filters .form-select {
+  border-color: #e6e6e6;
+  border-radius: .6rem; /* original */
+  box-shadow: none;
+}
+
+/* Alternative form control style */
+.sidebar-filters.alt .form-control,
+.sidebar-filters.alt .form-select {
+  border-color: #e6e6e6;
+  border-radius: 12px;
+  box-shadow: none;
+}
+
+.sidebar-filters .form-control:focus,
+.sidebar-filters .form-select:focus {
+  border-color: #c9c9c9;
+  box-shadow: 0 0 0 .2rem rgba(0,0,0,.04);
+}
+
+.sidebar-filters .btn {
+  border-radius: .65rem;
+  font-size: .95rem;
+  padding: .55rem .75rem;
+}
+
+/* Alternative button style */
+.sidebar-filters.alt .btn {
+  border-radius: 12px;
+}
+
+.sidebar-filters .btn.btn-dark {
+  background: #222;
+  border-color: #222;
+}
+
+.sidebar-filters .btn-link {
+  color: #6c757d;
+  text-decoration: underline;
+}
+
+/* Sticky wrapper keeps the filter + info block beside the grid */
+.pn-sticky { position: sticky; top: 1rem; }
+
+/* Card frame */
+.pn-filter { border-radius: 18px; overflow: hidden; background: #fff; }
+
+/* Header */
+.pn-filter__head {
+  padding: .9rem 1rem;
+  background: linear-gradient(180deg, #7fb482, #6aa869);
+  color: #fff;
+  border-top-left-radius: 18px; border-top-right-radius: 18px;
+}
+.pn-filter__title { font-weight: 800; letter-spacing: .2px; }
+.pn-filter__reset {
+  color: #fff; opacity: .9; text-decoration: none; font-size: .92rem;
+}
+.pn-filter__reset:hover { opacity: 1; }
+
+/* Body spacing */
+.pn-filter__body { padding: 1rem; }
+
+/* Labels & inputs */
+.pn-label {
+  display: block;
+  font-weight: 700;
+  font-size: .92rem;
+  color: #2c2c2c;
+  margin-bottom: .4rem;
+}
+.pn-input, .pn-select {
+  border-radius: 10px; height: 44px; font-size: .95rem;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 0 rgba(0,0,0,.02) inset;
+}
+.pn-input:focus, .pn-select:focus {
+  border-color: #7fb482;
+  box-shadow: 0 0 0 .2rem rgba(127,180,130,.15);
+}
+
+/* Apply button */
+.pn-filter__apply {
+  background: #7fb482; color: #fff; font-weight: 700;
+  border: 0; border-radius: 12px; padding: .75rem 1rem; flex: 1 1 auto;
+  box-shadow: 0 8px 18px rgba(127,180,130,.25);
+  transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+}
+.pn-filter__apply:hover {
+  background: #6aa869;
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(127,180,130,.3);
+}
+
+/* Two-line Clear/All link */
+.pn-clear-all {
+  display: inline-flex;
+  flex-direction: column;
+  line-height: 1.1;
+  text-decoration: none;
+  color: #6b7280;
+  font-weight: 600;
+}
+.pn-clear-all:hover { color: #111827; }
+
+/* Info block under filter */
+.pn-info { background: #e8f5e9; padding: 1rem; }
+
+/* Make the aside actually sticky and behave nicely in flex/grid layouts */
+.plp-aside {
+  position: sticky;
+  top: calc(var(--header-offset, 72px) + 8px);
+  align-self: flex-start;
+  height: fit-content;
+  z-index: 2;
+}
+
+/* Sticky breaks if an ancestor has overflow not visible — ensure it’s visible */
+.pn-page, .container-xxl, .row, .col, .col-lg-3 { overflow: visible; }
+
+/* FAQ accordion colors */
+.accordion .accordion-item.faq-item .accordion-body {
+  background: #ECF8F2; color: #123a26;
+}
+.accordion .accordion-item.faq-item .accordion-body p,
+.accordion .accordion-item.faq-item .accordion-body li,
+.accordion .accordion-item.faq-item .accordion-body div,
+.accordion .accordion-item.faq-item .accordion-body a { color: inherit; }
+.accordion .accordion-item.faq-item .accordion-body a {
+  text-decoration: underline; font-weight: 600;
+}
+.accordion .accordion-item.faq-item .accordion-button {
+  background: #54733b; color: #fff;
+}
+.accordion .accordion-item.faq-item .accordion-button:not(.collapsed) {
+  background: #779b59; color: #fff;
+}
+.accordion .accordion-item.faq-item .accordion-button::after { filter: invert(1); }
