@@ -1,7 +1,8 @@
+# db/seeds.rb
 # frozen_string_literal: true
 
 require "csv"
-require "open-uri" # NEW: needed for URI.open timeouts
+require "open-uri"
 
 puts "🌱 Seeding database..."
 
@@ -28,14 +29,8 @@ puts "➡️ Seeding provinces..."
   end
 end
 
-StaticPage.find_or_create_by!(slug: "about") do |p|
-  p.title = "About"
-  p.body  = "Write about your store here."
-end
-StaticPage.find_or_create_by!(slug: "contact") do |p|
-  p.title = "Contact"
-  p.body  = "Email: support@prairienatural.com\nAddress: …"
-end
+StaticPage.find_or_create_by!(slug: "about")   { |p| p.title = "About";   p.body = "Write about your store here." }
+StaticPage.find_or_create_by!(slug: "contact") { |p| p.title = "Contact"; p.body = "Email: support@prairienatural.com\nAddress: …" }
 
 if defined?(Coupon)
   Coupon.find_or_create_by!(code: "SAVE10") do |c|
@@ -64,7 +59,7 @@ puts "➡️ Creating categories..."
 end
 
 # ---------------------------
-# Helpers
+# Helpers (defined BEFORE use)
 # ---------------------------
 def attach_remote_image!(record, url)
   return false if url.blank?
@@ -82,18 +77,119 @@ rescue => e
   false
 end
 
+def attach_local_image!(record, path)
+  return false if path.blank? || !File.exist?(path)
+  fname = File.basename(path)
+  File.open(path, "rb") do |io|
+    if record.respond_to?(:image)
+      record.image.attach(io: io, filename: fname)
+    elsif record.respond_to?(:images)
+      record.images.attach(io: io, filename: fname)
+    end
+  end
+  true
+rescue => e
+  Rails.logger.warn("Local image attach failed for #{record.class}##{record.id}: #{e.class} #{e.message}")
+  false
+end
+
 def product_has_image?(p)
   (p.respond_to?(:image)  && p.image.attached?) ||
   (p.respond_to?(:images) && p.images.attached?)
 end
 
 def product_price_value(p)
+  p.respond_to?(:price_cents) ? p.price_cents.to_i : (p.price || 0).to_f
+end
+
+def set_price!(p, amount)
+  amt = amount.to_d
   if p.respond_to?(:price_cents)
-    p.price_cents.to_i
+    p.price_cents = (amt * 100).to_i
   else
-    (p.price || 0).to_f
+    p.price = amt
   end
 end
+
+# ---------------------------
+# Custom Products (Hair Care from local images)
+# ---------------------------
+puts "➡️ Seeding Hair Care custom products from local files…"
+hair_care = Category.find_or_create_by!(name: "Hair Care")
+
+images_dir = Rails.root.join("db/seeds/images")   # put your 10 files here as image_1.jpg ... image_10.jpg
+files = Dir[images_dir.join("image_*.{png,jpg,jpeg,webp}")].
+          sort_by { |p| File.basename(p)[/\d+/].to_i }.
+          first(10)
+
+names = [
+  "Argan Oil Shampoo",
+  "Keratin Repair Conditioner",
+  "Biotin Growth Serum",
+  "Rosemary Scalp Oil",
+  "Castor Oil Hair Mask",
+  "Coconut Hydration Shampoo",
+  "Tea Tree Anti-Dandruff Shampoo",
+  "Volumizing Hair Spray",
+  "Color Protect Conditioner",
+  "Daily Nourish Hair Cream"
+]
+
+descriptions = [
+  "Infused with Moroccan argan oil to restore shine and moisture.",
+  "Deep repair formula with keratin proteins for damaged hair.",
+  "Biotin-rich serum that promotes thicker, fuller-looking hair.",
+  "Rosemary essential oil blend to refresh the scalp and stimulate roots.",
+  "Castor oil mask to strengthen and deeply condition dry strands.",
+  "Lightweight coconut-based shampoo that hydrates without buildup.",
+  "Soothing tea tree formula to reduce flakes and itchiness.",
+  "Strong-hold spray that boosts volume and locks in style.",
+  "Color-protecting conditioner that shields against fading.",
+  "Everyday nourishing cream that softens and prevents split ends."
+]
+
+prices  = [19.99,22.50,29.00,15.99,18.75,25.00,21.50,20.25,16.50,23.99]
+ratings = [4.6,4.7,4.8,4.5,4.4,4.9,4.3,4.6,4.2,4.7]
+reviews = [186,142,95,88,76,132,73,54,61,120]
+
+created = updated = kept = dropped = 0
+
+files.each_with_index do |filepath, i|
+  name   = names[i]        || "Hair Care Product #{i + 1}"
+  desc   = descriptions[i] || "A quality hair care product."
+  price  = prices[i]       || 9.99
+  rating = ratings[i]      || 4.5
+  rcnt   = reviews[i]      || 10
+
+  product = Product.find_or_initialize_by(name: name, category_id: hair_care.id)
+  product.category_id       = hair_care.id
+  set_price!(product, price)
+  product.rating            = rating if product.respond_to?(:rating)
+  product.review_count      = rcnt   if product.respond_to?(:review_count)
+  product.description       = desc   if product.respond_to?(:description)
+  product.short_description = desc   if product.respond_to?(:short_description) && product.short_description.blank?
+
+  # Save if new or changed
+  to_create = product.new_record?
+  before_changes = product.changes.dup
+  product.save! if to_create || product.changed?
+  created += 1 if to_create
+  updated += 1 if !to_create && before_changes.any?
+
+  attach_local_image!(product, filepath) unless product_has_image?(product)
+
+  # enforce rule: must have price > 0 and at least one image
+  has_img = product_has_image?(product)
+  price_v = product_price_value(product)
+  if !has_img || price_v <= 0
+    product.destroy
+    dropped += 1
+  else
+    kept += 1
+  end
+end
+
+puts "✅ Hair Care custom products — Files: #{files.size}, Created: #{created}, Updated: #{updated}, Kept: #{kept}, Dropped: #{dropped}"
 
 # ---------------------------
 # Products from CSV
@@ -107,13 +203,13 @@ else
   headers = nil
 
   CSV.foreach(csv_path, headers: true).with_index(2) do |row, i|
-    headers      ||= row.headers
-    name           = row["name"].to_s.strip.presence || row["title"].to_s.strip
-    price_str      = row["price"].to_s
-    rating_str     = row["rating"].to_s
-    link           = (row["link-href"].presence || row["link"].presence)
-    image_url      = (row["image-src"].presence || row["image_url"].presence)
-    csv_category   = row["category"].to_s.strip
+    headers        ||= row.headers
+    name             = row["name"].to_s.strip.presence || row["title"].to_s.strip
+    price_str        = row["price"].to_s
+    rating_str       = row["rating"].to_s
+    link             = (row["link-href"].presence || row["link"].presence)
+    image_url        = (row["image-src"].presence || row["image_url"].presence)
+    csv_category     = row["category"].to_s.strip
 
     if name.blank?
       skipped += 1
@@ -121,7 +217,6 @@ else
     end
 
     price = price_str.gsub(/[^\d\.]/, "").presence&.to_d || 0
-
     rating_value = rating_str[/\A\s*([\d.]+)/, 1]&.to_f
     review_count = rating_str[/-\s*([\d,]+)\s+Reviews/i, 1]&.delete(",")&.to_i
 
@@ -139,35 +234,27 @@ else
         Product.find_or_initialize_by(name: name, category_id: category.id)
       end
 
-    product.name          ||= name[0, 200]
+    product.name           ||= name[0, 200]
     if product.respond_to?(:price_cents)
-      product.price_cents    = (price * 100).to_i
+      product.price_cents     = (price * 100).to_i
     else
-      product.price          = price
+      product.price           = price
     end
-    product.rating          = (rating_value if rating_value&.positive?)
-    product.review_count    = review_count if review_count
-    product.image_url       = image_url if product.respond_to?(:image_url)
-    product.category_id     = category.id
+    product.rating           = (rating_value if rating_value&.positive?)
+    product.review_count     = review_count if review_count
+    product.image_url        = image_url if product.respond_to?(:image_url)
+    product.category_id      = category.id
 
-    # Save (create/update)
-    if product.new_record?
-      product.save!
-      created += 1
-    else
-      if product.changed?
-        product.save!
-        updated += 1
-      end
-    end
+    to_create = product.new_record?
+    before_changes = product.changes.dup
+    product.save! if to_create || product.changed?
+    created += 1 if to_create
+    updated += 1 if !to_create && before_changes.any?
 
-    # Try to attach exactly one image if none yet
     if image_url.present? && !product_has_image?(product)
-      attached_ok = attach_remote_image!(product, image_url)
-      Rails.logger.info("Attached image to Product##{product.id}") if attached_ok
+      attach_remote_image!(product, image_url)
     end
 
-    # ENFORCE RULE: must have price > 0 and at least one image
     has_img   = product_has_image?(product)
     price_val = product_price_value(product)
     if !has_img || price_val <= 0
@@ -187,11 +274,9 @@ end
 # Walmart API (inline)
 # ---------------------------
 puts "➡️ Importing Walmart API products..."
-
 begin
   require Rails.root.join("app/services/walmart_serpapi_importer")
   importer = WalmartSerpapiImporter.new
-
   keywords = ["ashwagandha", "turmeric", "lavender oil"]
   limit    = 90
 

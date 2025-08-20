@@ -22,7 +22,7 @@ gem "tzinfo-data", platforms: %i[windows jruby]
 
 # Rails 8 “Solid” adapters
 gem "solid_cache"
-gem "solid_queue"
+
 gem "solid_cable"
 
 # Boot speed

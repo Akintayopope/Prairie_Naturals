@@ -22,7 +22,7 @@ class WalmartSerpapiImporter
     [ /protein|whey|casein|collagen|gainer/i,                           "Protein Supplements" ],
     [ /digest|probiotic|enzyme|fiber|prebiotic/i,                       "Digestive Health" ],
     [ /skin|serum|face|cream|lotion|retinol|hyaluronic|sunscreen/i,     "Skin Care" ],
-    [ /hair|shampoo|conditioner|biotin|keratin|castor|rosemary|argan|keratin|hair serum|hair oil|scalp/i,                 "Hair Care" ]
+    [ /hair|shampoo|conditioner|biotin|keratin|scalp/i,                 "Hair Care" ]
   ].freeze
 
   def initialize(api_key: ENV["SERPAPI_KEY"])
