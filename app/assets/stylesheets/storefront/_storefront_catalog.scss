@@ -27,8 +27,39 @@
 /* Titles & links */
 .link-plain { color: inherit; text-decoration: none; }
 .link-plain:hover { text-decoration: underline; }
-.card-title { font-weight: 600; line-height: 1.2; min-height: 2.1em; margin-bottom: .15rem; }
+.card-title { font-weight: 1000; line-height: 1.3; min-height: 2.1em; margin-bottom: .15rem; font-size: 1.1rem; }
 .text-truncate-2 { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+
+/* Tighten stars + rating spacing */
+.product-card .pn-stars {
+  margin-bottom: 0 !important;   /* remove Bootstrap mb-1 gap */
+}
+
+/* Tighten up the whole rating block */
+.pn-rating {
+  margin-bottom: 0 !important;   /* remove space under the container */
+  padding-bottom: 0 !important;
+}
+
+.pn-rating .pn-stars {
+  margin-bottom: 0 !important;   /* remove gap below stars */
+}
+
+.pn-rating .pn-rating-meta {
+  margin-top: 0 !important;      /* remove gap above reviews */
+  margin-bottom: 0 !important;
+  line-height: 1.2;              /* tighter text */
+}
+
+
+.product-card .pn-rating-meta {
+  margin-top: 0 !important;      /* prevent extra spacing on the meta line */
+  line-height: 1.2;              /* tighten text if needed */
+}
+
+.product-card .d-flex.mb-2 {
+  margin-bottom: 0 !important;
+}
 
 /* Rating (tight below title) */
 .rating { line-height: 1; min-height: 1.05rem; margin-bottom: .12rem; }

@@ -1,15 +1,12 @@
-# db/seeds.rb
-# frozen_string_literal: true
-
 require "csv"
 require "open-uri"
 
-puts "🌱 Seeding database..."
+puts "Seeding database..."
 
 # ---------------------------
 # Provinces (idempotent)
 # ---------------------------
-puts "➡️ Seeding provinces..."
+puts "Seeding provinces..."
 [
   { name: "Alberta",                   pst: 0.00,    gst: 0.05, hst: 0.00 },
   { name: "British Columbia",          pst: 0.07,    gst: 0.05, hst: 0.00 },
@@ -20,7 +17,10 @@ puts "➡️ Seeding provinces..."
   { name: "Ontario",                   pst: 0.00,    gst: 0.00, hst: 0.13 },
   { name: "Prince Edward Island",      pst: 0.00,    gst: 0.00, hst: 0.15 },
   { name: "Quebec",                    pst: 0.09975, gst: 0.05, hst: 0.00 },
-  { name: "Saskatchewan",              pst: 0.06,    gst: 0.05, hst: 0.00 }
+  { name: "Saskatchewan",              pst: 0.06,    gst: 0.05, hst: 0.00 },
+  { name: "Yukon",                     gst: 0.05,    pst: 0.00,  hst: 0.00 },
+  { name: "Northwest Territories",     gst: 0.05,    pst: 0.00,  hst: 0.00 },
+  { name: "Nunavut",                   gst: 0.05,    pst: 0.00,  hst: 0.00 },
 ].each do |prov|
   Province.find_or_create_by!(name: prov[:name]) do |p|
     p.pst = prov[:pst]
@@ -53,7 +53,7 @@ end
 # ---------------------------
 # Categories (canonical 5)
 # ---------------------------
-puts "➡️ Creating categories..."
+puts "Creating categories..."
 %w[Vitamins Protein\ Supplements Digestive\ Health Skin\ Care Hair\ Care].each do |name|
   Category.find_or_create_by!(name: name)
 end
@@ -114,7 +114,7 @@ end
 # ---------------------------
 # Custom Products (Hair Care from local images)
 # ---------------------------
-puts "➡️ Seeding Hair Care custom products from local files…"
+puts "Seeding Hair Care custom products from local files…"
 hair_care = Category.find_or_create_by!(name: "Hair Care")
 
 images_dir = Rails.root.join("db/seeds/images")   # put your 10 files here as image_1.jpg ... image_10.jpg
@@ -189,15 +189,15 @@ files.each_with_index do |filepath, i|
   end
 end
 
-puts "✅ Hair Care custom products — Files: #{files.size}, Created: #{created}, Updated: #{updated}, Kept: #{kept}, Dropped: #{dropped}"
+puts "Hair Care custom products — Files: #{files.size}, Created: #{created}, Updated: #{updated}, Kept: #{kept}, Dropped: #{dropped}"
 
 # ---------------------------
 # Products from CSV
 # ---------------------------
-puts "➡️ Importing products from CSV..."
+puts "Importing products from CSV..."
 csv_path = Rails.root.join("db/data/iherb_products.csv")
 if !File.exist?(csv_path)
-  puts "⚠️ CSV not found at #{csv_path}"
+  puts "CSV not found at #{csv_path}"
 else
   created = updated = skipped = kept = dropped = 0
   headers = nil
@@ -264,16 +264,16 @@ else
       kept += 1
     end
   rescue => e
-    puts "❌ Row #{i} failed (headers: #{headers.inspect}): #{e.class} – #{e.message}"
+    puts "Row #{i} failed (headers: #{headers.inspect}): #{e.class} – #{e.message}"
   end
 
-  puts "✅ CSV import done. Created: #{created}, Updated: #{updated}, Skipped rows: #{skipped}, Kept: #{kept}, Dropped(no image/price): #{dropped}"
+  puts "CSV import done. Created: #{created}, Updated: #{updated}, Skipped rows: #{skipped}, Kept: #{kept}, Dropped(no image/price): #{dropped}"
 end
 
 # ---------------------------
 # Walmart API (inline)
 # ---------------------------
-puts "➡️ Importing Walmart API products..."
+puts "Importing Walmart API products..."
 begin
   require Rails.root.join("app/services/walmart_serpapi_importer")
   importer = WalmartSerpapiImporter.new
@@ -284,7 +284,7 @@ begin
   ActiveJob::Base.queue_adapter = :inline
 
   keywords.each_with_index do |kw, idx|
-    puts "➡️  [#{idx + 1}/#{keywords.size}] Importing #{limit} items for: '#{kw}'"
+    puts "[#{idx + 1}/#{keywords.size}] Importing #{limit} items for: '#{kw}'"
     count = importer.import_keyword(kw, limit: limit)
     puts "   → Imported #{count} items for '#{kw}'"
     puts
@@ -296,7 +296,7 @@ end
 # ---------------------------
 # Final cleanup & report
 # ---------------------------
-puts "🧹 Final cleanup: dropping any product left without image or price..."
+puts "Final cleanup: dropping any product left without image or price..."
 removed = 0
 Product.find_each do |p|
   price_val = product_price_value(p)
@@ -305,15 +305,15 @@ Product.find_each do |p|
     removed += 1
   end
 end
-puts "🧹 Removed #{removed} post-import stragglers."
+puts "Removed #{removed} post-import stragglers."
 
-puts "📊 Import Summary by Category:"
+puts "Import Summary by Category:"
 %w[Vitamins Protein\ Supplements Digestive\ Health Skin\ Care Hair\ Care].each do |cat|
   c = Category.find_by(name: cat)
   puts "   #{cat}: #{c&.products&.count || 0} products"
 end
 
-puts "➡️ Seeding admin user..."
+puts "Seeding admin user..."
 admin_email    = ENV.fetch("ADMIN_EMAIL", "admin@prairienaturals.com")
 admin_password = ENV.fetch("ADMIN_PASSWORD", "prairienaturals")
 
@@ -323,7 +323,7 @@ AdminUser.find_or_create_by!(email: admin_email) do |admin|
 end
 
 if AdminUser.any? && Product.any?
-  puts "➡️ Creating sample comments..."
+  puts "Creating sample comments..."
   admin   = AdminUser.first
   product = Product.first
 
@@ -335,9 +335,9 @@ if AdminUser.any? && Product.any?
       author: admin
     )
   end
-  puts "✅ Added 5 sample comments."
+  puts "Added 5 sample comments."
 else
-  puts "⚠️ No AdminUser or Product found — skipping comment seeding."
+  puts "No AdminUser or Product found — skipping comment seeding."
 end
 
-puts "✅ Seeding completed!"
+puts "Seeding completed!"

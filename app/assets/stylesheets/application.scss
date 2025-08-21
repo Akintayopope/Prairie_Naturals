@@ -1,19 +1,27 @@
-
 /*
- * This file is compiled into application.css by Sprockets.
- * Keep require_self so rules below the imports win.
+ * Compiled into application.css by Sprockets.
+ * We control order with @import; DO NOT use require_tree with Sass.
  *= require_self
- *= require_tree .
-*/
+ */
 
-@import "bootstrap_custom"; // or "bootstrap"
+/* 1) Fonts first (safe to keep here) */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap');
 
-/* storefront partials — note the folder prefix */
+/* 2) Bootstrap — choose ONE source:
+      - EITHER import it here via bootstrap_custom
+      - OR load from CDN in the layout (not both) */
+@import "bootstrap_custom"; // make sure this file exists and imports Bootstrap properly
+
+/* 3) Your app styles (order matters; components before utilities) */
 @import "storefront/static_pages";
 @import "storefront/storefront_catalog";
-@import "storefront/storefront_sidebar";   // <-- fix this line
+@import "storefront/storefront_sidebar";   /* ensure file exists: _storefront_sidebar.scss */
 @import "storefront/floating_cart";
 @import "storefront/utilities";
 
-/* Prairie Naturals - Base CSS Styling */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap');
+/* 4) Place any one-off overrides LAST (so they always win) */
+/* e.g.
+.product-card .card-title,
+.product-card .card-title a { font-family: 'Playfair Display', serif; font-weight:700; font-size:1.25rem; }
+.pn-rating .pn-stars { margin-bottom:0 !important; }
+*/

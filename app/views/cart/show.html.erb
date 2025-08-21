@@ -34,7 +34,7 @@
                     remove_item_cart_path(product_id: item.product.slug),
                     method: :delete,
                     form: { data: { turbo_confirm: "Remove item?" } },
-                    class: "btn btn-link btn-light btn-lift" %>
+                    class: "btn btn-sm btn-lift" %>
               </td>
             </tr>
           <% end %>
@@ -42,12 +42,12 @@
       </table>
     </div>
     <div class="d-flex flex-wrap justify-content-between align-items-center mt-3 cart-actions">
-      <%= link_to 'Continue Shopping', storefront_products_path, class: "btn btn-outline-secondary" %>
+      <%= link_to 'Continue Shopping', storefront_products_path, class: "btn btn-sm btn-lift" %>
       <p class="m-0 fw-semibold">
         Cart Total:
         <span class="cart-total"><%= number_to_currency(@cart_items.sum { |i| i.product.price * i.quantity }) %></span>
       </p>
-      <%= link_to "Proceed to Checkout", new_checkout_path, class: "btn btn-primary btn-lg" %>
+      <%= link_to "Proceed to Checkout", new_checkout_path, class: "btn btn-sm btn-lift" %>
     </div>
   <% else %>
     <p class="text-muted">Your cart is empty.</p>
@@ -75,7 +75,7 @@
                       session[:cart][product.slug],
                       min: 0,
                       class: "form-control form-control-sm qty-input text-center" %>
-                <%= submit_tag "Update", class: "btn btn-sm btn-outline-secondary" %>
+                <%= submit_tag "Update", class: "btn btn-sm btn-lift" %>
               <% end %>
             </td>
             <td class="text-end"><%= number_to_currency(product.price) %></td>
