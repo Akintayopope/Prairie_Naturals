@@ -36,7 +36,8 @@ namespace :active_storage do
             filename: blob.filename
           )
           # Point the existing blob to the new file/service
-          blob.update_columns(key: new_key, service_name: current, updated_at: Time.current)
+          blob.update_columns(key: new_key, service_name: current)
+
         end
 
         migrated += 1
