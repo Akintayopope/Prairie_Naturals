@@ -1,3 +1,5 @@
+ruby "3.3.9"
+
 source "https://rubygems.org"
 
 ruby File.read(".ruby-version").strip rescue nil
