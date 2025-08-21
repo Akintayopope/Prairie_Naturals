@@ -15,7 +15,6 @@ module PrairieNaturals
     # not contain `.rb` files, or that should not be reloaded or eager loaded.
     # Common ones are `templates`, `generators`, or `middleware`, for example.
     config.autoload_lib(ignore: %w[assets tasks])
-    config.action_controller.protect_from_forgery = true
     config.force_ssl = false # for development only
 
     # Configuration for the application, engines, and railties goes here.
@@ -25,6 +24,6 @@ module PrairieNaturals
     #
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
-    config.active_job.queue_adapter = :solid_queue
+    config.active_job.queue_adapter = :async
   end
 end

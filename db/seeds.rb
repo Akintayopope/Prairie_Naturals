@@ -3,9 +3,6 @@ require "open-uri"
 
 puts "Seeding database..."
 
-# ---------------------------
-# Provinces (idempotent)
-# ---------------------------
 puts "Seeding provinces..."
 [
   { name: "Alberta",                   pst: 0.00,    gst: 0.05, hst: 0.00 },
@@ -58,9 +55,6 @@ puts "Creating categories..."
   Category.find_or_create_by!(name: name)
 end
 
-# ---------------------------
-# Helpers (defined BEFORE use)
-# ---------------------------
 def attach_remote_image!(record, url)
   return false if url.blank?
   fname = File.basename(URI(url).path.presence || "image.jpg")
@@ -176,7 +170,20 @@ files.each_with_index do |filepath, i|
   created += 1 if to_create
   updated += 1 if !to_create && before_changes.any?
 
-  attach_local_image!(product, filepath) unless product_has_image?(product)
+  # attach to CURRENT service (e.g., :cloudinary) if it doesn't already have one there
+current = Rails.application.config.active_storage.service.to_s
+has_on_current = product.images.attachments.joins(:blob)
+                     .where(active_storage_blobs: { service_name: current }).exists?
+
+unless has_on_current
+  # optionally purge any old non-current attachments so the new Cloudinary image is used
+  product.images.attachments.joins(:blob)
+         .where.not(active_storage_blobs: { service_name: current })
+         .find_each(&:purge)
+
+  attach_local_image!(product, filepath)
+end
+
 
   # enforce rule: must have price > 0 and at least one image
   has_img = product_has_image?(product)
