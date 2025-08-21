@@ -66,12 +66,14 @@ h1,h2,h3,h4,h5,h6 { font-family: var(--font-heading); font-weight: 700; color: v
   color: hsl(115, 45%, 80%) !important;
 }
 .btn-lift:focus { outline: none; box-shadow: var(--shadow-md), 0 0 0 3px rgba(168, 213, 162, 0.4); }
-.btn-outline-secondary { border: 2px solid var(--border-light) !important; color: var(--text-dark) !important; background: transparent; }
+.btn-outline-secondary {border: 2px solid var(--border-light) !important; color: var(--text-dark) !important; }
 .btn-outline-secondary:hover { background: var(--soft-green) !important; border-color: var(--soft-green) !important; color: #fff !important; }
 .btn-primary, .btn-dark { background-color: #000 !important; color: #fff; box-shadow: 0 4px 15px rgba(44, 62, 44, 0.3); }
 .btn-primary:hover, .btn-dark:hover { background: var(--soft-green) !important; border-color: var(--soft-green) !important; color: #fff !important; transform: translateY(-2px); box-shadow: var(--shadow-md); }
 .btn-link { color: var(--text-dark) !important; text-decoration: none !important; }
 .btn-link:hover { color: var(--soft-green) !important; }
+
+
 
 /* ================== SMALL UTILITIES ================== */
 .badge { font-size: .75rem; font-weight: 600; padding: .25rem .5rem; border-radius: var(--border-radius); }
@@ -96,3 +98,4 @@ h1,h2,h3,h4,h5,h6 { font-family: var(--font-heading); font-weight: 700; color: v
   * { animation: none !important; transition: none !important; }
   .pn-promo::before, .top-bar::before { display: none !important; }
 }
+

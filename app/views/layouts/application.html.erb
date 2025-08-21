@@ -71,10 +71,10 @@
               <!-- Right actions -->
               <div class="order-1 order-lg-3 d-flex align-items-center justify-content-lg-end gap-2">
                 <% if user_signed_in? %>
-                  <%= link_to orders_path, class: "btn btn-link px-2 pn-link" do %>
+                  <%= link_to orders_path, class: "btn btn-lift" do %>
                     <i class="bi bi-person-check"></i> <span class="d-none d-md-inline">My Orders</span>
                   <% end %>
-                  <%= button_to "Logout", destroy_user_session_path, method: :delete, class: "btn btn-outline-secondary btn-sm btn-lift" %>
+                  <%= button_to "Logout", destroy_user_session_path, method: :delete, class: "btn btn-lift" %>
                 <% elsif admin_user_signed_in? %>
                   <%= link_to send("#{ActiveAdmin.application.default_namespace}_root_path"),
                         class: "btn btn-link px-2 pn-link" do %>
