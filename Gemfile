@@ -49,7 +49,7 @@ gem "bootstrap", "~> 5.3.0"
 gem "sassc-rails"
 
 # XML/HTML, PDFs
-gem "nokogiri", "~> 1.16"          # "~> 1.18" doesn’t exist; 1.16.x is current/stable
+gem "nokogiri", "~> 1.18"          # "~> 1.18" doesn’t exist; 1.16.x is current/stable
 gem "prawn"
 gem "prawn-table"
 
