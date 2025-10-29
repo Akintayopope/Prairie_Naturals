@@ -4,7 +4,7 @@ source "https://rubygems.org"
 
 ruby File.read(".ruby-version").strip rescue nil
 
-gem "rails", "~> 8.0.2"
+gem "rails", "~> 8.1.1"
 gem "propshaft"
 
 # DB / server
